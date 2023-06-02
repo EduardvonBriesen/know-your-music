@@ -2,6 +2,7 @@
 	import Counter from './Counter.svelte';
 	import welcome from '$lib/images/svelte-welcome.webp';
 	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import Authenticate from '../components/Authenticate.svelte';
 </script>
 
 <svelte:head>
@@ -10,6 +11,7 @@
 </svelte:head>
 
 <section>
+	<Authenticate />
 	<h1>
 		<span class="welcome">
 			<picture>
