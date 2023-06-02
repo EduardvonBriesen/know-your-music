@@ -2,6 +2,11 @@
 	import { page } from '$app/stores';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
+	import { authHandler, authStore } from '../store/store';
+
+	const logout = () => {
+		authHandler.logout();
+	};
 </script>
 
 <header>
@@ -31,10 +36,8 @@
 		</svg>
 	</nav>
 
-	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
-			<img src={github} alt="GitHub" />
-		</a>
+	<div>
+		<button on:click={logout} class="m-2 rounded bg-purple-400 px-2">Logout</button>
 	</div>
 </header>
 
