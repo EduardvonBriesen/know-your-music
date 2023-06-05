@@ -1,6 +1,11 @@
 <script lang="ts">
-	import Header from '../Components/Header.svelte';
+	// Your selected Skeleton theme:
+	import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
+	import '@skeletonlabs/skeleton/styles/skeleton.css';
 	import '../app.css';
+
+	import Header from '../Components/Header.svelte';
+	import { AppShell } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
@@ -45,17 +50,16 @@
 					...store,
 					user,
 					data: dataToSetStore,
-					loading: false
 				};
 			});
 		});
 	});
 </script>
 
-<div class="app">
-	<Header />
+<AppShell>
+	<svelte:fragment slot="header"><Header /></svelte:fragment>
 
 	<main>
 		<slot />
 	</main>
-</div>
+</AppShell>

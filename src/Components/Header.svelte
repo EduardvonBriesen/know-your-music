@@ -1,13 +1,16 @@
 <script>
 	import { authHandler } from '../store/store';
+	import { AppBar } from '@skeletonlabs/skeleton';
 
 	const logout = () => {
 		authHandler.logout();
 	};
 </script>
 
-<header class="flex w-full justify-end">
-	<div>
-		<button on:click={logout} class="m-2 rounded bg-purple-400 px-2">Logout</button>
-	</div>
-</header>
+<AppBar>
+	<svelte:fragment slot="lead">know your music.</svelte:fragment>
+
+	<svelte:fragment slot="trail">
+		<button on:click={logout} class="btn btn-sm variant-ghost"> Logout </button>
+	</svelte:fragment>
+</AppBar>
