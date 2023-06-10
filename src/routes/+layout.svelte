@@ -4,7 +4,7 @@
 	import '@skeletonlabs/skeleton/styles/skeleton.css';
 	import '../app.css';
 
-	import Header from '../Components/Header.svelte';
+	import Header from '../components/Header.svelte';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { auth, db } from '$lib/firebase/firebase';
