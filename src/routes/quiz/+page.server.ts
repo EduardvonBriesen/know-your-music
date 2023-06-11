@@ -116,17 +116,15 @@ const updateUser = async (correct: boolean, user_id: string) => {
 	if (!userDoc.exists()) return;
 
 	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.incorrect || 0) + (correct ? 0 : 1);
-	const newScore = newCorrect - newIncorrect;
+	const newCorrect = (userData.stats.correct || 0) + (correct ? 1 : 0);
+	const newIncorrect = (userData.stats.incorrect || 0) + (correct ? 0 : 1);
 
 	await setDoc(
 		userRef,
 		{
 			stats: {
 				correct: newCorrect,
-				incorrect: newIncorrect,
-				score: newScore
+				incorrect: newIncorrect
 			}
 		},
 		{ merge: true }
