@@ -12,7 +12,6 @@
 	import { authStore } from '../store/store';
 
 	onMount(() => {
-		console.log('mounted');
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
 			const currentPath = window.location.pathname;
 

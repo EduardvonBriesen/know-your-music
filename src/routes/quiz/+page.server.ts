@@ -1,4 +1,6 @@
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
+import { db } from '$lib/firebase/firebase';
+import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { fail } from '@sveltejs/kit';
 
 type Track = {
@@ -70,15 +72,21 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
 	default: async ({ request, cookies }) => {
+		// console.log('request', request.formData());
 		const spotify_token = cookies.get('spotify_token');
 		if (!spotify_token) return fail(500, { message: 'Could not get token' });
 		const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
 
 		// evaluate answer
 		const answer = await request.formData();
+		console.log(answer);
+
 		const tracks = await getTracks(spotify_token, current_quiz.tracks);
 		const mostPopularTrack = tracks.tracks.sort((a, b) => b.popularity - a.popularity)[0].id;
 		const correct = answer.get('track') === mostPopularTrack;
+
+		// update user
+		await updateUser(correct, answer.get('user_id') as string);
 
 		// get new artist
 		const relatedArtists = await getRelatedArtists(spotify_token, current_quiz.artist);
@@ -100,6 +108,27 @@ export const actions = {
 			return fail(200, { false: null, correct: mostPopularTrack });
 		}
 	}
+};
+
+const updateUser = async (correct: boolean, user_id: string) => {
+	const userRef = doc(db, 'user', user_id);
+	const userDoc = await getDoc(userRef);
+	if (!userDoc.exists()) return;
+
+	const userData = userDoc.data() as DocumentData;
+	const newCorrect = (userData.correct || 0) + (correct ? 1 : 0);
+	const newIncorrect = (userData.incorrect || 0) + (correct ? 0 : 1);
+	const newScore = newCorrect - newIncorrect;
+
+	await setDoc(
+		userRef,
+		{
+			correct: newCorrect,
+			incorrect: newIncorrect,
+			score: newScore
+		},
+		{ merge: true }
+	);
 };
 
 const getToken = async () => {

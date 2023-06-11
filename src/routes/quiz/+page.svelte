@@ -1,18 +1,25 @@
-<script>
+<script lang="ts">
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
+	import { authStore } from '../../store/store';
 
 	export let data;
 	export let form;
+
+	let user_id: string = '';
+
+	authStore.subscribe((store: any) => {
+		user_id = store.user.uid;
+	});
 </script>
 
 <div class="flex place-content-center">
-	<div class="card p-4 w-1/2 text-token space-4 m-10">
+	<div class="card p-4 w-2/3 text-token space-4 m-10">
 		<header class="card-header flex flex-col items-center">
 			<Avatar
 				rounded="rounded-xl"
-				width="w-1/2"
+				width="w-1/3"
 				cursor="cursor-pointer"
 				src={data.artist?.image}
 				alt={data.artist?.name}
@@ -21,7 +28,12 @@
 			<span class="text-center">Which of the following tracks is most popular?</span>
 		</header>
 		<section class="p-4">
-			<form method="POST" use:enhance>
+			<form
+				method="POST"
+				use:enhance={({ data }) => {
+					data.set('user_id', user_id);
+				}}
+			>
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					{#each data.tracks ?? [] as track (track.id)}
 						<button

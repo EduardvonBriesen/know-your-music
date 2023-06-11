@@ -3,8 +3,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { writable } from 'svelte/store';
 
 export const authStore = writable({
-	user: {},
-	data: {}
+	user: {}
 });
 
 export const authHandler = {
