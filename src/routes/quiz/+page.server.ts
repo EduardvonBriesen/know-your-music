@@ -111,7 +111,7 @@ export const actions = {
 };
 
 const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'user', user_id);
+	const userRef = doc(db, 'users', user_id);
 	const userDoc = await getDoc(userRef);
 	if (!userDoc.exists()) return;
 
@@ -123,9 +123,11 @@ const updateUser = async (correct: boolean, user_id: string) => {
 	await setDoc(
 		userRef,
 		{
-			correct: newCorrect,
-			incorrect: newIncorrect,
-			score: newScore
+			stats: {
+				correct: newCorrect,
+				incorrect: newIncorrect,
+				score: newScore
+			}
 		},
 		{ merge: true }
 	);

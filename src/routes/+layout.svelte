@@ -32,7 +32,7 @@
 			const docSnap = await getDoc(docRef);
 
 			if (!docSnap.exists()) {
-				const userRef = doc(db, 'user', user.uid);
+				const userRef = doc(db, 'users', user.uid);
 				(dataToSetStore = {
 					email: user.email,
 					createdAt: new Date(),
@@ -47,8 +47,7 @@
 			authStore.update((store) => {
 				return {
 					...store,
-					user,
-					data: dataToSetStore,
+					user
 				};
 			});
 		});

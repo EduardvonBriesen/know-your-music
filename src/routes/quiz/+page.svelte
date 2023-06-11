@@ -30,8 +30,8 @@
 		<section class="p-4">
 			<form
 				method="POST"
-				use:enhance={({ data }) => {
-					data.set('user_id', user_id);
+				use:enhance={({ formData }) => {
+					formData.set('user_id', user_id);
 				}}
 			>
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
