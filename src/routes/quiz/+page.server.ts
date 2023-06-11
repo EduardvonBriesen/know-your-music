@@ -1,11 +1,13 @@
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
+import { fail } from '@sveltejs/kit';
 
 let tracks: any[] = [];
 
 export const load = async ({ cookies }) => {
-	const token = cookies.get('spotify_token');
+	const spotify_token = cookies.get('spotify_token');
+	const track_guesses = cookies.get('track_guesses');
 
-	if (!token) {
+	if (!spotify_token) {
 		const newToken = await getToken();
 
 		cookies.set('spotify_token', newToken.access_token, {
@@ -14,13 +16,13 @@ export const load = async ({ cookies }) => {
 		});
 	}
 
-	if (!token) return;
+	if (!spotify_token) return;
 
 	const artist_id = '1G9G7WwrXka3Z1r7aIDjI7';
 
-	const artist = await getArtist(token, artist_id);
+	const artist = await getArtist(spotify_token, artist_id);
 
-	const topTracks = await getArtistTopTracks(token, artist_id);
+	const topTracks = await getArtistTopTracks(spotify_token, artist_id);
 
 	const randomTracks = topTracks.tracks.sort(() => Math.random() - 0.5).slice(0, 3);
 	tracks = randomTracks;
@@ -42,9 +44,14 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request }) => {
 		const answer = await request.formData();
-		const correct = answer.get('track') === mostPopular(tracks);
+		const mostPopularTrack = mostPopular(tracks);
+		const correct = answer.get('track') === mostPopularTrack;
 
-		return { success: correct };
+		if (!correct) {
+			return fail(400, { false: answer.get('track'), correct: mostPopularTrack });
+		} else {
+			return fail(200, { false: null, correct: mostPopularTrack });
+		}
 	}
 };
 
