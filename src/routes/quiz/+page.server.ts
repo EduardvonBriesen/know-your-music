@@ -1,51 +1,98 @@
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '$env/static/private';
 import { fail } from '@sveltejs/kit';
 
-let tracks: any[] = [];
+type Track = {
+	id: string;
+	name: string;
+	popularity: number;
+};
+
+type Artist = {
+	id: string;
+	name: string;
+	images: {
+		url: string;
+	}[];
+};
 
 export const load = async ({ cookies }) => {
-	const spotify_token = cookies.get('spotify_token');
-	const track_guesses = cookies.get('track_guesses');
+	let spotify_token = cookies.get('spotify_token');
+	const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
 
 	if (!spotify_token) {
 		const newToken = await getToken();
+		if (!newToken) return fail(500, { message: 'Could not get token' });
 
 		cookies.set('spotify_token', newToken.access_token, {
 			path: '/',
 			maxAge: newToken.expires_in
 		});
+
+		spotify_token = newToken.access_token;
 	}
 
-	if (!spotify_token) return;
+	const artist = await getArtist(spotify_token, current_quiz.artist ?? '4tZwfgrHOc3mvqYlEYSvVi');
+	let tracks: Track[] = [];
 
-	const artist_id = '1G9G7WwrXka3Z1r7aIDjI7';
+	if (current_quiz.tracks) {
+		const _tracks = await getTracks(spotify_token, current_quiz.tracks ?? []);
+		tracks = _tracks.tracks;
+	} else {
+		let randomTracks = [];
 
-	const artist = await getArtist(spotify_token, artist_id);
+		const topTracks = await getArtistTopTracks(spotify_token, artist.id);
+		randomTracks = topTracks.tracks.sort(() => Math.random() - 0.5).slice(0, 3);
+		tracks = randomTracks;
 
-	const topTracks = await getArtistTopTracks(spotify_token, artist_id);
-
-	const randomTracks = topTracks.tracks.sort(() => Math.random() - 0.5).slice(0, 3);
-	tracks = randomTracks;
+		cookies.set(
+			'current_quiz',
+			JSON.stringify({
+				artist: artist.id,
+				tracks: tracks.map((track) => track.id)
+			}),
+			{
+				path: '/'
+			}
+		);
+	}
 
 	return {
 		artist: {
-			name: artist.name || 'unknown',
-			image: artist.images[0].url || 'unknown'
+			name: artist.name,
+			image: artist.images[0].url
 		},
-		tracks: randomTracks.map((track) => ({
+		tracks: tracks.map((track) => ({
 			id: track.id,
-			name: track.name,
-			preview: track.preview_url,
-			image: track.album.images[0].url
+			name: track.name
 		}))
 	};
 };
 
 export const actions = {
-	default: async ({ request }) => {
+	default: async ({ request, cookies }) => {
+		const spotify_token = cookies.get('spotify_token');
+		if (!spotify_token) return fail(500, { message: 'Could not get token' });
+		const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
+
+		// evaluate answer
 		const answer = await request.formData();
-		const mostPopularTrack = mostPopular(tracks);
+		const tracks = await getTracks(spotify_token, current_quiz.tracks);
+		const mostPopularTrack = tracks.tracks.sort((a, b) => b.popularity - a.popularity)[0].id;
 		const correct = answer.get('track') === mostPopularTrack;
+
+		// get new artist
+		const relatedArtists = await getRelatedArtists(spotify_token, current_quiz.artist);
+		const randomArtist = relatedArtists.artists.sort(() => Math.random() - 0.5).slice(0, 1);
+		const artist = randomArtist[0];
+		cookies.set(
+			'current_quiz',
+			JSON.stringify({
+				artist: artist.id
+			}),
+			{
+				path: '/'
+			}
+		);
 
 		if (!correct) {
 			return fail(400, { false: answer.get('track'), correct: mostPopularTrack });
@@ -55,15 +102,9 @@ export const actions = {
 	}
 };
 
-const mostPopular = (tracks: any[]) => {
-	return tracks.sort((a, b) => b.popularity - a.popularity)[0].id;
-};
-
 const getToken = async () => {
 	const url = 'https://accounts.spotify.com/api/token';
 	const body = `grant_type=client_credentials&client_id=${SPOTIFY_CLIENT_ID}&client_secret=${SPOTIFY_CLIENT_SECRET}`;
-
-	console.log('body', body);
 
 	const res = await fetch(url, {
 		method: 'POST',
@@ -80,7 +121,7 @@ const getToken = async () => {
 	return token;
 };
 
-const getArtist = async (token: string, id: string) => {
+const getArtist = async (token: string, id: string): Promise<Artist> => {
 	const res = await fetch(`https://api.spotify.com/v1/artists/${id}`, {
 		headers: {
 			Authorization: 'Bearer  ' + token
@@ -89,8 +130,26 @@ const getArtist = async (token: string, id: string) => {
 	return await res.json();
 };
 
-const getArtistTopTracks = async (token: string, id: string) => {
+const getArtistTopTracks = async (token: string, id: string): Promise<{ tracks: Track[] }> => {
 	const res = await fetch(`https://api.spotify.com/v1/artists/${id}/top-tracks?market=DE`, {
+		headers: {
+			Authorization: 'Bearer  ' + token
+		}
+	});
+	return await res.json();
+};
+
+const getRelatedArtists = async (token: string, id: string): Promise<{ artists: Artist[] }> => {
+	const res = await fetch(`https://api.spotify.com/v1/artists/${id}/related-artists`, {
+		headers: {
+			Authorization: 'Bearer  ' + token
+		}
+	});
+	return await res.json();
+};
+
+const getTracks = async (token: string, ids: string[]): Promise<{ tracks: Track[] }> => {
+	const res = await fetch(`https://api.spotify.com/v1/tracks?ids=${ids.join(',')}`, {
 		headers: {
 			Authorization: 'Bearer  ' + token
 		}

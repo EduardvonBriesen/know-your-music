@@ -5,8 +5,6 @@
 
 	export let data;
 	export let form;
-
-	$: console.log('form', form);
 </script>
 
 <div class="flex place-content-center">
@@ -25,7 +23,7 @@
 		<section class="p-4">
 			<form method="POST" use:enhance>
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-					{#each data.tracks as track (track.id)}
+					{#each data.tracks ?? [] as track (track.id)}
 						<button
 							class="btn disabled:opacity-100"
 							class:variant-filled-primary={form?.correct !== track.id && form?.false !== track.id}
