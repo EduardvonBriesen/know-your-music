@@ -13,6 +13,26 @@ pnpm run dev
 pnpm run dev -- --open
 ```
 
+### Environment
+
+You will need to create a `.env` file in the root of the project with the following variables:
+
+```bash
+# Firebase
+VITE_API_KEY=""
+VITE_AUTH_DOMAIN=""
+VITE_PROJECT_ID=""
+VITE_STORAGE_BUCKET=""
+VITE_MESSAGING_SENDER_ID=""
+VITE_APP_ID=""
+
+# Spotify
+SPOTIFY_CLIENT_ID=""
+SPOTIFY_CLIENT_SECRET=""
+```
+
+You can get the Firebase variables from the [Firebase dashboard](https://console.firebase.google.com/project/know-your-music-7ea79/settings/general/). The Spotify variables can be obtained by creating a Spotify app in the [Spotify developer dashboard](https://developer.spotify.com/documentation/web-api/tutorials/getting-started).
+
 ## Building
 
 To create a production version of your app:

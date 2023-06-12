@@ -4,15 +4,13 @@
 	import '@skeletonlabs/skeleton/styles/skeleton.css';
 	import '../app.css';
 
-	import Header from '../Components/Header.svelte';
-	import { AppShell } from '@skeletonlabs/skeleton';
+	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
-	import { authStore } from '../store/store';
+	import { authHandler, authStore } from '../store/store';
 
 	onMount(() => {
-		console.log('mounted');
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
 			const currentPath = window.location.pathname;
 
@@ -33,7 +31,7 @@
 			const docSnap = await getDoc(docRef);
 
 			if (!docSnap.exists()) {
-				const userRef = doc(db, 'user', user.uid);
+				const userRef = doc(db, 'users', user.uid);
 				(dataToSetStore = {
 					email: user.email,
 					createdAt: new Date(),
@@ -48,16 +46,30 @@
 			authStore.update((store) => {
 				return {
 					...store,
-					user,
-					data: dataToSetStore,
+					user
 				};
 			});
 		});
 	});
+
+	const logout = () => {
+		authHandler.logout();
+	};
 </script>
 
 <AppShell>
-	<svelte:fragment slot="header"><Header /></svelte:fragment>
+	<svelte:fragment slot="header">
+		<AppBar>
+			<svelte:fragment slot="lead">know your music.</svelte:fragment>
+			<nav>
+				<a class="btn variant-soft" href="/quiz/popularity">Quiz</a>
+				<a class="btn variant-soft" href="/stats">Stats</a>
+			</nav>
+			<svelte:fragment slot="trail">
+				<button on:click={logout} class="btn variant-ghost"> Logout </button>
+			</svelte:fragment>
+		</AppBar>
+	</svelte:fragment>
 
 	<main>
 		<slot />
