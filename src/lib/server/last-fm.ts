@@ -4,6 +4,13 @@ export type ArtistInfo = any;
 
 const baseUrl = 'https://ws.audioscrobbler.com/2.0/';
 
+export const getArtistInfoById = async (artist_id: string): Promise<ArtistInfo> => {
+	const res = await fetch(
+		`${baseUrl}?method=artist.getinfo&mbid=${artist_id}&api_key=${VITE_LAST_FM_KEY}&format=json`
+	);
+	return await res.json();
+};
+
 export const getArtistInfo = async (artist: string): Promise<ArtistInfo> => {
 	const res = await fetch(
 		`${baseUrl}?method=artist.getinfo&artist=${artist}&api_key=${VITE_LAST_FM_KEY}&format=json`

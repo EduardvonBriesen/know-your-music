@@ -1,10 +1,9 @@
-import { getArtistInfo as lastFmGetArtistInfo } from '$lib/server/last-fm';
-import { getArtistInfo as musicBrainzGetArtistInfo } from '$lib/server/music-brainz';
+import { getArtistInfoById, getArtistInfo } from '$lib/server/last-fm';
 import { fail } from '@sveltejs/kit';
 
 export const load = async ({ cookies }) => {
-	const artist = 'Cher';
-	const artistInfo = await lastFmGetArtistInfo(artist);
+	const artist = 'Daft Punk';
+	const artistInfo = await getArtistInfo(artist);
 
 	const artistId = artistInfo.artist.mbid;
 	let artistBio = artistInfo.artist.bio.summary;
@@ -34,13 +33,17 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const artistId = JSON.parse(cookies.get('current_quiz') || '{}').artist;
-		const answer = await request.formData();
-		// const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
-		const artist = 'Cher';
+		const answer = (await request.formData()).get('answer') as string;
 
-		const correctAnswer = answer.get('answer') === artist;
-		console.log(answer.get('answer'));
+		const artist = await getArtistInfoById(artistId);
+		const artistName = artist.artist.name;
 
-		return fail(200, { correct: correctAnswer, artist: artist });
+		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
+
+		if (correctAnswer) {
+			return fail(200, { correct: correctAnswer, artist: artistName });
+		} else {
+			return fail(200, { correct: correctAnswer, artist: artistName });
+		}
 	}
 };

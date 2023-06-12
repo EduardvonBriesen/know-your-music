@@ -109,7 +109,3 @@ const updateUser = async (correct: boolean, user_id: string) => {
 		{ merge: true }
 	);
 };
-
-
-https://upload.wikimedia.org/wikipedia/commons/3/31/Michael_Jackson_in_1988.jpg
-https://commons.wikimedia.org/wiki/File:Michael_Jackson_in_1988.jpg
