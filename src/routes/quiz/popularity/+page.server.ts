@@ -11,21 +11,10 @@ import {
 } from '$lib/server/spotify';
 
 export const load = async ({ cookies }) => {
-	let spotify_token = cookies.get('spotify_token');
+	const spotify_token = await getToken(cookies);
+	if (!spotify_token) return fail(500, { message: 'Could not get token' });
+
 	const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
-
-	// get new token
-	if (!spotify_token) {
-		const newToken = await getToken();
-		if (!newToken) return fail(500, { message: 'Could not get token' });
-
-		cookies.set('spotify_token', newToken.access_token, {
-			path: '/',
-			maxAge: newToken.expires_in
-		});
-
-		spotify_token = newToken.access_token;
-	}
 
 	const artist = await getArtist(spotify_token, current_quiz.artist ?? '4tZwfgrHOc3mvqYlEYSvVi');
 	let tracks: Track[] = [];
@@ -40,6 +29,7 @@ export const load = async ({ cookies }) => {
 		cookies.set(
 			'current_quiz',
 			JSON.stringify({
+				type: 'popularity',
 				artist: artist.id,
 				tracks: tracks.map((track) => track.id)
 			}),
@@ -63,7 +53,7 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const spotify_token = cookies.get('spotify_token');
+		const spotify_token = await getToken(cookies);
 		if (!spotify_token) return fail(500, { message: 'Could not get token' });
 		const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
 
@@ -83,6 +73,7 @@ export const actions = {
 		cookies.set(
 			'current_quiz',
 			JSON.stringify({
+				type: 'popularity',
 				artist: artist.id
 			}),
 			{
@@ -118,3 +109,7 @@ const updateUser = async (correct: boolean, user_id: string) => {
 		{ merge: true }
 	);
 };
+
+
+https://upload.wikimedia.org/wikipedia/commons/3/31/Michael_Jackson_in_1988.jpg
+https://commons.wikimedia.org/wiki/File:Michael_Jackson_in_1988.jpg
