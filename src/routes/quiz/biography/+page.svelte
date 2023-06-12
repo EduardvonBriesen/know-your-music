@@ -49,7 +49,13 @@
 				{#if !form}
 					<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
 				{:else}
-					<button class="btn variant-filled-success w-fit">Try Again</button>
+					<button
+						class="btn variant-filled-success w-fit"
+						type="button"
+						on:click={() => {
+							window.location.reload();
+						}}>Try Again</button
+					>
 				{/if}
 			</footer>
 		</form>

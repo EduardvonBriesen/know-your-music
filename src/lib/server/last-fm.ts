@@ -17,3 +17,12 @@ export const getArtistInfo = async (artist: string): Promise<ArtistInfo> => {
 	);
 	return await res.json();
 };
+
+export const getRandomArtist = async (): Promise<ArtistInfo> => {
+	const res = await fetch(
+		`${baseUrl}?method=chart.gettopartists&api_key=${VITE_LAST_FM_KEY}&format=json`
+	);
+	const artists = (await res.json()).artists.artist;
+	const randomArtist = artists[Math.floor(Math.random() * artists.length)];
+	return randomArtist;
+}

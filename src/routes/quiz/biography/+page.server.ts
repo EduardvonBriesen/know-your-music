@@ -1,29 +1,40 @@
 import { db } from '$lib/firebase/firebase';
-import { getArtistInfoById, getArtistInfo } from '$lib/server/last-fm';
+import { getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
 export const load = async ({ cookies }) => {
-	const artist = 'Daft Punk';
-	const artistInfo = await getArtistInfo(artist);
+	const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
 
-	const artistId = artistInfo.artist.mbid;
-	let artistBio = artistInfo.artist.bio.summary;
+	let artistName = '';
+	let artistId = '';
+
+	if (current_quiz.type !== 'biography' || !current_quiz.artist) {
+		const artist = await getRandomArtist();
+		artistName = artist.name;
+		artistId = artist.mbid;
+
+		cookies.set(
+			'current_quiz',
+			JSON.stringify({
+				type: 'biography',
+				artist: artistId
+			}),
+			{
+				path: '/'
+			}
+		);
+	} else {
+		artistId = current_quiz.artist;
+		const artist = await getArtistInfoById(artistId);
+		artistName = artist.artist.name;
+	}
+
+	let artistBio = (await getArtistInfoById(artistId)).artist.bio.summary;
 	// obfuscate artist name
-	artistBio = artistInfo.artist.bio.summary.replaceAll(artist, '<input />');
+	artistBio = artistBio.replaceAll(artistName, '<input />');
 	// cut out anchor tags
 	artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
-
-	cookies.set(
-		'current_quiz',
-		JSON.stringify({
-			type: 'biography',
-			artist: artistId
-		}),
-		{
-			path: '/'
-		}
-	);
 
 	return {
 		artist: {
@@ -44,6 +55,16 @@ export const actions = {
 		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
 
 		updateUser(correctAnswer, response.get('user_id') as string);
+
+		cookies.set(
+			'current_quiz',
+			JSON.stringify({
+				type: 'biography'
+			}),
+			{
+				path: '/'
+			}
+		);
 
 		if (correctAnswer) {
 			return fail(200, { correct: correctAnswer, artist: artistName });
