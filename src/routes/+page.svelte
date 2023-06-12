@@ -9,8 +9,9 @@
 <section class="text-center">
 	<h1 class="text-2xl">Home</h1>
 	<p class="text-lg">
-		There's not much to do yet, but you can play try Proof of Concept <a href="/quiz" class="anchor"
-			>Quiz</a
+		There's not much to do yet, but you can play try Proof of Concept <a
+			href="/quiz/pupularity"
+			class="anchor">Quiz</a
 		>.
 	</p>
 </section>

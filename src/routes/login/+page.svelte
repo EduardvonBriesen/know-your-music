@@ -1,6 +1,5 @@
 <script>
 	import { authHandler } from '../../store/store';
-	import { fade } from 'svelte/transition';
 
 	let email = '';
 	let password = '';
@@ -10,9 +9,8 @@
 
 	let register = false;
 
+	// TODO: Move to server side?
 	const submit = () => {
-		console.log(email, password);
-
 		if (register) {
 			if (password !== confirmPassword) {
 				alert('Passwords do not match');

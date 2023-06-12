@@ -2,7 +2,7 @@
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
-	import { authStore } from '../../store/store';
+	import { authStore } from '../../../store/store';
 
 	export let data;
 	export let form;

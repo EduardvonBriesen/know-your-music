@@ -5,9 +5,8 @@
 	import { onMount } from 'svelte';
 
 	let stats = {
-		score: 0,
-		correct: 0,
-		incorrect: 0
+		correct: 1,
+		incorrect: 1
 	};
 
 	let conicStops: ConicStop[] = [
@@ -16,8 +15,7 @@
 	];
 
 	$: {
-		const winRate = stats.correct / (stats.correct + stats.incorrect) || 0;
-		console.log(winRate);
+		const winRate = stats.correct / (stats.correct + stats.incorrect);
 
 		conicStops = [
 			{ label: 'Correct', color: 'rgb(var(--color-success-500))', start: 0, end: winRate * 100 },
