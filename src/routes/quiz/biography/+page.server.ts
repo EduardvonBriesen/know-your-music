@@ -1,5 +1,7 @@
 import { db } from '$lib/firebase/firebase';
 import { getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
+import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
+import { getArtist as spotifyGetArtist, getToken } from '$lib/server/spotify';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
@@ -51,10 +53,15 @@ export const actions = {
 		const artist = await getArtistInfoById(artistId);
 		const artistName = artist.artist.name;
 
-		const answer = response.get('answer') as string;
+		const answer = (response.get('answer') as string) || '';
 		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
 
 		updateUser(correctAnswer, response.get('user_id') as string);
+
+		const spotifyToken = await getToken(cookies);
+		const spotifyId = await mbidToSpotifyId(artistId);
+		const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
+		const artistImage = spotifyArtist.images[0].url;
 
 		cookies.set(
 			'current_quiz',
@@ -67,9 +74,9 @@ export const actions = {
 		);
 
 		if (correctAnswer) {
-			return fail(200, { correct: correctAnswer, artist: artistName });
+			return fail(200, { correct: correctAnswer, artist: artistName, image: artistImage });
 		} else {
-			return fail(200, { correct: correctAnswer, artist: artistName });
+			return fail(200, { correct: correctAnswer, artist: artistName, image: artistImage });
 		}
 	}
 };

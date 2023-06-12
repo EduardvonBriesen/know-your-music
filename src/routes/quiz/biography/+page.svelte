@@ -2,6 +2,7 @@
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
+	import { Avatar } from '@skeletonlabs/skeleton';
 
 	export let data;
 	export let form;
@@ -17,7 +18,18 @@
 <div class="flex place-content-center">
 	<div class="card p-4 w-2/3 text-token space-4 m-10">
 		<header class="card-header flex flex-col items-center">
-			<h3 class="h3">Who hides behind this Bio?</h3>
+			{#if !form}
+				<h3 class="h3">Who hides behind this Bio?</h3>
+			{:else}
+				<Avatar
+					rounded="rounded-xl"
+					width="w-1/3"
+					cursor="cursor-pointer"
+					src={form?.image}
+					alt={form?.artist}
+				/>
+				<h3 class="h3">{form?.artist}</h3>
+			{/if}
 		</header>
 		<form
 			method="POST"
