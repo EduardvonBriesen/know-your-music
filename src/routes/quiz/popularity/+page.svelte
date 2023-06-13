@@ -35,15 +35,16 @@
 				}}
 			>
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-					{#each data.tracks ?? [] as track (track.id)}
+					{#each data.tracks ?? [] as track}
 						<button
 							class="btn disabled:opacity-100"
-							class:variant-filled-primary={form?.correct !== track.id && form?.false !== track.id}
-							class:variant-filled-success={form?.correct === track.id}
-							class:variant-filled-error={form?.false === track.id}
+							class:variant-filled-primary={form?.correct !== track.name &&
+								form?.false !== track.name}
+							class:variant-filled-success={form?.correct === track.name}
+							class:variant-filled-error={form?.false === track.name}
 							type="submit"
-							name="track"
-							value={track.id}
+							name="answer"
+							value={track.name}
 							disabled={!!form}
 						>
 							<span class="text-sm break-words whitespace-normal">{track.name}</span>
