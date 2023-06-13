@@ -1,6 +1,7 @@
 import { MusicBrainzApi } from 'musicbrainz-api';
 
-export const mbidToSpotifyId = async (mbid: string): Promise<string> => {
+export const mbidToSpotifyId = async (mbid: string): Promise<string | undefined> => {
+	console.log('mbidToSpotifyId', mbid);
 	const mbApi = new MusicBrainzApi({
 		appName: 'know your music',
 		appVersion: '0.1.0',
@@ -8,9 +9,14 @@ export const mbidToSpotifyId = async (mbid: string): Promise<string> => {
 	});
 
 	const artist = await mbApi.lookupArtist(mbid, ['url-rels']);
-	if (!artist) return '';
-	const spotifyUrl = artist.relations.find((relation) => relation.url.resource.includes('spotify'))
-		.url.resource;
+	if (!artist || !artist.relations) return;
+	const spotifyRel = artist.relations.find((relation) =>
+		relation.url?.resource.includes('spotify')
+	);
+	if (!spotifyRel) return;
+	const spotifyUrl = spotifyRel.url?.resource;
+	if (!spotifyUrl) return;
 	const spotifyId = spotifyUrl.split('/').pop();
-	return spotifyId || '';
+	console.log('spotifyId', spotifyId);
+	return spotifyId;
 };

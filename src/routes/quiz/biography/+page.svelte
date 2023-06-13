@@ -21,13 +21,15 @@
 			{#if !form}
 				<h3 class="h3">Who hides behind this Bio?</h3>
 			{:else}
-				<Avatar
-					rounded="rounded-xl"
-					width="w-1/3"
-					cursor="cursor-pointer"
-					src={form?.image}
-					alt={form?.artist}
-				/>
+				{#if form?.image}
+					<Avatar
+						rounded="rounded-xl"
+						width="w-1/3"
+						cursor="cursor-pointer"
+						src={form?.image}
+						alt={form?.artist}
+					/>
+				{/if}
 				<h3 class="h3">{form?.artist}</h3>
 			{/if}
 		</header>
@@ -39,23 +41,22 @@
 		>
 			<section class="p-4">
 				<p class="text-justify">
-					{#each data.artist?.summary.split('<input />') as text, i}
-						{text}
-						{#if i < data.artist?.summary.split('<input />').length - 1 && !form}
-							<input class="input w-24 px-2" bind:value={guess} name="answer" />
-						{:else if i < data.artist?.summary.split('<input />').length - 1 && form?.correct}
-							<em class="font-bold text-primary-500">{form.artist}</em>
-						{:else if i < data.artist?.summary.split('<input />').length - 1 && form?.correct === false}
-							<em class="font-bold text-error-500">{form.artist}</em>
-						{/if}
-					{/each}
+					{#if !form}
+						{@html data.artist?.summary}
+					{:else if form?.correct}
+						<div class="[&>em]:font-bold [&>em]:text-primary-500">
+							{@html form.bio}
+						</div>
+					{:else}
+						<div class="[&>em]:font-bold [&>em]:text-error-500">
+							{@html form.bio}
+						</div>
+					{/if}
 				</p>
 			</section>
 			<footer class="card-footer flex flex-col items-center">
-				{#if form?.correct}
-					<span class="text-center">Thats Right!</span>
-				{:else if form?.correct === false}
-					<span class="text-center">Thats Wrong!</span>
+				{#if data.artist?.summary.split('<input').length === 1}
+					<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
 				{/if}
 
 				{#if !form}

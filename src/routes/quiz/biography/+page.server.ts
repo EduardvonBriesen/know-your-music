@@ -10,11 +10,16 @@ export const load = async ({ cookies }) => {
 
 	let artistName = '';
 	let artistId = '';
+	let artistBio = '';
 
 	if (current_quiz.type !== 'biography' || !current_quiz.artist) {
-		const artist = await getRandomArtist();
-		artistName = artist.name;
-		artistId = artist.mbid;
+		// get random artist, check if bio is long enough
+		while (artistBio.length < 10) {
+			const artist = await getRandomArtist();
+			artistName = artist.name;
+			artistId = artist.mbid;
+			artistBio = (await getArtistInfoById(artistId)).artist?.bio?.summary || '';
+		}
 
 		cookies.set(
 			'current_quiz',
@@ -27,14 +32,23 @@ export const load = async ({ cookies }) => {
 			}
 		);
 	} else {
+		// get artist from cookie
 		artistId = current_quiz.artist;
 		const artist = await getArtistInfoById(artistId);
 		artistName = artist.artist.name;
+		artistBio = (await getArtistInfoById(artistId)).artist.bio.summary;
 	}
 
-	let artistBio = (await getArtistInfoById(artistId)).artist.bio.summary;
 	// obfuscate artist name
-	artistBio = artistBio.replaceAll(artistName, '<input />');
+	artistBio = artistBio.replaceAll(
+		artistName,
+		'<input class="input w-24 px-2" bind:value={guess} name="answer" />'
+	);
+	// obfuscate substrings of artist name
+	artistName.split(' ').forEach((word) => {
+		if (word.length < 3) return;
+		artistBio = artistBio.replaceAll(word, '<b class="blur">Asdfasdf</b>');
+	});
 	// cut out anchor tags
 	artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
@@ -53,16 +67,34 @@ export const actions = {
 		const artist = await getArtistInfoById(artistId);
 		const artistName = artist.artist.name;
 
+		// check if answer is correct
 		const answer = (response.get('answer') as string) || '';
 		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
 
+		// update user stats
 		updateUser(correctAnswer, response.get('user_id') as string);
 
+		// get artist image
+		let artistImage = '';
 		const spotifyToken = await getToken(cookies);
 		const spotifyId = await mbidToSpotifyId(artistId);
-		const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
-		const artistImage = spotifyArtist.images[0].url;
+		if (spotifyId) {
+			const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
+			artistImage = spotifyArtist.images[0].url;
+		}
 
+		let artistBio = artist.artist.bio.summary;
+		// obfuscate artist name
+		artistBio = artistBio.replaceAll(artistName, `<em>${artistName}</em>`);
+		// obfuscate substrings of artist name
+		artistName.split(' ').forEach((word: string) => {
+			if (word.length < 3) return;
+			artistBio = artistBio.replaceAll(' ' + word + ' ', ` <em>${word}</em> `);
+		});
+		// cut out anchor tags
+		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
+
+		// reset quiz
 		cookies.set(
 			'current_quiz',
 			JSON.stringify({
@@ -74,9 +106,19 @@ export const actions = {
 		);
 
 		if (correctAnswer) {
-			return fail(200, { correct: correctAnswer, artist: artistName, image: artistImage });
+			return fail(200, {
+				correct: correctAnswer,
+				artist: artistName,
+				image: artistImage,
+				bio: artistBio
+			});
 		} else {
-			return fail(200, { correct: correctAnswer, artist: artistName, image: artistImage });
+			return fail(200, {
+				correct: correctAnswer,
+				artist: artistName,
+				image: artistImage,
+				bio: artistBio
+			});
 		}
 	}
 };
