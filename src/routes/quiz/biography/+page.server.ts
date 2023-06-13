@@ -6,13 +6,13 @@ import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
 export const load = async ({ cookies }) => {
-	const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
+	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
 
 	let artistName = '';
 	let artistId = '';
 	let artistBio = '';
 
-	if (current_quiz.type !== 'biography' || !current_quiz.artist) {
+	if (!current_quiz.artist) {
 		// get random artist, check if bio is long enough
 		while (artistBio.length < 10) {
 			const artist = await getRandomArtist();
@@ -22,9 +22,8 @@ export const load = async ({ cookies }) => {
 		}
 
 		cookies.set(
-			'current_quiz',
+			'biography',
 			JSON.stringify({
-				type: 'biography',
 				artist: artistId
 			}),
 			{
@@ -40,13 +39,10 @@ export const load = async ({ cookies }) => {
 	}
 
 	// obfuscate artist name
-	artistBio = artistBio.replaceAll(
-		artistName,
-		'<input class="input w-24 px-2" bind:value={guess} name="answer" />'
-	);
+	artistBio = artistBio.replaceAll(artistName, '<input class="input w-24 px-2" name="answer" />');
 	// obfuscate substrings of artist name
 	artistName.split(' ').forEach((word) => {
-		if (word.length < 3) return;
+		if (word.length <= 3) return;
 		artistBio = artistBio.replaceAll(word, '<b class="blur">Asdfasdf</b>');
 	});
 	// cut out anchor tags
@@ -61,7 +57,7 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const artistId = JSON.parse(cookies.get('current_quiz') || '{}').artist;
+		const artistId = JSON.parse(cookies.get('biography') || '{}').artist;
 		const response = await request.formData();
 
 		const artist = await getArtistInfoById(artistId);
@@ -72,7 +68,7 @@ export const actions = {
 		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
 
 		// update user stats
-		updateUser(correctAnswer, response.get('user_id') as string);
+		// updateUser(correctAnswer, response.get('user_id') as string);
 
 		// get artist image
 		let artistImage = '';
@@ -84,26 +80,15 @@ export const actions = {
 		}
 
 		let artistBio = artist.artist.bio.summary;
-		// obfuscate artist name
+
 		artistBio = artistBio.replaceAll(artistName, `<em>${artistName}</em>`);
-		// obfuscate substrings of artist name
-		artistName.split(' ').forEach((word: string) => {
-			if (word.length < 3) return;
-			artistBio = artistBio.replaceAll(' ' + word + ' ', ` <em>${word}</em> `);
-		});
 		// cut out anchor tags
 		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
 		// reset quiz
-		cookies.set(
-			'current_quiz',
-			JSON.stringify({
-				type: 'biography'
-			}),
-			{
-				path: '/'
-			}
-		);
+		cookies.set('biography', '', {
+			path: '/'
+		});
 
 		if (correctAnswer) {
 			return fail(200, {

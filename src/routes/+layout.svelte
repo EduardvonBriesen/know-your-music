@@ -62,7 +62,8 @@
 		<AppBar>
 			<svelte:fragment slot="lead">know your music.</svelte:fragment>
 			<nav>
-				<a class="btn variant-soft" href="/quiz">Quiz</a>
+				<a class="btn variant-soft" href="/quiz/popularity">Popularity Quiz</a>
+				<a class="btn variant-soft" href="/quiz/biography">Bio Quiz</a>
 				<a class="btn variant-soft" href="/stats">Stats</a>
 			</nav>
 			<svelte:fragment slot="trail">

@@ -1,37 +1,42 @@
 import { db } from '$lib/firebase/firebase';
 import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { fail } from '@sveltejs/kit';
-import {
-	getArtist,
-	getArtistTopTracks,
-	getRelatedArtists,
-	getToken,
-	getTracks,
-	type Track
-} from '$lib/server/spotify';
+import { getToken, getArtist as spotifyGetArtist } from '$lib/server/spotify';
+import { getRandomArtist, getTopTracks, getTrackInfo } from '$lib/server/last-fm';
+import { mbidToSpotifyId } from '$lib/server/music-brainz';
 
 export const load = async ({ cookies }) => {
-	const spotify_token = await getToken(cookies);
-	if (!spotify_token) return fail(500, { message: 'Could not get token' });
+	const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
 
-	const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
+	let artistName = current_quiz?.artist?.name;
+	let artistId = current_quiz?.artist?.id;
+	let tracks = current_quiz?.tracks;
 
-	const artist = await getArtist(spotify_token, current_quiz.artist ?? '4tZwfgrHOc3mvqYlEYSvVi');
-	let tracks: Track[] = [];
-	if (current_quiz.tracks) {
-		const _tracks = await getTracks(spotify_token, current_quiz.tracks ?? []);
-		tracks = _tracks.tracks;
-	} else {
-		const topTracks = await getArtistTopTracks(spotify_token, artist.id);
-		const randomTracks = topTracks.tracks.sort(() => Math.random() - 0.5).slice(0, 3);
-		tracks = randomTracks;
+	if (!current_quiz.artist) {
+		// get random artist
+		const artist = await getRandomArtist();
+		artistName = artist.name;
+		artistId = artist.mbid;
+	}
+
+	if (!current_quiz.tracks) {
+		// get random top tracks
+		const topTracks = await getTopTracks(artistId);
+
+		if (!topTracks) return fail(500, { message: 'Could not get top tracks' });
+		const randomTracks = topTracks.toptracks.track?.sort(() => Math.random() - 0.5).slice(0, 3);
+		tracks = randomTracks.map((track) => ({
+			name: track?.name
+		}));
 
 		cookies.set(
-			'current_quiz',
+			'popularity',
 			JSON.stringify({
-				type: 'popularity',
-				artist: artist.id,
-				tracks: tracks.map((track) => track.id)
+				artist: {
+					id: artistId,
+					name: artistName
+				},
+				tracks: tracks
 			}),
 			{
 				path: '/'
@@ -39,52 +44,56 @@ export const load = async ({ cookies }) => {
 		);
 	}
 
+	let artistImage = '';
+	const spotifyToken = await getToken(cookies);
+	const spotifyId = await mbidToSpotifyId(artistId);
+	if (spotifyId) {
+		const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
+		artistImage = spotifyArtist.images[0].url;
+	}
+
 	return {
 		artist: {
-			name: artist.name,
-			image: artist.images[0].url
+			name: artistName,
+			image: artistImage
 		},
-		tracks: tracks.map((track) => ({
-			id: track.id,
-			name: track.name
-		}))
+		tracks: tracks
 	};
 };
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const spotify_token = await getToken(cookies);
-		if (!spotify_token) return fail(500, { message: 'Could not get token' });
-		const current_quiz = JSON.parse(cookies.get('current_quiz') || '{}');
+		const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
 
 		// evaluate answer
 		const answer = await request.formData();
-		const tracks = await getTracks(spotify_token, current_quiz.tracks);
-		const mostPopularTrack = tracks.tracks.sort((a, b) => b.popularity - a.popularity)[0].id;
-		const correct = answer.get('track') === mostPopularTrack;
+		const guess = answer.get('answer') as string;
+
+		const tracks = current_quiz.tracks;
+		const trackInfos = await Promise.all(
+			tracks.map(async (track) => {
+				const info = await getTrackInfo(track.name, current_quiz.artist.name);
+				return {
+					name: info.track?.name,
+					playcount: info.track?.playcount
+				};
+			})
+		);
+		const mostPopularTrack = trackInfos.sort((a, b) => b.playcount - a.playcount)[0];
+		const correct = mostPopularTrack.name === guess;
 
 		// update user
 		await updateUser(correct, answer.get('user_id') as string);
 
-		// get new artist
-		const relatedArtists = await getRelatedArtists(spotify_token, current_quiz.artist);
-		const randomArtist = relatedArtists.artists.sort(() => Math.random() - 0.5).slice(0, 1);
-		const artist = randomArtist[0];
-		cookies.set(
-			'current_quiz',
-			JSON.stringify({
-				type: 'popularity',
-				artist: artist.id
-			}),
-			{
-				path: '/'
-			}
-		);
+		// reset quiz
+		cookies.set('popularity', '', {
+			path: '/'
+		});
 
 		if (!correct) {
-			return fail(400, { false: answer.get('track'), correct: mostPopularTrack });
+			return fail(400, { false: guess, correct: mostPopularTrack.name });
 		} else {
-			return fail(200, { false: null, correct: mostPopularTrack });
+			return fail(200, { false: null, correct: mostPopularTrack.name });
 		}
 	}
 };
