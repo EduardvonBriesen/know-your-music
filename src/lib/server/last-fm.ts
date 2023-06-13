@@ -1,10 +1,13 @@
-import { VITE_LAST_FM_KEY } from '$env/static/private';
+// https://www.last.fm/api/
 
-export type ArtistInfo = any;
+import { VITE_LAST_FM_KEY } from '$env/static/private';
+import type { ArtistInfo, TopTracks, Track, lfmError } from './last-fm.types';
 
 const baseUrl = 'http://ws.audioscrobbler.com/2.0/';
 
-export const getArtistInfoById = async (artist_id: string): Promise<ArtistInfo> => {
+export const getArtistInfoById = async (
+	artist_id: string
+): Promise<{ artist: ArtistInfo } | lfmError> => {
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.getinfo');
 	url.searchParams.append('mbid', artist_id);
@@ -14,7 +17,7 @@ export const getArtistInfoById = async (artist_id: string): Promise<ArtistInfo> 
 	return await res.json();
 };
 
-export const getArtistInfo = async (artist: string): Promise<ArtistInfo> => {
+export const getArtistInfo = async (artist: string): Promise<ArtistInfo | lfmError> => {
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.getinfo');
 	url.searchParams.append('artist', artist);
@@ -24,7 +27,7 @@ export const getArtistInfo = async (artist: string): Promise<ArtistInfo> => {
 	return await res.json();
 };
 
-export const getRandomArtist = async (): Promise<ArtistInfo> => {
+export const getRandomArtist = async (): Promise<ArtistInfo | lfmError> => {
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'chart.gettopartists');
 	url.searchParams.append('api_key', VITE_LAST_FM_KEY);
@@ -35,7 +38,7 @@ export const getRandomArtist = async (): Promise<ArtistInfo> => {
 	return randomArtist;
 };
 
-export const getTopTracks = async (artist_id: string): Promise<any> => {
+export const getTopTracks = async (artist_id: string): Promise<TopTracks | lfmError> => {
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.gettoptracks');
 	url.searchParams.append('mbid', artist_id);
@@ -45,7 +48,7 @@ export const getTopTracks = async (artist_id: string): Promise<any> => {
 	return await res.json();
 };
 
-export const getTrackInfo = async (track: string, artist: string): Promise<any> => {
+export const getTrackInfo = async (track: string, artist: string): Promise<Track | lfmError> => {
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'track.getInfo');
 	url.searchParams.append('api_key', VITE_LAST_FM_KEY);

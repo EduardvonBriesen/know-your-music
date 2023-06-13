@@ -16,9 +16,12 @@ export const load = async ({ cookies }) => {
 		// get random artist, check if bio is long enough
 		while (artistBio.length < 10) {
 			const artist = await getRandomArtist();
+			if ('error' in artist) return { error: "Couldn't get artist" };
 			artistName = artist.name;
 			artistId = artist.mbid;
-			artistBio = (await getArtistInfoById(artistId)).artist?.bio?.summary || '';
+			const artistInfo = await getArtistInfoById(artistId);
+			if ('error' in artistInfo) return { error: "Couldn't get artist info" };
+			artistBio = artistInfo.artist?.bio?.summary || '';
 		}
 
 		cookies.set(
@@ -34,8 +37,11 @@ export const load = async ({ cookies }) => {
 		// get artist from cookie
 		artistId = current_quiz.artist;
 		const artist = await getArtistInfoById(artistId);
+		if ('error' in artist) return { error: "Couldn't get artist" };
 		artistName = artist.artist.name;
-		artistBio = (await getArtistInfoById(artistId)).artist.bio.summary;
+		const artistInfo = await getArtistInfoById(artistId);
+		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
+		artistBio = artistInfo.artist?.bio?.summary || '';
 	}
 
 	// obfuscate artist name
@@ -61,6 +67,7 @@ export const actions = {
 		const response = await request.formData();
 
 		const artist = await getArtistInfoById(artistId);
+		if ('error' in artist) return fail(500, { error: "Couldn't get artist" });
 		const artistName = artist.artist.name;
 
 		// check if answer is correct
@@ -68,7 +75,7 @@ export const actions = {
 		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
 
 		// update user stats
-		// updateUser(correctAnswer, response.get('user_id') as string);
+		updateUser(correctAnswer, response.get('user_id') as string);
 
 		// get artist image
 		let artistImage = '';
@@ -76,6 +83,7 @@ export const actions = {
 		const spotifyId = await mbidToSpotifyId(artistId);
 		if (spotifyId) {
 			const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
+			if ('error' in spotifyArtist) return ''; // TODO: fallback image
 			artistImage = spotifyArtist.images[0].url;
 		}
 

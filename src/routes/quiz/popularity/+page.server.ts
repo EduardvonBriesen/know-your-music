@@ -15,6 +15,13 @@ export const load = async ({ cookies }) => {
 	if (!current_quiz.artist) {
 		// get random artist
 		const artist = await getRandomArtist();
+
+		// assert that artist is valid
+		if ('error' in artist)
+			return {
+				error: "Couldn't get artist"
+			};
+
 		artistName = artist.name;
 		artistId = artist.mbid;
 	}
@@ -22,8 +29,8 @@ export const load = async ({ cookies }) => {
 	if (!current_quiz.tracks) {
 		// get random top tracks
 		const topTracks = await getTopTracks(artistId);
+		if ('error' in topTracks) return { error: "Couldn't get top track" };
 
-		if (!topTracks) return fail(500, { message: 'Could not get top tracks' });
 		const randomTracks = topTracks.toptracks.track?.sort(() => Math.random() - 0.5).slice(0, 3);
 		tracks = randomTracks.map((track) => ({
 			name: track?.name
@@ -49,6 +56,7 @@ export const load = async ({ cookies }) => {
 	const spotifyId = await mbidToSpotifyId(artistId);
 	if (spotifyId) {
 		const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
+		if ('error' in spotifyArtist) return { error: "Couldn't get artist" };
 		artistImage = spotifyArtist.images[0].url;
 	}
 
@@ -69,16 +77,22 @@ export const actions = {
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
 
-		const tracks = current_quiz.tracks;
+		const tracks = current_quiz.tracks as { name: string }[];
 		const trackInfos = await Promise.all(
 			tracks.map(async (track) => {
 				const info = await getTrackInfo(track.name, current_quiz.artist.name);
+				if ('error' in info)
+					return {
+						name: track.name,
+						playcount: 0
+					};
 				return {
 					name: info.track?.name,
 					playcount: info.track?.playcount
 				};
 			})
 		);
+
 		const mostPopularTrack = trackInfos.sort((a, b) => b.playcount - a.playcount)[0];
 		const correct = mostPopularTrack.name === guess;
 
