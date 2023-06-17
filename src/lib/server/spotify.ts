@@ -1,6 +1,6 @@
 import { VITE_SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET } from '$env/static/private';
 import type { Cookies } from '@sveltejs/kit';
-import type { Artist, SpotifyError, Token, Track } from './spotify.types';
+import type { Album, Artist, SpotifyError, Token, Track } from './spotify.types';
 
 const baseUrl = 'https://api.spotify.com/v1/';
 
@@ -73,6 +73,20 @@ export const getTracks = async (
 	track_ids: string[]
 ): Promise<{ tracks: Track[] } | SpotifyError> => {
 	const res = await fetch(`${baseUrl}tracks?ids=${track_ids.join(',')}`, {
+		headers: {
+			Authorization: 'Bearer  ' + token
+		}
+	});
+	return await res.json();
+};
+
+export const getArtistAlbums = async (
+	token: string,
+	artist_id: string
+): Promise<{ items: Album[] } | SpotifyError> => {
+	const url = new URL(`${baseUrl}artists/${artist_id}/albums`);
+	url.searchParams.append('include_groups', 'album');
+	const res = await fetch(url, {
 		headers: {
 			Authorization: 'Bearer  ' + token
 		}
