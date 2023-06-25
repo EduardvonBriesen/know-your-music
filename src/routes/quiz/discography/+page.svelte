@@ -30,8 +30,9 @@
 				return { id: index, name: album.name, image: album.image };
 			});
 		}
-		// console.log(items);
 	}
+
+	$: console.log(form);
 </script>
 
 <div class="flex place-content-center">
@@ -56,28 +57,53 @@
 		>
 			<section
 				class="flex flex-row justify-evenly gap-4 p-4"
-				use:dndzone={{ items, flipDurationMs, dropTargetStyle: { outline: 'none' } }}
+				use:dndzone={{
+					items,
+					flipDurationMs,
+					dropTargetStyle: { outline: 'none' },
+					dragDisabled: !!form
+				}}
 				on:consider={handleDndConsider}
 				on:finalize={handleDndFinalize}
 			>
 				{#each items as item (item.id)}
 					<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
 						<Avatar
-							class="w-auto aspect-square max-h-64"
+							class="w-auto aspect-square"
 							rounded="rounded-xl"
-							cursor="cursor-pointer"
+							border={!form
+								? ''
+								: form?.result.get(item.name).correct
+								? 'border-4 border-success-500'
+								: 'border-4 border-error-500'}
+							cursor={!form ? 'cursor-pointer' : 'cursor-default'}
 							src={item.image}
 							alt={item.name}
 						/>
-						<p class="text-center line-clamp-2">{item.name}</p>
+						<p class="text-center line-clamp-1">{item.name}</p>
+						{#if form}
+							{#if form?.result.get(item.name).correct}
+								<span class="text-success-500">{form?.result.get(item.name).date}</span>
+							{:else}
+								<span class="text-error-500">{form?.result.get(item.name).date}</span>
+							{/if}
+						{/if}
 					</div>
 				{/each}
 			</section>
 
 			<footer class="card-footer flex flex-col items-center">
-				<!-- {#if !form} -->
-				<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
-				<!-- {/if} -->
+				{#if !form}
+					<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+				{:else}
+					<button
+						class="btn variant-filled-primary w-fit"
+						type="button"
+						on:click={() => {
+							window.location.reload();
+						}}>Try Again</button
+					>
+				{/if}
 			</footer>
 		</form>
 	</div>

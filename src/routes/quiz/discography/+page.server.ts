@@ -4,6 +4,8 @@ import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/ser
 import type { Album } from '$lib/server/spotify.types';
 import { fail } from '@sveltejs/kit';
 
+const numberOfAlbums = 5;
+
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('discography') || '{}');
 
@@ -57,7 +59,7 @@ export const load = async ({ cookies }) => {
 		// get random albums
 		artistAlbums.items.sort(() => Math.random() - 0.5);
 
-		albums = artistAlbums.items.slice(0, 5);
+		albums = artistAlbums.items.slice(0, numberOfAlbums);
 	} else {
 		// get albums from cookie
 		const artistAlbums = await getSeveralAlbums(spotifyToken, albumIds);
@@ -96,7 +98,6 @@ export const load = async ({ cookies }) => {
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const artistId = JSON.parse(cookies.get('discography') || '{}').artist;
 		const albumIds = JSON.parse(cookies.get('discography') || '{}').albums;
 		const response = await request.formData();
 
@@ -104,7 +105,6 @@ export const actions = {
 		if ('error' in albums) return fail(200, {});
 
 		const submittedOrder: string[] = JSON.parse(response.get('answer') as string) || '';
-		console.log(submittedOrder);
 
 		// get album data in correct order
 		const correctOrder = albums.albums
@@ -117,14 +117,41 @@ export const actions = {
 			.sort((a, b) => a.release_date.localeCompare(b.release_date));
 		console.log(correctOrder);
 
-		// calculate score based on acuracy of order
-		const score = submittedOrder.reduce((acc, name, i) => {
-			if (name === correctOrder[i].name) return acc + 1;
-			return acc;
-		}, 0);
-		console.log(score);
+		// get array of correct/incorrect, hashmap of album name to release date
+		// TODO: get nicer way to calculate this based on orders
+		const result = new Map(
+			submittedOrder.map((name, index) => [
+				name,
+				{
+					correct: name === correctOrder[index].name,
+					date: correctOrder
+						.find((album) => album.name === name)
+						?.release_date.split('-')
+						.reverse()
+						.join('.')
+				}
+			])
+		);
 
-		return fail(200, {});
+		// const result = submittedOrder.map((name, index) => ({
+		// 	name,
+		// 	correct: name === correctOrder[index].name,
+		// 	date: correctOrder
+		// 		.find((album) => album.name === name)
+		// 		?.release_date.split('-')
+		// 		.reverse()
+		// 		.join('.')
+		// }));
+
+		console.log(result);
+
+		cookies.set('discography', '', {
+			path: '/'
+		});
+
+		return fail(200, {
+			result: result
+		});
 	}
 };
 
