@@ -93,3 +93,15 @@ export const getArtistAlbums = async (
 	});
 	return await res.json();
 };
+
+export const getSeveralAlbums = async (
+	token: string,
+	album_ids: string[]
+): Promise<{ albums: Album[] } | SpotifyError> => {
+	const res = await fetch(`${baseUrl}albums?ids=${album_ids.join(',')}`, {
+		headers: {
+			Authorization: 'Bearer  ' + token
+		}
+	});
+	return await res.json();
+};

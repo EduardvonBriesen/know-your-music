@@ -15,7 +15,7 @@
 </script>
 
 <div class="flex place-content-center">
-	<div class="card p-4 w-2/3 text-token space-4 m-10">
+	<div class="card p-4 w-2/3 variant-glass-surface space-4 m-10">
 		<header class="card-header flex flex-col items-center">
 			<Avatar
 				rounded="rounded-xl"

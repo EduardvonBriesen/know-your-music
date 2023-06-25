@@ -1,16 +1,20 @@
-<script>
+<script lang="ts">
 	import { flip } from 'svelte/animate';
 	import { dndzone } from 'svelte-dnd-action';
 	import { Avatar } from '@skeletonlabs/skeleton';
+	import { enhance } from '$app/forms';
+	import { authStore } from '../../../store/store.js';
 
 	export let data;
+	export let form;
 
-	let items = [
-		{ id: 1, name: 'item1', image: '' },
-		{ id: 2, name: 'item2', image: '' },
-		{ id: 3, name: 'item3', image: '' },
-		{ id: 4, name: 'item4', image: '' }
-	];
+	let user_id: string = '';
+
+	authStore.subscribe((store: any) => {
+		user_id = store.user.uid;
+	});
+
+	let items = [{ id: 1, name: 'item1', image: '' }];
 	const flipDurationMs = 300;
 
 	function handleDndConsider(e) {
@@ -26,11 +30,12 @@
 				return { id: index, name: album.name, image: album.image };
 			});
 		}
+		// console.log(items);
 	}
 </script>
 
 <div class="flex place-content-center">
-	<div class="card w-2/3 text-token space-4 m-10">
+	<div class="card w-2/3 space-4 m-10 variant-glass-surface">
 		<header class="card-header flex flex-col items-center">
 			<Avatar
 				rounded="rounded-xl"
@@ -42,24 +47,38 @@
 			<h3 class="h3">{data.artist?.name}</h3>
 			<span class="text-center">In what order were these albums released?</span>
 		</header>
-		<section
-			class="flex flex-row justify-evenly gap-4 p-4"
-			use:dndzone={{ items, flipDurationMs }}
-			on:consider={handleDndConsider}
-			on:finalize={handleDndFinalize}
+		<form
+			method="POST"
+			use:enhance={({ formData }) => {
+				formData.set('user_id', user_id);
+				formData.set('answer', JSON.stringify(items.map((item) => item.name)));
+			}}
 		>
-			{#each items as item (item.id)}
-				<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
-					<Avatar
-						class="w-auto aspect-square"
-						rounded="rounded-xl"
-						cursor="cursor-pointer"
-						src={item.image}
-						alt={item.name}
-					/>
-					<p class="text-center line-clamp-2">{item.name}</p>
-				</div>
-			{/each}
-		</section>
+			<section
+				class="flex flex-row justify-evenly gap-4 p-4"
+				use:dndzone={{ items, flipDurationMs, dropTargetStyle: { outline: 'none' } }}
+				on:consider={handleDndConsider}
+				on:finalize={handleDndFinalize}
+			>
+				{#each items as item (item.id)}
+					<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
+						<Avatar
+							class="w-auto aspect-square max-h-64"
+							rounded="rounded-xl"
+							cursor="cursor-pointer"
+							src={item.image}
+							alt={item.name}
+						/>
+						<p class="text-center line-clamp-2">{item.name}</p>
+					</div>
+				{/each}
+			</section>
+
+			<footer class="card-footer flex flex-col items-center">
+				<!-- {#if !form} -->
+				<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+				<!-- {/if} -->
+			</footer>
+		</form>
 	</div>
 </div>
