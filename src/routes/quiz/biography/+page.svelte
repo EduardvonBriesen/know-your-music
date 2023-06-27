@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
 	import { Avatar } from '@skeletonlabs/skeleton';
+	import { each } from 'svelte/internal';
 
 	export let data;
 	export let form;
@@ -42,7 +43,7 @@
 			<section class="p-4">
 				<p class="text-justify">
 					{#if !form}
-						{@html data.artist?.summary}
+						{@html data.bio}
 					{:else if form?.correct}
 						<div class="[&>em]:font-bold [&>em]:text-primary-500">
 							{@html form.bio}
@@ -55,12 +56,32 @@
 				</p>
 			</section>
 			<footer class="card-footer flex flex-col items-center">
-				{#if data.artist?.summary.split('<input').length === 1}
-					<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
-				{/if}
-
 				{#if !form}
-					<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+					{#if data.options && data.options.length > 0}
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+							{#each data.options as option}
+								<button
+									class="btn disabled:opacity-100 variant-filled-primary"
+									type="submit"
+									name="answer"
+									value={option}
+									disabled={!!form}
+								>
+									<span class="text-sm line-clamp-1">{option}</span>
+								</button>
+							{/each}
+						</div>
+					{:else}
+						{#if data.bio?.split('<input').length === 1}
+							<input
+								bind:value={guess}
+								class="input px-2 w-48 m-2"
+								name="answer"
+								disabled={!!form}
+							/>
+						{/if}
+						<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+					{/if}
 				{:else}
 					<button
 						class="btn variant-filled-success w-fit"
