@@ -1,9 +1,12 @@
+import { db } from '$lib/firebase/firebase';
 import { getRandomArtist } from '$lib/server/last-fm';
 import { mbidToSpotifyId } from '$lib/server/music-brainz';
 import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/server/spotify';
 import type { Album } from '$lib/server/spotify.types';
 import { fail } from '@sveltejs/kit';
+import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 
+// This can be changed to adjust the difficulty of the quiz
 const numberOfAlbums = 5;
 
 export const load = async ({ cookies }) => {
@@ -115,7 +118,6 @@ export const actions = {
 				release_date: album.release_date
 			}))
 			.sort((a, b) => a.release_date.localeCompare(b.release_date));
-		console.log(correctOrder);
 
 		// get array of correct/incorrect, hashmap of album name to release date
 		// TODO: get nicer way to calculate this based on orders
@@ -133,17 +135,11 @@ export const actions = {
 			])
 		);
 
-		// const result = submittedOrder.map((name, index) => ({
-		// 	name,
-		// 	correct: name === correctOrder[index].name,
-		// 	date: correctOrder
-		// 		.find((album) => album.name === name)
-		// 		?.release_date.split('-')
-		// 		.reverse()
-		// 		.join('.')
-		// }));
-
-		console.log(result);
+		// update user stats
+		updateUser(
+			[...result.values()].every((album) => album.correct),
+			response.get('user_id') as string
+		);
 
 		cookies.set('discography', '', {
 			path: '/'
@@ -155,23 +151,23 @@ export const actions = {
 	}
 };
 
-// const updateUser = async (correct: boolean, user_id: string) => {
-// 	const userRef = doc(db, 'users', user_id);
-// 	const userDoc = await getDoc(userRef);
-// 	if (!userDoc.exists()) return;
+const updateUser = async (correct: boolean, user_id: string) => {
+	const userRef = doc(db, 'users', user_id);
+	const userDoc = await getDoc(userRef);
+	if (!userDoc.exists()) return;
 
-// 	const userData = userDoc.data() as DocumentData;
-// 	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-// 	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
+	const userData = userDoc.data() as DocumentData;
+	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
+	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
 
-// 	await setDoc(
-// 		userRef,
-// 		{
-// 			stats: {
-// 				correct: newCorrect,
-// 				incorrect: newIncorrect
-// 			}
-// 		},
-// 		{ merge: true }
-// 	);
-// };
+	await setDoc(
+		userRef,
+		{
+			stats: {
+				correct: newCorrect,
+				incorrect: newIncorrect
+			}
+		},
+		{ merge: true }
+	);
+};
