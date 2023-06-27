@@ -2,6 +2,7 @@ import { db } from '$lib/firebase/firebase';
 import { getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
 import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
 import { getArtist as spotifyGetArtist, getToken } from '$lib/server/spotify';
+import { LevenshteinDistance } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
@@ -94,7 +95,7 @@ export const actions = {
 		const answer = response.getAll('answer').filter((answer) => answer !== '')[0] as string;
 		console.log('formData', answer);
 
-		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
+		const correctAnswer = LevenshteinDistance(answer.toLowerCase(), artistName.toLowerCase()) < 3;
 
 		// update user stats
 		updateUser(correctAnswer, response.get('user_id') as string);
