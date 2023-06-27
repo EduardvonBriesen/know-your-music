@@ -9,6 +9,7 @@
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 	import { authHandler, authStore } from '../store/store';
+	import {initDataStructure} from "../store/data_structure"
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -31,14 +32,17 @@
 			const docSnap = await getDoc(docRef);
 
 			if (!docSnap.exists()) {
+				//signup
 				const userRef = doc(db, 'users', user.uid);
-				(dataToSetStore = {
+				/* dataToSetStore = {
 					email: user.email,
 					createdAt: new Date(),
 					updatedAt: new Date()
-				}),
-					await setDoc(userRef, dataToSetStore, { merge: true });
+				}; */
+				dataToSetStore = initDataStructure("tbd_name", user.email);
+				await setDoc(userRef, dataToSetStore, { merge: true });
 			} else {
+				//login
 				const userData = docSnap.data();
 				dataToSetStore = userData;
 			}
