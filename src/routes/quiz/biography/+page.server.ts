@@ -6,7 +6,7 @@ import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
 // This can be changed to adjust the difficulty of the quiz
-const difficulty: 1 | 2 | 3 = 2;
+const difficulty: 1 | 2 | 3 = 3;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
@@ -31,6 +31,10 @@ export const load = async ({ cookies }) => {
 				const relatedArtists =
 					artistInfo.artist?.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
 				options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
+			}
+
+			if (difficulty === 3) {
+				artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
 			}
 		}
 
