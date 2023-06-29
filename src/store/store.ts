@@ -12,8 +12,10 @@ export const authHandler = {
 	},
 	login: async (email: string, pass: string) => {
 		await signInWithEmailAndPassword(auth, email, pass);
+		//add logs
 	},
 	logout: async () => {
+		//add logs
 		await signOut(auth);
 	}
 };
