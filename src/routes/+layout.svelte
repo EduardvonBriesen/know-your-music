@@ -35,20 +35,12 @@
 			if (!docSnap.exists()) {
 				//signup
 				const userRef = doc(db, 'users', user.uid);
-				/* dataToSetStore = {
-					email: user.email,
-					createdAt: new Date(),
-					updatedAt: new Date()
-				}; */
 				dataToSetStore = initDataStructure("tbd_name", user.email);
 				await setDoc(userRef, dataToSetStore, { merge: true });
 			} else {
 				//login
 				const userData = docSnap.data();
 				dataToSetStore = userData;
-				//saving new log
-				//was the user already logged at this day -> add new session
-				//it is the first login of the user at this day -> add new history
 				addNewHistory(user.uid, db, userData);
 				
 			}
@@ -60,24 +52,15 @@
 				};
 			});
 			
-			
-			// authStore.user.uid
 		});
 	});
 
 	const logout = () => {
-		// src/routes/quiz/biography/+page.svelte anpassen
-		auth.onAuthStateChanged(async (user) => {
-			if (user) {
-				// User is signed in, see docs for a list of available properties
-				// https://firebase.google.com/docs/reference/js/auth.user
-				const uid = user.uid;
-				//Save logout time for calculation of duration of the active session
-				saveHistory(uid,db);
-			} else {
-				// User is signed out
-			}
+		let user_id ="";
+		authStore.subscribe((store: any) => {
+			user_id = store.user.uid;
 		});
+		saveHistory(user_id,db);
 		//this timeout is out of some reassons needed so that the log is done before logout
 		setTimeout(authHandler.logout,500);
 	};
