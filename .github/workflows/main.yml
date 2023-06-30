@@ -1,6 +1,5 @@
 name: CI
 on:
-  - push
   - pull_request
 
 jobs:
@@ -36,10 +35,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: 🔨 Build
         env:
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
           VITE_AUTH_DOMAIN: ${{ secrets.VITE_AUTH_DOMAIN }}
@@ -53,6 +52,6 @@ jobs:
           VITE_LAST_FM_SECRET: ${{ secrets.VITE_LAST_FM_SECRET }}
         run: pnpm build
 
-      - name: Lint
+      - name: 🔍 Lint
         run: pnpm lint
         continue-on-error: true
