@@ -7,10 +7,10 @@
 	export let data;
 	export let form;
 
-	let user_id: string = '';
-	let guess: string = '';
+	let user_id = '';
+	let guess = '';
 
-	authStore.subscribe((store: any) => {
+	authStore.subscribe((store) => {
 		user_id = store.user.uid;
 	});
 </script>
