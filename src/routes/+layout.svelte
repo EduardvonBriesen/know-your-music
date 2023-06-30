@@ -24,7 +24,10 @@
 				return;
 			}
 
-			if (!user) return;
+			if (!user) {
+				authStore.set({ user: {} });
+				return;
+			}
 
 			let dataToSetStore: DocumentData;
 			const docRef = doc(db, 'users', user.uid);
@@ -67,7 +70,9 @@
 				<a class="btn variant-soft" href="/stats">Stats</a>
 			</nav>
 			<svelte:fragment slot="trail">
-				<button on:click={logout} class="btn variant-ghost"> Logout </button>
+				<button on:click={logout} class="btn variant-ghost" class:invisible={!$authStore.user.uid}>
+					Logout
+				</button>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>

@@ -7,7 +7,7 @@ import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
 // This can be changed to adjust the difficulty of the quiz
-const difficulty: 1 | 2 | 3 = 3;
+const difficulty: 1 | 2 | 3 = 2;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
@@ -60,7 +60,7 @@ export const load = async ({ cookies }) => {
 		artistBio = artistInfo.artist?.bio?.summary || '';
 	}
 
-	const inputField = '<input class="input w-24 px-2" name="answer" />';
+	const inputField = '<input />';
 	const blurredField = '<b class="blur">Asdfasdf</b>';
 
 	// obfuscate artist name

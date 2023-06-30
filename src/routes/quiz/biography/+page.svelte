@@ -3,7 +3,6 @@
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
 	import { Avatar } from '@skeletonlabs/skeleton';
-	import { each } from 'svelte/internal';
 
 	export let data;
 	export let form;
@@ -43,7 +42,17 @@
 			<section class="p-4">
 				<p class="text-justify">
 					{#if !form}
-						{@html data.bio}
+						{#each data.bio?.split('<input />') || [] as slice}
+							{@html slice}
+							{#if slice !== data.bio?.split('<input />')[data.bio?.split('<input />').length - 1]}
+								<input
+									bind:value={guess}
+									class="input w-24 px-2"
+									name="answer"
+									autocomplete="off"
+								/>
+							{/if}
+						{/each}
 					{:else if form?.correct}
 						<div class="[&>em]:font-bold [&>em]:text-primary-500">
 							{@html form.bio}
@@ -78,9 +87,14 @@
 								class="input px-2 w-48 m-2"
 								name="answer"
 								disabled={!!form}
+								autocomplete="off"
 							/>
 						{/if}
-						<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+						<button
+							class="btn variant-filled-primary w-fit"
+							type="submit"
+							disabled={guess.length < 1}>Submit</button
+						>
 					{/if}
 				{:else}
 					<button
