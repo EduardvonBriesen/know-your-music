@@ -9,7 +9,7 @@
 
 	let user_id = '';
 
-	authStore.subscribe((store: any) => {
+	authStore.subscribe((store) => {
 		user_id = store.user.uid;
 	});
 </script>
