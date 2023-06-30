@@ -7,7 +7,7 @@
 	export let data;
 	export let form;
 
-	let user_id: string = '';
+	let user_id = '';
 
 	authStore.subscribe((store: any) => {
 		user_id = store.user.uid;
