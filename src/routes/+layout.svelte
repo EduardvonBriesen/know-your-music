@@ -78,6 +78,7 @@
 			<nav>
 				<a class="btn btn-sm variant-soft-surface" href="/quiz/popularity">Popularity Quiz</a>
 				<a class="btn btn-sm variant-soft-surface" href="/quiz/biography">Bio Quiz</a>
+				<a class="btn btn-sm variant-soft-surface" href="/quiz/discography">Discography Quiz</a>
 				<a class="btn btn-sm variant-soft-surface" href="/stats">Stats</a>
 			</nav>
 			<svelte:fragment slot="trail">
