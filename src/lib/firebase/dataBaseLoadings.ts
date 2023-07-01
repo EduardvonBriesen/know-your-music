@@ -1,25 +1,103 @@
-import { doc, getDoc,updateDoc,type DocumentData } from "firebase/firestore";
+import { doc, getDoc,updateDoc,type DocumentData, Timestamp } from "firebase/firestore";
+
+export type UserData = {
+    name: string;
+    email: string;
+    progress: {
+      overall_score: number;
+      overall_questions: number;
+      genre_scores: {
+        classic: number;
+        rock: number;
+        pop: number;
+        jazz: number;
+        rap: number;
+        folk_music: number;
+      };
+      music_period_scores: {
+        outdated: number;
+        eighties: number;
+        nineties: number;
+        twothousandties: number;
+        charts: number;
+      };
+      genres: {
+        [genre: string]: {
+          levelOne: {
+            correct: number;
+            questions: number;
+          };
+          levelTwo: {
+            correct: number;
+            questions: number;
+          };
+          levelThree: {
+            correct: number;
+            questions: number;
+          };
+          overall_questions: number;
+        };
+      };
+      music_periods: {
+        [period: string]: {
+          levelOne: {
+            correct: number;
+            questions: number;
+          };
+          levelTwo: {
+            correct: number;
+            questions: number;
+          };
+          levelThree: {
+            correct: number;
+            questions: number;
+          };
+          overall_questions: number;
+        };
+      };
+    };
+    logs: {
+      registered_since: Date;
+      overall_duration: number;
+      history: {
+        date: string;
+        accumulated_duration: number;
+        sessions: {
+          begin: Date;
+          duration: number;
+        }[];
+      }[];
+    };
+  };
 
 export const saveHistory = async (docName: string, db: any)=>{
     const collectionsName = "users";
     const docRef = doc(db, collectionsName, docName);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-        const history = docSnap.data().logs.history;
-        const historyLength = history.length;
-        const sessions = history[historyLength-1].sessions
-        const begin= sessions[sessions.length-1].begin;
-        const date = new Date();
-        const duration = Math.round(date.valueOf()/1000 ) - begin.seconds;
-        sessions[sessions.length-1].duration = duration;
-        history[history.length-1].sessions = sessions;
-        const newAccumulateDuration = history[history.length-1].accumulated_duration + duration;
-        history[history.length-1].accumulated_duration = newAccumulateDuration;
-        const overAllDuration = docSnap.data().logs.overall_duration + duration;
-        await updateDoc(docRef, {
-            "logs.history": history,
-            "logs.overall_duration" : overAllDuration
-        });
+        try{
+            const data= docSnap.data() as UserData;
+            //const history = docSnap.data().logs.history;
+            const history = data.logs.history;
+            const historyLength = history.length;
+            const sessions = history[historyLength-1].sessions
+            const begin= sessions[sessions.length-1].begin ;
+            const date = new Date();
+            const duration = Math.round(date.valueOf()/1000 ) - begin.seconds;
+            sessions[sessions.length-1].duration = duration;
+            history[history.length-1].sessions = sessions;
+            const newAccumulateDuration = history[history.length-1].accumulated_duration + duration;
+            history[history.length-1].accumulated_duration = newAccumulateDuration;
+            const overAllDuration = docSnap.data().logs.overall_duration + duration;
+            await updateDoc(docRef, {
+                "logs.history": history,
+                "logs.overall_duration" : overAllDuration
+            });
+        }
+        catch(e){
+            console.error(e);
+            return;
+        }
     } else {
         // docSnap.data() will be undefined in this case
         console.log("No such document!");
