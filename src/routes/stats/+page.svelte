@@ -18,8 +18,8 @@
 		const winRate = stats.correct / (stats.correct + stats.incorrect);
 
 		conicStops = [
-			{ label: 'Correct', color: 'rgb(var(--color-success-500))', start: 0, end: winRate * 100 },
-			{ label: 'Incorrect', color: 'rgb(var(--color-error-500))', start: winRate * 100, end: 100 }
+			{ label: 'Correct', color: 'rgb(var(--color-success-500))', start: 0, end: Math.round(winRate * 100 *100)/100},
+			{ label: 'Incorrect', color: 'rgb(var(--color-error-500))', start: Math.round(winRate * 100 * 100)/100, end: 100 }
 		];
 	}
 
@@ -35,7 +35,9 @@
 </script>
 
 <div class="flex place-content-center">
-	<div class="card p-4 w-2/3 text-token space-4 m-10">
-		<ConicGradient width="w-48" stops={conicStops} legend>Your Scores</ConicGradient>
+	<div class="card p-4 w-2/3 text-token space-4 m-12 flex place-content-center">
+		<div class="p-6 m-0 w-min">
+			<ConicGradient class="h3" width="w-48" stops={conicStops} legend>Your Answers</ConicGradient>
+		</div>
 	</div>
 </div>
