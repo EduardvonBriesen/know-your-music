@@ -98,21 +98,12 @@ export const actions = {
 			path: '/'
 		});
 
-		if (correctAnswer) {
-			return fail(200, {
-				correct: correctAnswer,
-				artist: artistName,
-				image: artistImage,
-				bio: artistBio
-			});
-		} else {
-			return fail(200, {
-				correct: correctAnswer,
-				artist: artistName,
-				image: artistImage,
-				bio: artistBio
-			});
-		}
+		return fail(200, {
+			correct: correctAnswer,
+			artist: artistName,
+			image: artistImage,
+			bio: artistBio
+		});
 	}
 };
 
