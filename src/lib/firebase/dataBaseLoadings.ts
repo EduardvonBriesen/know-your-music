@@ -47,7 +47,7 @@ export const addNewHistory = async(docName: string, db: any, userData: DocumentD
     });
 }
 
-export const newHistoryArrayElement = (date: Date )=> {
+const newHistoryArrayElement = (date: Date )=> {
     const newHistory = {
         date: date.toLocaleDateString(),
         accumulated_duration: 0,
@@ -61,7 +61,7 @@ export const newHistoryArrayElement = (date: Date )=> {
      return newHistory;
 }
 
-export const newSessionsArrayElement = (date: Date )=> {
+const newSessionsArrayElement = (date: Date )=> {
     const newSession = {
         begin: date,
         duration:0
@@ -69,7 +69,7 @@ export const newSessionsArrayElement = (date: Date )=> {
      return newSession;
 }
 
-export const initDataStructure = (name: string, email: any )=> {
+export const initDataStructure = (name: string, email: string )=> {
     const data={
         name: name,
         email: email,
