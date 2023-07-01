@@ -72,7 +72,7 @@
 	<svelte:fragment slot="header">
 		<AppBar>
 			<svelte:fragment slot="lead">
-				<!--<img class="h6 w6" src="./static/Facebook_logo_(square).png" alt="Logo"/> -->
+				<img class="h-6 w-6 mr-4" src="/images/Facebook_logo_(square).png" alt="Logo"/>
 				<a class="text-xl font-bold" href="/">Know Your Music</a>
 			</svelte:fragment>			
 			<nav>
