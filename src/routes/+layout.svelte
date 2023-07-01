@@ -1,22 +1,18 @@
 <script lang="ts">
-	// Your selected Skeleton theme:
 	
-	// Your custom Skeleton theme:
 	import '../theme.postcss';
-	// This contains the bulk of Skeletons required styles:
 	import '@skeletonlabs/skeleton/styles/skeleton.css';
-	// Finally, your application's global stylesheet (sometimes labeled 'app.css')
 	import '../app.postcss';
 
-	//import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
-	//import '@skeletonlabs/skeleton/styles/skeleton.css';
-	//import '../app.css';
 
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 	import { authHandler, authStore } from '../store/store';
+	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+	import { storePopup } from '@skeletonlabs/skeleton';
+storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {

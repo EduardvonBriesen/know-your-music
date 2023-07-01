@@ -35,6 +35,13 @@
 		}
 	}
 
+	import { popup } from '@skeletonlabs/skeleton';
+import type { PopupSettings } from '@skeletonlabs/skeleton';
+const popupHover: PopupSettings = {
+	event: 'hover',
+	target: 'popupHover',
+	placement: 'top'
+};
 
 </script>
 
@@ -51,7 +58,13 @@
 			<h3 class="h3 font-bold">{data.artist?.name}</h3>
 			<div class="h3 mt-6 mb-0 flex items-center">
 				<span class="mr-2">Which of the following tracks is most popular?</span>
-				<span class="badge-icon variant-soft-surface"> i </span> <!-- Use Floating UI for popip + use (maybe) fontawesome for info icon -->
+				<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
+					<span class="badge-icon variant-soft-surface"> i </span>
+				</div>
+				<div class="card p-2 variant-filled-surface" data-popup="popupHover">
+					<p class="text-sm">Popularity is measured by the number of streams</p>
+					<div class="arrow variant-filled-surface" />
+				</div>
 			</div>
 		</header>
 		<section class="p-6 pt-4 pb-8">
@@ -84,9 +97,9 @@
 			<footer class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {form?.false === null ? 'bg-success-200' : 'bg-error-200'}">
 				<div class="flex justify-between items-center w-full p-6">
 					{#if form?.false === null}
-						<span class="w-4/5 font-bold text-success-500">{feedback}</span>
+						<span class="w-3/4 font-bold text-success-500">{feedback}</span>
 					{:else if form?.false !== null}
-						<span class="w-4/5 font-bold text-error-500">{feedback}</span>
+						<span class="w-3/4 font-bold text-error-500">{feedback}</span>
 					{/if}
 					<button class="btn w-fit {form?.false === null ? 'variant-filled-success' : 'variant-filled-error'}" on:click={() => window.location.reload()}>Continue</button> 
 				</div>

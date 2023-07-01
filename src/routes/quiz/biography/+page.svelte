@@ -88,9 +88,9 @@
 						<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
 					{/if}
 						{#if form?.correct}
-							<span class="w-4/5 font-bold text-success-500">{feedback}</span>
+							<span class="w-3/4 font-bold text-success-500">{feedback}</span>
 						{:else}
-							<span class="w-4/5 font-bold text-error-500">{feedback} {form?.artist}</span>
+							<span class="w-3/4 font-bold text-error-500">{feedback} {form?.artist}</span>
 						{/if}
 						<button
 							class="btn w-fit {form?.correct? 'variant-filled-success' : 'variant-filled-error'}"
