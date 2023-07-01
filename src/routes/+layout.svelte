@@ -9,8 +9,7 @@
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 	import { authHandler, authStore } from '../store/store';
-	//import {initDataStructure} from "../store/data_structure"
-	import {addNewHistory,saveHistory,initDataStructure} from "../store/dataBaseLoadings"
+	import {addNewHistory,saveHistory,initDataStructure} from "../lib/firebase/dataBaseLoadings"
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -51,18 +50,16 @@
 					user
 				};
 			});
-			
 		});
 	});
 
-	const logout = () => {
+	const logout = async() => {
 		let user_id ="";
 		authStore.subscribe((store: any) => {
 			user_id = store.user.uid;
 		});
-		saveHistory(user_id,db);
-		//this timeout is out of some reassons needed so that the log is done before logout
-		setTimeout(authHandler.logout,500);
+		await saveHistory(user_id,db);
+		authHandler.logout();
 	};
 </script>
 
