@@ -3,11 +3,12 @@ import { getRandomArtist } from '$lib/server/last-fm';
 import { mbidToSpotifyId } from '$lib/server/music-brainz';
 import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/server/spotify';
 import type { Album } from '$lib/server/spotify.types';
+import { kendallRankCorrelation } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 
 // This can be changed to adjust the difficulty of the quiz
-const numberOfAlbums = 5;
+const numberOfAlbums = 3;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('discography') || '{}');
@@ -135,6 +136,14 @@ export const actions = {
 			])
 		);
 
+		let score = kendallRankCorrelation(
+			submittedOrder.map((name) => correctOrder.findIndex((album) => album.name === name)),
+			correctOrder.map((album, index) => index)
+		);
+
+		score = score < 0 ? 0 : score * numberOfAlbums;
+		score = Math.round(score);
+
 		// update user stats
 		updateUser(
 			[...result.values()].every((album) => album.correct),
@@ -146,7 +155,8 @@ export const actions = {
 		});
 
 		return fail(200, {
-			result: result
+			result,
+			score
 		});
 	}
 };

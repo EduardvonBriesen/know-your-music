@@ -96,6 +96,10 @@
 				{#if !form}
 					<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
 				{:else}
+					<p class="text-center">
+						You scored <span class="text-primary-500">{form?.score}</span> out of
+						<span class="text-primary-500">{form?.result.size}</span> points!
+					</p>
 					<button
 						class="btn variant-filled-primary w-fit"
 						type="button"
