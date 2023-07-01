@@ -35,6 +35,7 @@ export type UserData = {
             correct: number;
             questions: number;
           };
+          history_score: number; //only the last 10 given answer are considerd
           overall_questions: number;
         };
       };
@@ -55,6 +56,12 @@ export type UserData = {
           overall_questions: number;
         };
       };
+      shortterm_genre_history:{
+        MAX_HISTORY_LENGTH: number; // proposal =20
+        current_index: number; // index of the oldest element, if overall_questions<20 then index=-1
+        list_of_genre: Genre[]; //list of genres of the last HISTORY_LENGTH questions
+
+      };
     };
     logs: {
       registered_since: Date;
@@ -69,6 +76,24 @@ export type UserData = {
       }[];
     };
   };
+
+export type LevelData = {
+    levelOne: {
+        correct: number;
+        questions: number;
+    };
+    levelTwo: {
+        correct: number;
+        questions: number;
+    };
+    levelThree: {
+        correct: number;
+        questions: number;
+    };
+    overall_questions: number;
+}
+
+type Genre = "rock" | "pop" | "jazz" | "folk_music" | "classic"| "rap" ;
 
 export const saveHistory = async (docName: string, db: any)=>{
     const collectionsName = "users";
@@ -183,6 +208,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 rock: {
@@ -198,6 +224,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 jazz: {
@@ -213,6 +240,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 folk_music: {
@@ -228,6 +256,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 rap: {
@@ -243,6 +272,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 classic: {
@@ -258,6 +288,7 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 }
 
@@ -339,8 +370,12 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
 
+            },
+            shortterm_genre_history:{
+                MAX_HISTORY_LENGTH: 20, // proposal =20
+                current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
+                list_of_genre: [] //list of genres of the last MAX_HISTORY_LENGTH questions
             }
-
         },
         logs:{
             registered_since: new Date(),
@@ -361,3 +396,43 @@ export const initDataStructure = (name: string, email: string )=> {
     }
     return data;
 }
+
+export async function getGenreWithLevelForItem(docName: string, db: any){
+    const collectionsName = "users";
+    const docRef = doc(db, collectionsName, docName);
+    const docSnap = await getDoc(docRef);
+    if(!docSnap.exists()){
+        return;
+    }
+
+    const userData = docSnap.data() as UserData;
+    const genre: string = getGenreForItemtype(userData);
+
+    const genreLevelData = userData.progress.genres[genre] as LevelData;
+    const level = getLevelForGenre(genre, genreLevelData);
+    return {genre, level};
+}
+
+function getGenreForItemtype(data: UserData){
+    const genres: Genre[] = ["rock", "pop", "jazz", "rap", "classic", "folk_music"]
+
+    for (const genre in genres){
+        
+    }
+    return genres[0];
+}
+
+function getLevelForGenre(genre: string, genreLevelData: LevelData){
+
+}
+
+function extractRelevantGenreData(data: UserData, genre: Genre){
+    const overallScore = data.progress.overall_score;
+    const overallQuestions = data.progress.overall_questions;
+    const overallGenreScore = data.progress.genre_scores[genre];
+    const overallGenreQuestions = data.progress.genres[genre].overall_questions;
+
+
+
+}
+
