@@ -31,7 +31,7 @@ export type UserData = {
       };
       genres: {
         [genre: string]: {
-          level1: {
+          level1:{
             correct: number;
             questions: number;
           };
@@ -43,6 +43,10 @@ export type UserData = {
             correct: number;
             questions: number;
           };
+          history: {
+            scores: number[];
+            index_oldest_score: number;
+          }
           history_score: number; //only the last 10 given answer are considerd
           overall_questions: number;
         };
@@ -61,6 +65,11 @@ export type UserData = {
             correct: number;
             questions: number;
           };
+          history: {
+            scores: number[];
+            index_oldest_score: number;
+          }
+          history_score: number; //only the last 10 given answer are considerd
           overall_questions: number;
         };
       };
@@ -227,6 +236,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 rock: {
@@ -243,6 +256,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 jazz: {
@@ -258,7 +275,11 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
-                    history_score: 0, 
+                    history_score: 0,
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    }, 
                     overall_questions: 0
                 },
                 folk_music: {
@@ -274,7 +295,11 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
-                    history_score: 0, 
+                    history_score: 0,
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 rap: {
@@ -290,7 +315,11 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
-                    history_score: 0, 
+                    history_score: 0,
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 classic: {
@@ -306,7 +335,11 @@ export const initDataStructure = (name: string, email: string )=> {
                         correct: 0,
                         questions: 0
                     },
-                    history_score: 0, 
+                    history_score: 0,
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    }, 
                     overall_questions: 0
                 }
             },
@@ -325,6 +358,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 "80s": {
@@ -341,6 +378,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 "90s": {
@@ -357,6 +398,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 "00s": {
@@ -373,6 +418,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 },
                 "2020s": {
@@ -389,6 +438,10 @@ export const initDataStructure = (name: string, email: string )=> {
                         questions: 0
                     },
                     history_score: 0, 
+                    history: {
+                        scores: [],
+                        index_oldest_score: -1
+                    },
                     overall_questions: 0
                 }
             },
@@ -526,7 +579,7 @@ function extractRelevantGenreData(data: UserData, genre: Genre){
     }
 }
 
-export async function updateUserProgressData(db: any, docName: string, points: number, genre: Genre, level: Levels){
+export async function updateUserProgressData(db: any, docName: string, relativePoints: number, genre: Genre, level: Levels){
     const collectionsName = "users";
     const docRef = doc(db, collectionsName, docName);
     const docSnap = await getDoc(docRef);
@@ -538,16 +591,41 @@ export async function updateUserProgressData(db: any, docName: string, points: n
 
     /*TODO*/
     //simple increments
-    let overall_questions: number = data.progress.overall_questions+1;
-    let genre_questions: number = data.progress.genres[genre].overall_questions+1;
-    let genre_level_questions: number = data.progress.genres[genre][level].correct;
-    let list_of_genre: Genre[] = [];
-    let history_current_index: number = 0;
+    const overall_questions: number = data.progress.overall_questions+1;
+    const genre_questions: number = data.progress.genres[genre].overall_questions+1;
+    const genre_level_questions: number = data.progress.genres[genre][level].questions+1;
 
-    let overall_score: number = 0;
-    let genre_score: number = 0;
-    let genre_level_correct: number = 0;
-    let genre_history_score: number = 0;
+    const{list_of_genre, history_current_index} = getUpdatedHistoryListOfGenres(
+        data.progress.shortterm_genre_history.list_of_genre, 
+        data.progress.shortterm_genre_history.current_index, genre
+    );
+
+    let genreLevelXCorrect:number = 0;
+    let genreLevelYCorrect:number = 0;
+
+    if (level==="level1"){
+        genreLevelXCorrect = data.progress.genres[genre].level2.correct;
+        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
+    }else if (level==="level2"){
+        genreLevelXCorrect= data.progress.genres[genre].level1.correct;
+        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
+    }else{
+        genreLevelXCorrect = data.progress.genres[genre].level1.correct;
+        genreLevelYCorrect = data.progress.genres[genre].level2.correct;
+    }
+
+    const {overall_score, genre_score, genre_level_correct, genre_history_score} = getUpdatedScore(
+            data.progress.overall_score,
+            data.progress.genre_scores[genre],
+            data.progress.genres[genre][level].correct,
+            genreLevelXCorrect,
+            genreLevelYCorrect,
+            data.progress.genres[genre][level].questions,
+            data.progress.genres[genre].history_score,
+            data.progress.genres[genre].history.scores,
+            data.progress.genres[genre].history.index_oldest_score,
+            relativePoints
+    );
     
     try{
         await updateDoc(docRef, {
@@ -564,7 +642,58 @@ export async function updateUserProgressData(db: any, docName: string, points: n
     }catch(e){
         console.error(e);
     }
+
+} 
+
+
+/**
+ * Function to calculate updated history list of genres and index of oldest element in list
+ * @returns {Genre[], number} 
+ */
+function getUpdatedHistoryListOfGenres(listOfGenre: Genre[], index: number, newGenre: Genre){
+    let newListOfGenre: Genre[] = listOfGenre;
+    let newIndex: number = 0;
+    if (index===-1){ // lesser than MAX_HISTORY_LENGTH questions are answered
+        newListOfGenre.push(newGenre);
+        if(newListOfGenre.length === MAX_HISTORY_LENGTH){
+            newIndex = 0; //index 0 should be the oldest element
+        }else{
+            newIndex = -1; //still lesser than MAX_HISTORY_LENGTH questions answered
+        }
+    }else{ // MAX_HISTORY_LENGTH are already answered
+        newListOfGenre[index] = newGenre;
+        if(index===MAX_HISTORY_LENGTH-1){
+            newIndex=0;
+        }else{
+            newIndex=index+1;
+        }
+    }
+    return{
+        list_of_genre: newListOfGenre, 
+        history_current_index: newIndex
+    };
+}
+
+function getUpdatedScore(   oldOverallScore: number,oldGenreScore: number, 
+                            oldGenreLevelCorrect:number, genreLevelXCorrect:number,
+                            genreLevelYCorrect:number, genreLevelQuestions:number, 
+                            oldGenreHistoryScore:number, oldGenreHistoryScoresList: number[],
+                            oldGenreHistoryScoresListIndex:number, newPoints:number){
     
-    } 
+    let newGenreLevelCorrect:number = (oldGenreLevelCorrect*genreLevelQuestions+newPoints)/(genreLevelQuestions+1);
+    let newGenreScore:number = (newGenreLevelCorrect+genreLevelYCorrect+genreLevelXCorrect)/3;
+    let newOverallScore: number = 0;
+    let newGenreHistoryScore:number = 0;
+
+
+    return{
+        overall_score: newOverallScore,
+        genre_score: newGenreScore,
+        genre_level_correct: newGenreLevelCorrect,
+        genre_history_score: newGenreHistoryScore
+    };
+}
+
+
 
 
