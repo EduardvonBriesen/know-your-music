@@ -31,15 +31,15 @@ export type UserData = {
       };
       genres: {
         [genre: string]: {
-          levelOne: {
+          level1: {
             correct: number;
             questions: number;
           };
-          levelTwo: {
+          level2: {
             correct: number;
             questions: number;
           };
-          levelThree: {
+          level3: {
             correct: number;
             questions: number;
           };
@@ -49,15 +49,15 @@ export type UserData = {
       };
       music_periods: {
         [period: string]: {
-          levelOne: {
+          level1: {
             correct: number;
             questions: number;
           };
-          levelTwo: {
+          level2: {
             correct: number;
             questions: number;
           };
-          levelThree: {
+          level3: {
             correct: number;
             questions: number;
           };
@@ -86,15 +86,15 @@ export type UserData = {
   };
 
 type LevelData = {
-    levelOne: {
+    level1: {
         correct: number;
         questions: number;
     };
-    levelTwo: {
+    level2: {
         correct: number;
         questions: number;
     };
-    levelThree: {
+    level3: {
         correct: number;
         questions: number;
     };
@@ -103,7 +103,7 @@ type LevelData = {
 
 export type Genre = "rock" | "pop" | "jazz" | "folk_music" | "classic"| "rap" ;
 
-export type Levels = 1 |2|3;
+export type Levels = "level1"|"level2"|"level3";
 
 type GenreData = {
     overallScore: number;
@@ -214,15 +214,15 @@ export const initDataStructure = (name: string, email: string )=> {
             },
             genres:{
                 pop: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
@@ -230,15 +230,15 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
                 rock: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
@@ -246,15 +246,15 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
                 jazz: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
@@ -262,15 +262,15 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
                 folk_music: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
@@ -278,15 +278,15 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
                 rap: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
@@ -294,100 +294,103 @@ export const initDataStructure = (name: string, email: string )=> {
                     overall_questions: 0
                 },
                 classic: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
                     history_score: 0, 
                     overall_questions: 0
                 }
-
             },
             music_periods:{
                 outdated: {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 "80s": {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 "90s": {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 "00s": {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
                 },
                 "2020s": {
-                    levelOne: {
+                    level1: {
                         correct: 0,
                         questions: 0
                     },
-                    levelTwo: {
+                    level2: {
                         correct: 0,
                         questions: 0
                     },
-                    levelThree: {
+                    level3: {
                         correct: 0,
                         questions: 0
                     },
+                    history_score: 0, 
                     overall_questions: 0
-                },
-
+                }
             },
             shortterm_genre_history:{
                 MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
@@ -415,6 +418,10 @@ export const initDataStructure = (name: string, email: string )=> {
     return data;
 }
 
+/**
+ * Function to determine the genre with a level for the next quetsions
+ * @returns {Genre, Levels} //delivers the configuration for a item type
+ */
 export async function getGenreWithLevelForItem(docName: string, db: any){
     const collectionsName = "users";
     const docRef = doc(db, collectionsName, docName);
@@ -434,6 +441,10 @@ export async function getGenreWithLevelForItem(docName: string, db: any){
     };
 }
 
+/**
+ * Function to determine the genre of the next quetsions
+ * @returns {Genre} 
+ */
 function getGenreForItemtype(data: UserData){
     const genres: Genre[] = ["rock", "pop", "jazz", "rap", "classic", "folk_music"]
     let scores: number[] = [];
@@ -465,31 +476,31 @@ function getGenreForItemtype(data: UserData){
 }
 
 /**
- * Function to determin the level of the next quetsions (of type genre)
- * @returns {Levels} The sum of the two numbers
+ * Function to determine the level of the next quetsions (of type genre)
+ * @returns {Levels}
  */
 function getLevelForGenre(genreLevelData: LevelData){
-    const level1_score:number = genreLevelData.levelOne.correct/genreLevelData.levelOne.questions;
-    const level2_score:number = genreLevelData.levelTwo.correct/genreLevelData.levelTwo.questions;
-    const level3_score:number = genreLevelData.levelThree.correct/genreLevelData.levelThree.questions;
+    const level1_score:number = genreLevelData.level1.correct/genreLevelData.level1.questions;
+    const level2_score:number = genreLevelData.level2.correct/genreLevelData.level2.questions;
+    const level3_score:number = genreLevelData.level3.correct/genreLevelData.level3.questions;
     const diff1_2: number = level1_score-level2_score;
     const diff1_3: number = level1_score-level3_score;
     const diff2_3: number = level2_score-level3_score;
 
     if (level1_score < 0.2){
-        return 1;
+        return "level1";
     }
     if (level2_score < 0.4){
         let scores: number[] = []; 
         scores.push(Math.random()+level1_score+diff1_2);
         scores.push(Math.random()+level2_score-diff1_2);
-        return scores.indexOf(Math.min(...scores))+1;
+        return `level${scores.indexOf(Math.min(...scores))+1}`;
     }else{
         let scores: number[] = []; 
         scores.push(0.3*Math.random()+level1_score+0.5*diff1_2+0.3*diff1_3);
         scores.push(0.5*Math.random()+level2_score-0.5*diff1_2+0.3*diff2_3);
         scores.push(Math.random()+level3_score-0.3*diff1_3+0.3*diff2_3);
-        return scores.indexOf(Math.min(...scores))+1;
+        return `level${scores.indexOf(Math.min(...scores))+1}`;
     }
 }
 
@@ -515,7 +526,7 @@ function extractRelevantGenreData(data: UserData, genre: Genre){
     }
 }
 
-export async function updateUserProgressData(db: any, docName: string, points: number, genre: Genre, level: string){
+export async function updateUserProgressData(db: any, docName: string, points: number, genre: Genre, level: Levels){
     const collectionsName = "users";
     const docRef = doc(db, collectionsName, docName);
     const docSnap = await getDoc(docRef);
@@ -525,16 +536,18 @@ export async function updateUserProgressData(db: any, docName: string, points: n
     }
     const data: UserData= docSnap.data() as UserData;
 
-    //TODO
+    /*TODO*/
+    //simple increments
+    let overall_questions: number = data.progress.overall_questions+1;
+    let genre_questions: number = data.progress.genres[genre].overall_questions+1;
+    let genre_level_questions: number = data.progress.genres[genre][level].correct;
+    let list_of_genre: Genre[] = [];
+    let history_current_index: number = 0;
+
     let overall_score: number = 0;
-    let overall_questions: number = 0;
     let genre_score: number = 0;
-    let genre_questions: number = 0;
-    let genre_level_questions: number = 0;
     let genre_level_correct: number = 0;
     let genre_history_score: number = 0;
-    let history_current_index: number = 0;
-    let list_of_genre: Genre[] = [];
     
     try{
         await updateDoc(docRef, {
