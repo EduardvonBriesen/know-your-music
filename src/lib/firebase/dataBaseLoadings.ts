@@ -1,13 +1,15 @@
 import { doc, getDoc,updateDoc,type DocumentData} from "firebase/firestore";
 
-const MAX_HISTORY_LENGTH: number = 20;
+/* Constants */
+const MAX_HISTORY_LENGTH = 20;
+const MAX_HISTORY_GENRE_LENGTH = 5;
 const WEIGHT_QUESTIONS_OVERALL = 1;
 const WEIGHT_SCORE_OVERALL = 1.5;
 const WEIGHT_SCORE_HISTORY = 4;
 const WEIGHT_QUESTIONS_HISTORY = 3.5;
 
 
-
+/* Exports */
 export type UserData = {
     name: string;
     email: string;
@@ -92,37 +94,11 @@ export type UserData = {
         }[];
       }[];
     };
-  };
-
-type LevelData = {
-    level1: {
-        correct: number;
-        questions: number;
-    };
-    level2: {
-        correct: number;
-        questions: number;
-    };
-    level3: {
-        correct: number;
-        questions: number;
-    };
-    overall_questions: number;
 }
 
 export type Genre = "rock" | "pop" | "jazz" | "folk_music" | "classic"| "rap" ;
 
 export type Levels = "level1"|"level2"|"level3";
-
-type GenreData = {
-    overallScore: number;
-    overallQuestions: number;
-    overallGenreScore: number ;
-    overallGenreQuestions: number;
-    historyGenreScore: number;
-    currentQuestionsInHistory: number;
-
-}
 
 export const saveHistory = async (docName: string, db: any)=>{
     const collectionsName = "users";
@@ -135,7 +111,7 @@ export const saveHistory = async (docName: string, db: any)=>{
             const history = data.logs.history;
             const historyLength = history.length;
             const sessions = history[historyLength-1].sessions
-            const begin= sessions[sessions.length-1].begin ;
+            const begin = sessions[sessions.length-1].begin;
             const date = new Date();
             const duration = Math.round(date.valueOf()/1000 ) - begin.seconds;
             sessions[sessions.length-1].duration = duration;
@@ -175,28 +151,6 @@ export const addNewHistory = async(docName: string, db: any, userData: DocumentD
     await updateDoc(docRef, {
         "logs.history": history
     });
-}
-
-const newHistoryArrayElement = (date: Date )=> {
-    const newHistory = {
-        date: date.toLocaleDateString(),
-        accumulated_duration: 0,
-        sessions: [
-            {
-                begin: date,
-                duration: 0
-            }
-        ]
-     }
-     return newHistory;
-}
-
-const newSessionsArrayElement = (date: Date )=> {
-    const newSession = {
-        begin: date,
-        duration:0
-     }
-     return newSession;
 }
 
 export const initDataStructure = (name: string, email: string )=> {
@@ -494,14 +448,138 @@ export async function getGenreWithLevelForItem(docName: string, db: any){
     };
 }
 
+export async function updateUserProgressData(db: any, docName: string, relativePoints: number, genre: Genre, level: Levels){
+    const collectionsName = "users";
+    const docRef = doc(db, collectionsName, docName);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+    }
+    const data: UserData= docSnap.data() as UserData;
+
+    //simple increments
+    const overall_questions: number = data.progress.overall_questions+1;
+    const genre_questions: number = data.progress.genres[genre].overall_questions+1;
+    const genre_level_questions: number = data.progress.genres[genre][level].questions+1;
+
+    const{list_of_genre, history_current_index} = getUpdatedHistoryListOfGenres(
+        data.progress.shortterm_genre_history.list_of_genre, 
+        data.progress.shortterm_genre_history.current_index, genre
+    );
+
+    let genreLevelXCorrect= 0;
+    let genreLevelYCorrect= 0;
+
+    if (level==="level1"){
+        genreLevelXCorrect = data.progress.genres[genre].level2.correct;
+        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
+    }else if (level==="level2"){
+        genreLevelXCorrect= data.progress.genres[genre].level1.correct;
+        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
+    }else{
+        genreLevelXCorrect = data.progress.genres[genre].level1.correct;
+        genreLevelYCorrect = data.progress.genres[genre].level2.correct;
+    }
+
+    const {overall_score, genre_score, genre_level_correct, genre_history_score, genre_history_scores, genre_history_scores_index} 
+    = getUpdatedScore(
+            data.progress.genre_scores,
+            genre,
+            data.progress.genres[genre][level].correct,
+            genreLevelXCorrect,
+            genreLevelYCorrect,
+            data.progress.genres[genre][level].questions,
+            data.progress.genres[genre].history.scores,
+            data.progress.genres[genre].history.index_oldest_score,
+            relativePoints
+    );
+    
+    try{
+        await updateDoc(docRef, {
+                "progress.overall_score": overall_score,
+                "progress.overall_questions" : overall_questions,
+                [`progress.genre_scores.${genre}`]: genre_score,
+                [`progress.genres.${genre}.${level}.questions`] : genre_level_questions,
+                [`progress.genres.${genre}.${level}.correct`] : genre_level_correct,
+                [`progress.genres.${genre}.overall_questions`] : genre_questions,
+                [`progress.genres.${genre}.history_score`] : genre_history_score,
+                "progress.shortterm_genre_history.current_index" : history_current_index,
+                "progress.shortterm_genre_history.list_of_genre" : list_of_genre,
+                [`progress.genres.${genre}.history.scores`] : genre_history_scores,
+                [`progress.genres.${genre}.history.index_oldest_score`]: genre_history_scores_index
+        });
+    }catch(e){
+        console.error(e);
+    }
+
+} 
+
+/* Helper functions */
+type LevelData = {
+    level1: {
+        correct: number;
+        questions: number;
+    };
+    level2: {
+        correct: number;
+        questions: number;
+    };
+    level3: {
+        correct: number;
+        questions: number;
+    };
+    overall_questions: number;
+}
+
+type GenreData = {
+    overallScore: number;
+    overallQuestions: number;
+    overallGenreScore: number ;
+    overallGenreQuestions: number;
+    historyGenreScore: number;
+    currentQuestionsInHistory: number;
+
+}
+type GenreScores ={
+    classic: number;
+    rock: number;
+    pop: number;
+    jazz: number;
+    rap: number;
+    folk_music: number;
+}
+
+const newHistoryArrayElement = (date: Date )=> {
+    const newHistory = {
+        date: date.toLocaleDateString(),
+        accumulated_duration: 0,
+        sessions: [
+            {
+                begin: date,
+                duration: 0
+            }
+        ]
+     }
+     return newHistory;
+}
+
+const newSessionsArrayElement = (date: Date )=> {
+    const newSession = {
+        begin: date,
+        duration:0
+     }
+     return newSession;
+}
+
 /**
  * Function to determine the genre of the next quetsions
  * @returns {Genre} 
  */
 function getGenreForItemtype(data: UserData){
     const genres: Genre[] = ["rock", "pop", "jazz", "rap", "classic", "folk_music"]
-    let scores: number[] = [];
-    let score: number = 0;
+    const scores: number[] = [];
+    let score = 0;
     let historyLength: number;
     if (data.progress.shortterm_genre_history.current_index===-1){
         historyLength = data.progress.shortterm_genre_history.list_of_genre.length;
@@ -544,12 +622,12 @@ function getLevelForGenre(genreLevelData: LevelData){
         return "level1";
     }
     if (level2_score < 0.4){
-        let scores: number[] = []; 
+        const scores: number[] = []; 
         scores.push(Math.random()+level1_score+diff1_2);
         scores.push(Math.random()+level2_score-diff1_2);
         return `level${scores.indexOf(Math.min(...scores))+1}`;
     }else{
-        let scores: number[] = []; 
+        const scores: number[] = []; 
         scores.push(0.3*Math.random()+level1_score+0.5*diff1_2+0.3*diff1_3);
         scores.push(0.5*Math.random()+level2_score-0.5*diff1_2+0.3*diff2_3);
         scores.push(Math.random()+level3_score-0.3*diff1_3+0.3*diff2_3);
@@ -557,18 +635,11 @@ function getLevelForGenre(genreLevelData: LevelData){
     }
 }
 
-
 /**
  * Function to collect genre data of UserData element
  * @returns {GenreData} The sum of the two numbers
  */
 function extractRelevantGenreData(data: UserData, genre: Genre){
-    // const overallScore = data.progress.overall_score;
-    // const overallQuestions = data.progress.overall_questions;
-    // const overallGenreScore = data.progress.genre_scores[genre];
-    // const overallGenreQuestions = data.progress.genres[genre].overall_questions;
-    // const historyGenreScore = data.progress.genres[genre].history_score;
-    // const currentQuestionsInHistory = data.progress.shortterm_genre_history.list_of_genre.filter((g)=>g===genre).length;
     return{
         overallScore : data.progress.overall_score,
         overallQuestions : data.progress.overall_questions,
@@ -579,80 +650,13 @@ function extractRelevantGenreData(data: UserData, genre: Genre){
     }
 }
 
-export async function updateUserProgressData(db: any, docName: string, relativePoints: number, genre: Genre, level: Levels){
-    const collectionsName = "users";
-    const docRef = doc(db, collectionsName, docName);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-        // docSnap.data() will be undefined in this case
-        console.log("No such document!");
-    }
-    const data: UserData= docSnap.data() as UserData;
-
-    /*TODO*/
-    //simple increments
-    const overall_questions: number = data.progress.overall_questions+1;
-    const genre_questions: number = data.progress.genres[genre].overall_questions+1;
-    const genre_level_questions: number = data.progress.genres[genre][level].questions+1;
-
-    const{list_of_genre, history_current_index} = getUpdatedHistoryListOfGenres(
-        data.progress.shortterm_genre_history.list_of_genre, 
-        data.progress.shortterm_genre_history.current_index, genre
-    );
-
-    let genreLevelXCorrect:number = 0;
-    let genreLevelYCorrect:number = 0;
-
-    if (level==="level1"){
-        genreLevelXCorrect = data.progress.genres[genre].level2.correct;
-        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
-    }else if (level==="level2"){
-        genreLevelXCorrect= data.progress.genres[genre].level1.correct;
-        genreLevelYCorrect= data.progress.genres[genre].level3.correct;
-    }else{
-        genreLevelXCorrect = data.progress.genres[genre].level1.correct;
-        genreLevelYCorrect = data.progress.genres[genre].level2.correct;
-    }
-
-    const {overall_score, genre_score, genre_level_correct, genre_history_score} = getUpdatedScore(
-            data.progress.overall_score,
-            data.progress.genre_scores[genre],
-            data.progress.genres[genre][level].correct,
-            genreLevelXCorrect,
-            genreLevelYCorrect,
-            data.progress.genres[genre][level].questions,
-            data.progress.genres[genre].history_score,
-            data.progress.genres[genre].history.scores,
-            data.progress.genres[genre].history.index_oldest_score,
-            relativePoints
-    );
-    
-    try{
-        await updateDoc(docRef, {
-                "progress.overall_score": overall_score,
-                "progress.overall_questions" : overall_questions,
-                [`progress.genre_scores.${genre}`]: genre_score,
-                [`progress.genres.${genre}.${level}.questions`] : genre_level_questions,
-                [`progress.genres.${genre}.${level}.correct`] : genre_level_correct,
-                [`progress.genres.${genre}.overall_questions`] : genre_questions,
-                [`progress.genres.${genre}.history_score`] : genre_history_score,
-                "progress.shortterm_genre_history.current_index" : history_current_index,
-                "progress.shortterm_genre_history.list_of_genre" : list_of_genre
-        });
-    }catch(e){
-        console.error(e);
-    }
-
-} 
-
-
 /**
  * Function to calculate updated history list of genres and index of oldest element in list
  * @returns {Genre[], number} 
  */
 function getUpdatedHistoryListOfGenres(listOfGenre: Genre[], index: number, newGenre: Genre){
-    let newListOfGenre: Genre[] = listOfGenre;
-    let newIndex: number = 0;
+    const newListOfGenre: Genre[] = listOfGenre;
+    let newIndex = 0;
     if (index===-1){ // lesser than MAX_HISTORY_LENGTH questions are answered
         newListOfGenre.push(newGenre);
         if(newListOfGenre.length === MAX_HISTORY_LENGTH){
@@ -674,23 +678,50 @@ function getUpdatedHistoryListOfGenres(listOfGenre: Genre[], index: number, newG
     };
 }
 
-function getUpdatedScore(   oldOverallScore: number,oldGenreScore: number, 
-                            oldGenreLevelCorrect:number, genreLevelXCorrect:number,
-                            genreLevelYCorrect:number, genreLevelQuestions:number, 
-                            oldGenreHistoryScore:number, oldGenreHistoryScoresList: number[],
-                            oldGenreHistoryScoresListIndex:number, newPoints:number){
+function getUpdatedScore(   oldGenreScores: GenreScores, 
+                            genre: Genre,
+                            oldGenreLevelCorrect:number, 
+                            genreLevelXCorrect:number,
+                            genreLevelYCorrect:number, 
+                            genreLevelQuestions:number, 
+                            oldGenreHistoryScoresList: number[],
+                            oldGenreHistoryScoresListIndex:number, 
+                            newPoints:number,
+                            ){
     
-    let newGenreLevelCorrect:number = (oldGenreLevelCorrect*genreLevelQuestions+newPoints)/(genreLevelQuestions+1);
-    let newGenreScore:number = (newGenreLevelCorrect+genreLevelYCorrect+genreLevelXCorrect)/3;
-    let newOverallScore: number = 0;
-    let newGenreHistoryScore:number = 0;
+    const newGenreLevelCorrect= (oldGenreLevelCorrect*genreLevelQuestions+newPoints)/(genreLevelQuestions+1);
+    const newGenreScore = (newGenreLevelCorrect+genreLevelYCorrect+genreLevelXCorrect)/3;
+    const newGenreScores: GenreScores = oldGenreScores;
+    newGenreScores[genre]=newGenreScore;
+    const newOverallScore = ( newGenreScores.rock + newGenreScores.pop +
+                                    newGenreScores.classic + newGenreScores.folk_music +
+                                    newGenreScores.jazz + newGenreScores.rap)/6; // sum of all genre scores divide through number of genre
+    
+    const newGenreHistoryScores:number[] = oldGenreHistoryScoresList;
+    let newGenreHistoryScoresIndex =-1;
+    if(oldGenreHistoryScoresListIndex===-1){ //lesser than MAX_HISTORY_GENRE_LENGTH
+        newGenreHistoryScores.push(newPoints);
+        if(newGenreHistoryScores.length === MAX_HISTORY_GENRE_LENGTH){
+            newGenreHistoryScoresIndex=0;
+        }// if not oldGenreHistoryScoresListIndex remains -1 as initialized
+    }else{
+        newGenreHistoryScores[oldGenreHistoryScoresListIndex] = newPoints;
+        newGenreHistoryScoresIndex = (oldGenreHistoryScoresListIndex+1)%20;
+
+    }
+    let sum = 0;
+    newGenreHistoryScores.forEach(item => {sum += item;});
+    const newGenreHistoryScore = sum/newGenreHistoryScores.length;
 
 
     return{
         overall_score: newOverallScore,
         genre_score: newGenreScore,
         genre_level_correct: newGenreLevelCorrect,
-        genre_history_score: newGenreHistoryScore
+        genre_history_score: newGenreHistoryScore,
+        genre_history_scores: newGenreHistoryScores,
+        genre_history_scores_index: newGenreHistoryScoresIndex
+
     };
 }
 
