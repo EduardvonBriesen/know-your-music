@@ -10,6 +10,12 @@ export type ArtistInfo = {
 		summary: string;
 		content: string;
 	};
+	similar: {
+		artist: {
+			name: string;
+			url: string;
+		}[];
+	};
 };
 
 export type Track = {

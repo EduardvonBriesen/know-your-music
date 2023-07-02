@@ -2,8 +2,12 @@ import { db } from '$lib/firebase/firebase';
 import { getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
 import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
 import { getArtist as spotifyGetArtist, getToken } from '$lib/server/spotify';
+import { LevenshteinDistance } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
+
+// This can be changed to adjust the difficulty of the quiz
+const difficulty: 1 | 2 | 3 = 2;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
@@ -11,6 +15,7 @@ export const load = async ({ cookies }) => {
 	let artistName = '';
 	let artistId = '';
 	let artistBio = '';
+	let options: string[] = current_quiz.options || [];
 
 	if (!current_quiz.artist) {
 		// get random artist, check if bio is long enough
@@ -22,12 +27,23 @@ export const load = async ({ cookies }) => {
 			const artistInfo = await getArtistInfoById(artistId);
 			if ('error' in artistInfo) return { error: "Couldn't get artist info" };
 			artistBio = artistInfo.artist?.bio?.summary || '';
+
+			if (difficulty === 1) {
+				const relatedArtists =
+					artistInfo.artist?.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
+				options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
+			}
+
+			if (difficulty === 3) {
+				artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
+			}
 		}
 
 		cookies.set(
 			'biography',
 			JSON.stringify({
-				artist: artistId
+				artist: artistId,
+				options: options
 			}),
 			{
 				path: '/'
@@ -44,20 +60,22 @@ export const load = async ({ cookies }) => {
 		artistBio = artistInfo.artist?.bio?.summary || '';
 	}
 
+	const inputField = '<input />';
+	const blurredField = '<b class="blur">Asdfasdf</b>';
+
 	// obfuscate artist name
-	artistBio = artistBio.replaceAll(artistName, '<input class="input w-24 px-2" name="answer" />');
+	artistBio = artistBio.replaceAll(artistName, difficulty === 1 ? blurredField : inputField);
 	// obfuscate substrings of artist name
 	artistName.split(' ').forEach((word) => {
 		if (word.length <= 3) return;
-		artistBio = artistBio.replaceAll(word, '<b class="blur">Asdfasdf</b>');
+		artistBio = artistBio.replaceAll(word, blurredField);
 	});
 	// cut out anchor tags
 	artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
 	return {
-		artist: {
-			summary: artistBio
-		}
+		bio: artistBio,
+		options: options
 	};
 };
 
@@ -66,13 +84,18 @@ export const actions = {
 		const artistId = JSON.parse(cookies.get('biography') || '{}').artist;
 		const response = await request.formData();
 
+		console.log(response);
+
 		const artist = await getArtistInfoById(artistId);
 		if ('error' in artist) return fail(500, { error: "Couldn't get artist" });
 		const artistName = artist.artist.name;
 
 		// check if answer is correct
-		const answer = (response.get('answer') as string) || '';
-		const correctAnswer = answer.toLowerCase() === artistName.toLowerCase();
+		// filter out empty strings
+		const answer = response.getAll('answer').filter((answer) => answer !== '')[0] as string;
+		console.log('formData', answer);
+
+		const correctAnswer = LevenshteinDistance(answer.toLowerCase(), artistName.toLowerCase()) < 3;
 
 		// update user stats
 		updateUser(correctAnswer, response.get('user_id') as string);
