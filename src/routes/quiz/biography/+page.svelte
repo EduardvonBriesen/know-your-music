@@ -16,7 +16,7 @@
 </script>
 
 <div class="flex place-content-center">
-	<div class="card p-4 w-2/3 text-token space-4 m-10">
+	<div class="card p-4 w-2/3 space-4 m-10 variant-glass-surface">
 		<header class="card-header flex flex-col items-center">
 			{#if !form}
 				<h3 class="h3">Who hides behind this Bio?</h3>
@@ -39,7 +39,7 @@
 				formData.set('user_id', user_id);
 			}}
 		>
-			<section class="p-4">
+			<section class="py-4">
 				<p class="text-justify">
 					{#if !form}
 						{#each data.bio?.split('<input />') || [] as slice}
