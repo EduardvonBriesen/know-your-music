@@ -1,4 +1,4 @@
-import { doc, getDoc,updateDoc,type DocumentData, Timestamp } from "firebase/firestore";
+import { doc, getDoc,updateDoc,type DocumentData} from "firebase/firestore";
 
 const MAX_HISTORY_LENGTH: number = 20;
 const WEIGHT_QUESTIONS_OVERALL = 1;
@@ -147,8 +147,6 @@ export const saveHistory = async (docName: string, db: any)=>{
         // docSnap.data() will be undefined in this case
         console.log("No such document!");
     }
-
-
 }
 
 export const addNewHistory = async(docName: string, db: any, userData: DocumentData) =>{
@@ -516,4 +514,44 @@ function extractRelevantGenreData(data: UserData, genre: Genre){
         currentQuestionsInHistory : data.progress.shortterm_genre_history.list_of_genre.filter((g)=>g===genre).length
     }
 }
+
+export async function updateUserProgressData(db: any, docName: string, points: number, genre: Genre, level: string){
+    const collectionsName = "users";
+    const docRef = doc(db, collectionsName, docName);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+        // docSnap.data() will be undefined in this case
+        console.log("No such document!");
+    }
+    const data: UserData= docSnap.data() as UserData;
+
+    //TODO
+    let overall_score: number = 0;
+    let overall_questions: number = 0;
+    let genre_score: number = 0;
+    let genre_questions: number = 0;
+    let genre_level_questions: number = 0;
+    let genre_level_correct: number = 0;
+    let genre_history_score: number = 0;
+    let history_current_index: number = 0;
+    let list_of_genre: Genre[] = [];
+    
+    try{
+        await updateDoc(docRef, {
+                "progress.overall_score": overall_score,
+                "progress.overall_questions" : overall_questions,
+                [`progress.genre_scores.${genre}`]: genre_score,
+                [`progress.genres.${genre}.${level}.questions`] : genre_level_questions,
+                [`progress.genres.${genre}.${level}.correct`] : genre_level_correct,
+                [`progress.genres.${genre}.overall_questions`] : genre_questions,
+                [`progress.genres.${genre}.history_score`] : genre_history_score,
+                "progress.shortterm_genre_history.current_index" : history_current_index,
+                "progress.shortterm_genre_history.list_of_genre" : list_of_genre
+        });
+    }catch(e){
+        console.error(e);
+    }
+    
+    } 
+
 
