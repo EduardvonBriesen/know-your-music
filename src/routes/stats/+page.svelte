@@ -37,7 +37,7 @@
 <div class="flex place-content-center">
 	<div class="card p-4 w-2/3 text-token space-4 m-12 flex place-content-center">
 		<div class="p-6 m-0 w-min">
-			<ConicGradient class="h3" width="w-48" stops={conicStops} legend>Your Answers</ConicGradient>
+			<ConicGradient class="h4" width="w-48" stops={conicStops} legend>Your Answers</ConicGradient>
 		</div>
 	</div>
 </div>

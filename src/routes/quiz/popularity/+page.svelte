@@ -36,12 +36,12 @@
 	}
 
 	import { popup } from '@skeletonlabs/skeleton';
-import type { PopupSettings } from '@skeletonlabs/skeleton';
-const popupHover: PopupSettings = {
-	event: 'hover',
-	target: 'popupHover',
-	placement: 'top'
-};
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'top'
+	};
 
 </script>
 
@@ -56,7 +56,7 @@ const popupHover: PopupSettings = {
 				alt={data.artist?.name}
 			/>
 			<h3 class="h3 font-bold">{data.artist?.name}</h3>
-			<div class="h3 mt-6 mb-0 flex items-center">
+			<div class="h4 mt-6 mb-0 flex items-center">
 				<span class="mr-2">Which of the following tracks is most popular?</span>
 				<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
 					<span class="badge-icon variant-soft-surface"> i </span>
@@ -67,7 +67,7 @@ const popupHover: PopupSettings = {
 				</div>
 			</div>
 		</header>
-		<section class="p-6 pt-4 pb-8">
+		<section class="p-6 pt-4">
 			<form
 				method="POST"
 				use:enhance={({ formData }) => {

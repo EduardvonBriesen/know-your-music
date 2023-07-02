@@ -42,7 +42,7 @@
 	<div class="card p-0 w-2/3 text-token space-4 m-12">
 		<header class="card-header flex flex-col items-center">
 			{#if !form}
-				<h3 class="h3 p-6 pb-4">Who hides behind this Bio?</h3>
+				<h3 class="h4 p-6 pb-4">Who hides behind this Bio?</h3>
 			{:else}
 				{#if form?.image}
 					<Avatar
