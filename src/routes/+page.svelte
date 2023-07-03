@@ -7,14 +7,14 @@
 </svelte:head>
 
 <section class="text-center">
-	<div class="wrapper h1 font-bold justify-center mt-12 mb-6">
+	<div class="wrapper text-7xl font-bold justify-center mt-12 mb-6">
 		<p>Know your</p>
 		<div class="words">
-			<span>music</span>
-			<span>artist</span>
-			<span>band</span>
-			<span>lyrics</span>
-			<span>music</span>
+			<span class="text-[#775AFF]">music</span>
+			<span class="text-[#00B487]">artist</span>
+			<span class="text-[#FFC549]">band</span>
+			<span class="text-[#F23F3A]">lyrics</span>
+			<span class="text-[#775AFF]">music</span>
 		</div>
 	</div>
 	<div class="flex justify-center">
@@ -55,7 +55,7 @@
 		box-sizing: border-box;
 		box-sizing: content-box;
 		display: flex;
-		height: 70px;
+		height: 90px;
 	}
 	.words{
 		box-sizing: border-box;
@@ -66,7 +66,6 @@
 		display: block;
 		height: 100%;
 		padding-left: 8px;
-		color: #0e6ffc;
 		animation: spin_words 6s infinite;
 	}
 	@keyframes spin_words{
