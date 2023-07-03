@@ -1,5 +1,5 @@
 <script>
-  </script>
+</script>
 
 <svelte:head>
 	<title>Home</title>
@@ -25,7 +25,7 @@
 </section>
 
 <div class="flex justify-center m-12">
-	<div class="card inline-flex">
+	<div class="card inline-flex bg-surface-50">
 		<section class="grid grid-cols-2 md:grid-cols-3 gap-6 m-6">
 			<div>
 				<img class="h-auto max-w-full rounded-lg h-32 w-32" src="https://i1.sndcdn.com/artworks-xAWEGB45fDRpdzK6-HsujxA-t500x500.jpg" alt="Music genre">

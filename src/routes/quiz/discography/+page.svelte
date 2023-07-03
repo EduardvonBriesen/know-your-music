@@ -67,7 +67,7 @@
 </script>
 
 <div class="flex place-content-center">
-	<div class="card w-2/3 text-token space-4 m-12">
+	<div class="card w-2/3 text-token bg-surface-50 space-4 m-12">
 		<header class="card-header flex flex-col items-center">
 			<Avatar
 				class="m-2"
