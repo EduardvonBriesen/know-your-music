@@ -5,7 +5,7 @@
 	import { authStore } from '../../../store/store';
 
 	export let data;
-	// export let form;
+	export let form;
 
 	let user_id = '';
 
@@ -31,16 +31,28 @@
 			<!-- <div class="text-center, whitespace-pre">{data.lyrics}</div> -->
 			<div class="flex flex-col items-center">
 				{#each data.revealedLines as line}
-					<span class="text-center">{line}</span>
+					<span>{line}</span>
 				{/each}
 			</div>
 		</section>
 		<footer class="card-footer">
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-				{#each data.guessOptions as option}
-					<button class="btn disabled:opacity-100 variant-filled-primary">{option}</button>
-				{/each}
-			</div>
+			<form
+				method="POST"
+				use:enhance={({ formData }) => {
+					formData.set('user_id', user_id);
+				}}
+			>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+					{#each data.guessOptions as option}
+						<button
+							class="btn disabled:opacity-100 variant-filled-primary whitespace-pre-wrap"
+							value={option}
+							type="submit"
+							name="answer">{option}</button
+						>
+					{/each}
+				</div>
+			</form>
 		</footer>
 		<!-- {#if !!form}
 			<footer class="card-footer flex flex-col items-center">
