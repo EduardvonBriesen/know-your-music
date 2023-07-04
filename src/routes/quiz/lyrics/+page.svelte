@@ -1,16 +1,25 @@
 <script lang="ts">
-	import { Avatar } from '@skeletonlabs/skeleton';
-	import { confetti } from '@neoconfetti/svelte';
+	import { Avatar, ProgressBar } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
+	import { afterUpdate } from 'svelte/internal';
 
 	export let data;
 	export let form;
 
 	let user_id = '';
+	let element: any;
 
 	authStore.subscribe((store) => {
 		user_id = store.user.uid;
+	});
+
+	const scrollToBottom = async (node: any) => {
+		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+	};
+
+	afterUpdate(() => {
+		scrollToBottom(element);
 	});
 </script>
 
@@ -28,7 +37,7 @@
 			<span class="text-center">Continue the lyrics...</span>
 		</header>
 		<section class="p-4">
-			<div class="flex flex-col items-center">
+			<div class="flex flex-col items-center overflow-y-auto max-h-64" bind:this={element}>
 				{#each data.revealedLines as line, i}
 					<span
 						class:text-primary-500={form?.progress.get(i)}
@@ -39,6 +48,12 @@
 			</div>
 		</section>
 		<footer class="card-footer">
+			<ProgressBar
+				class="my-8"
+				label="Progress Bar"
+				value={data.revealedLines.length}
+				max={data.totalLines}
+			/>
 			<form
 				method="POST"
 				use:enhance={({ formData }) => {

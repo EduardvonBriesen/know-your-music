@@ -45,7 +45,8 @@ export const load = async ({ cookies }) => {
 		albumArt,
 		title,
 		revealedLines,
-		guessOptions
+		guessOptions,
+		totalLines: lines.length
 	};
 };
 
@@ -75,6 +76,9 @@ export const actions = {
 		}
 		progress.set(lineToGuess, result);
 		redis.set(user_id + '-lyrics', JSON.stringify(Array.from(progress.entries())));
+		if (lineToGuess === lines.length - 1) {
+			redis.del(user_id + '-lyrics');
+		}
 
 		cookies.set(
 			'lyrics',
