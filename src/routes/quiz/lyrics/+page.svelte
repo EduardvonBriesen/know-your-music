@@ -17,10 +17,31 @@
 <div class="flex place-content-center">
 	<div class="card p-4 w-2/3 variant-glass-surface space-4 m-10">
 		<header class="card-header flex flex-col items-center">
-			<span class="text-center">Continue the lyrics?</span>
-			<div class="text-center, whitespace-pre">{data.verse}</div>
+			<Avatar
+				rounded="rounded-xl"
+				width="w-1/3"
+				cursor="cursor-pointer"
+				src={data.albumArt}
+				alt={data.title}
+			/>
+			<h3 class="h3">{data.title}</h3>
+			<span class="text-center">Continue the lyrics...</span>
 		</header>
-		<section class="p-4" />
+		<section class="p-4">
+			<!-- <div class="text-center, whitespace-pre">{data.lyrics}</div> -->
+			<div class="flex flex-col items-center">
+				{#each data.revealedLines as line}
+					<span class="text-center">{line}</span>
+				{/each}
+			</div>
+		</section>
+		<footer class="card-footer">
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+				{#each data.guessOptions as option}
+					<button class="btn disabled:opacity-100 variant-filled-primary">{option}</button>
+				{/each}
+			</div>
+		</footer>
 		<!-- {#if !!form}
 			<footer class="card-footer flex flex-col items-center">
 				{#if form?.false === null}
