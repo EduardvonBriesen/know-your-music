@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"firebase": "^9.22.1"
+		"firebase": "^9.22.1",
+		"genius-lyrics-api": "^3.2.0"
 	}
 }
