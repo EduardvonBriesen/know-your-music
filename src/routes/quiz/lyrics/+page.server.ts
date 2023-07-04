@@ -1,4 +1,5 @@
 import { getSong } from '$lib/server/genius';
+import { redis } from '$lib/server/redis';
 
 // TODO: difficulty levels
 // TODO: use random song
@@ -56,12 +57,24 @@ export const actions = {
 
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
+		const user_id = answer.get('user_id') as string;
 
 		const { lyrics } = await getSong(query);
 		const lines = getLines(lyrics);
 		const correctLine = lines[lineToGuess];
-
 		const result = correctLine === guess;
+
+		// update user progress in redis
+		// TODO: improve checking if user progress exists
+		const userProgress = await redis.get(user_id + '-lyrics');
+		let progress: Map<number, boolean>;
+		if (userProgress && userProgress.length > 0) {
+			progress = new Map(JSON.parse(userProgress));
+		} else {
+			progress = new Map();
+		}
+		progress.set(lineToGuess, result);
+		redis.set(user_id + '-lyrics', JSON.stringify(Array.from(progress.entries())));
 
 		cookies.set(
 			'lyrics',
@@ -77,7 +90,8 @@ export const actions = {
 
 		return {
 			result,
-			correctLine
+			correctLine,
+			progress
 		};
 	}
 };

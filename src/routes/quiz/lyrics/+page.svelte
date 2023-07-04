@@ -28,10 +28,13 @@
 			<span class="text-center">Continue the lyrics...</span>
 		</header>
 		<section class="p-4">
-			<!-- <div class="text-center, whitespace-pre">{data.lyrics}</div> -->
 			<div class="flex flex-col items-center">
-				{#each data.revealedLines as line}
-					<span>{line}</span>
+				{#each data.revealedLines as line, i}
+					<span
+						class:text-primary-500={form?.progress.get(i)}
+						class:text-error-500={form?.progress.get(i) === false}
+						class="text-center">{line}</span
+					>
 				{/each}
 			</div>
 		</section>
