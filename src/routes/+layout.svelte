@@ -9,6 +9,7 @@
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 	import { authHandler, authStore } from '../store/store';
+	import {addNewHistory,saveHistory,initDataStructure} from "../lib/firebase/dataBaseLoadings"
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -24,23 +25,26 @@
 				return;
 			}
 
-			if (!user) return;
+			if (!user) {
+				authStore.set({ user: {} });
+				return;
+			}
 
 			let dataToSetStore: DocumentData;
 			const docRef = doc(db, 'users', user.uid);
 			const docSnap = await getDoc(docRef);
 
 			if (!docSnap.exists()) {
+				//signup
 				const userRef = doc(db, 'users', user.uid);
-				(dataToSetStore = {
-					email: user.email,
-					createdAt: new Date(),
-					updatedAt: new Date()
-				}),
-					await setDoc(userRef, dataToSetStore, { merge: true });
+				dataToSetStore = initDataStructure("tbd_name", user.email);
+				await setDoc(userRef, dataToSetStore, { merge: true });
 			} else {
+				//login
 				const userData = docSnap.data();
 				dataToSetStore = userData;
+				addNewHistory(user.uid, db, userData);
+				
 			}
 
 			authStore.update((store) => {
@@ -50,9 +54,16 @@
 				};
 			});
 		});
+
+		return unsubscribe;
 	});
 
-	const logout = () => {
+	const logout = async() => {
+		let user_id ="";
+		authStore.subscribe((store: any) => {
+			user_id = store.user.uid;
+		});
+		await saveHistory(user_id,db);
 		authHandler.logout();
 	};
 </script>
@@ -64,10 +75,13 @@
 			<nav>
 				<a class="btn variant-soft" href="/quiz/popularity">Popularity Quiz</a>
 				<a class="btn variant-soft" href="/quiz/biography">Bio Quiz</a>
+				<a class="btn variant-soft" href="/quiz/discography">Discography Quiz</a>
 				<a class="btn variant-soft" href="/stats">Stats</a>
 			</nav>
 			<svelte:fragment slot="trail">
-				<button on:click={logout} class="btn variant-ghost"> Logout </button>
+				<button on:click={logout} class="btn variant-ghost" class:invisible={!$authStore.user.uid}>
+					Logout
+				</button>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>

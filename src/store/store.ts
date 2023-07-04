@@ -3,7 +3,9 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { writable } from 'svelte/store';
 
 export const authStore = writable({
-	user: {}
+	user: {
+		uid: ''
+	}
 });
 
 export const authHandler = {
@@ -12,8 +14,10 @@ export const authHandler = {
 	},
 	login: async (email: string, pass: string) => {
 		await signInWithEmailAndPassword(auth, email, pass);
+		//add logs
 	},
 	logout: async () => {
+		//add logs
 		await signOut(auth);
 	}
 };

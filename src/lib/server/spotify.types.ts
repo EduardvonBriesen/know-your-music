@@ -18,6 +18,15 @@ export type Artist = {
 	}[];
 };
 
+export type Album = {
+	id: string;
+	name: string;
+	images: {
+		url: string;
+	}[];
+	release_date: string;
+};
+
 export type SpotifyError = {
 	error: {
 		status: number;
