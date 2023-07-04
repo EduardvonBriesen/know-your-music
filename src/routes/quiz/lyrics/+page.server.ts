@@ -1,12 +1,13 @@
 import { getSong } from '$lib/server/genius';
 import { redis } from '$lib/server/redis';
+import { fail } from '@sveltejs/kit';
 
 // TODO: difficulty levels
 // TODO: use random song
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('lyrics') || '{}');
-	const lineToGuess = parseInt(current_quiz?.lineToGuess || '2');
+	const lineToGuess = parseInt(current_quiz?.lineToGuess || '85');
 	const query = current_quiz?.query || {
 		title: 'New York State of Mind',
 		artist: 'Nas',
@@ -51,7 +52,7 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	default: async ({ cookies, request }) => {
+	guess: async ({ cookies, request }) => {
 		const current_quiz = JSON.parse(cookies.get('lyrics') || '{}');
 		const lineToGuess = parseInt(current_quiz?.lineToGuess || '2');
 		const query = current_quiz?.query;
@@ -76,9 +77,6 @@ export const actions = {
 		}
 		progress.set(lineToGuess, result);
 		redis.set(user_id + '-lyrics', JSON.stringify(Array.from(progress.entries())));
-		if (lineToGuess === lines.length - 1) {
-			redis.del(user_id + '-lyrics');
-		}
 
 		cookies.set(
 			'lyrics',
@@ -92,10 +90,46 @@ export const actions = {
 			}
 		);
 
+		let finished = false;
+
+		if (lineToGuess === lines.length - 1) {
+			redis.del(user_id + '-lyrics');
+			finished = true;
+		}
+
+		if (!finished) {
+			cookies.set(
+				'lyrics',
+				JSON.stringify({
+					lineToGuess: lineToGuess + 1,
+					options: [],
+					query
+				}),
+				{
+					path: '/'
+				}
+			);
+		}
+
 		return {
+			finished,
 			result,
 			correctLine,
 			progress
+		};
+	},
+	finish: async ({ cookies }) => {
+		cookies.set('lyrics', '', {
+			path: '/'
+		});
+
+		console.log('resetting lyrics quiz');
+
+		return {
+			finished: false,
+			result: false,
+			correctLine: '',
+			progress: new Map()
 		};
 	}
 };

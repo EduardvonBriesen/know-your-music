@@ -47,30 +47,46 @@
 				{/each}
 			</div>
 		</section>
-		<footer class="card-footer">
+		<footer class="card-footer flex flex-col items-center">
 			<ProgressBar
 				class="my-8"
 				label="Progress Bar"
 				value={data.revealedLines.length}
 				max={data.totalLines}
 			/>
-			<form
-				method="POST"
-				use:enhance={({ formData }) => {
-					formData.set('user_id', user_id);
-				}}
-			>
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-					{#each data.guessOptions as option}
-						<button
-							class="btn disabled:opacity-100 variant-filled-primary whitespace-pre-wrap"
-							value={option}
-							type="submit"
-							name="answer">{option}</button
-						>
-					{/each}
-				</div>
-			</form>
+			{#if !form || form?.finished === false}
+				<form
+					action="?/guess"
+					method="POST"
+					use:enhance={({ formData }) => {
+						formData.set('user_id', user_id);
+					}}
+				>
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+						{#each data.guessOptions as option}
+							<button
+								class="btn disabled:opacity-100 variant-filled-primary whitespace-pre-wrap"
+								value={option}
+								type="submit"
+								name="answer">{option}</button
+							>
+						{/each}
+					</div>
+				</form>
+			{:else}
+				<form
+					action="?/finish"
+					method="POST"
+					use:enhance={({ formData }) => {
+						formData.set('user_id', user_id);
+					}}
+				>
+					<button
+						class="btn disabled:opacity-100 variant-filled-primary whitespace-pre-wrap"
+						type="submit">Try Again</button
+					>
+				</form>
+			{/if}
 		</footer>
 		<!-- {#if !!form}
 			<footer class="card-footer flex flex-col items-center">
