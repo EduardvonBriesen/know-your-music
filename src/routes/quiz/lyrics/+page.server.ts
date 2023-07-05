@@ -78,6 +78,11 @@ export const actions = {
 		progress.set(lineToGuess, result);
 		redis.set(user_id + '-lyrics', JSON.stringify(Array.from(progress.entries())));
 
+		// calculate user score as percentage of correct lines
+		const correctLines = Array.from(progress.values()).filter((line) => line).length;
+		const incorrectLines = Array.from(progress.values()).filter((line) => !line).length;
+		const score = Math.round((correctLines / (correctLines + incorrectLines)) * 100);
+
 		cookies.set(
 			'lyrics',
 			JSON.stringify({
@@ -92,12 +97,10 @@ export const actions = {
 
 		let finished = false;
 
-		if (lineToGuess === lines.length - 1) {
+		if (lineToGuess >= lines.length - 1) {
 			redis.del(user_id + '-lyrics');
 			finished = true;
-		}
-
-		if (!finished) {
+		} else {
 			cookies.set(
 				'lyrics',
 				JSON.stringify({
@@ -115,15 +118,14 @@ export const actions = {
 			finished,
 			result,
 			correctLine,
-			progress
+			progress,
+			score
 		};
 	},
 	finish: async ({ cookies }) => {
 		cookies.set('lyrics', '', {
 			path: '/'
 		});
-
-		console.log('resetting lyrics quiz');
 
 		return {
 			finished: false,

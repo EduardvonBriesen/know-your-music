@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
 	import { afterUpdate } from 'svelte/internal';
+	import { confetti } from '@neoconfetti/svelte';
 
 	export let data;
 	export let form;
@@ -48,13 +49,8 @@
 			</div>
 		</section>
 		<footer class="card-footer flex flex-col items-center">
-			<ProgressBar
-				class="my-8"
-				label="Progress Bar"
-				value={data.revealedLines.length}
-				max={data.totalLines}
-			/>
 			{#if !form || form?.finished === false}
+				<ProgressBar class="my-8" value={data.revealedLines.length} max={data.totalLines} />
 				<form
 					action="?/guess"
 					method="POST"
@@ -74,6 +70,18 @@
 					</div>
 				</form>
 			{:else}
+				<ProgressBar
+					class="mt-8"
+					meter="variant-filled-success"
+					track="variant-filled-error"
+					value={form.score}
+				/>
+				<p class="m-4">
+					You got <span
+						class:text-success-500={form.score && form.score >= 50}
+						class:text-error-500={form.score && form.score < 50}>{form.score}</span
+					>% right!
+				</p>
 				<form
 					action="?/finish"
 					method="POST"
@@ -88,17 +96,15 @@
 				</form>
 			{/if}
 		</footer>
-		<!-- {#if !!form}
-			<footer class="card-footer flex flex-col items-center">
-				{#if form?.false === null}
-					<span class="text-center">You chose correct!</span>
-				{:else if form?.false !== null}
-					<span class="text-center">You chose wrong!</span>
-				{/if}
-				<button class="btn variant-filled-primary w-fit" on:click={() => window.location.reload()}
-					>Play again</button
-				>
-			</footer>
-		{/if} -->
 	</div>
+	{#if form?.score && form?.score >= 50 && form?.finished !== null && form?.finished}
+		<div
+			style="position: absolute; left: 50%; top: 30%"
+			use:confetti={{
+				force: 0.7,
+				stageWidth: window.innerWidth,
+				stageHeight: window.innerHeight
+			}}
+		/>
+	{/if}
 </div>
