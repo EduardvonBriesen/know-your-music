@@ -1,13 +1,12 @@
 import { getSong } from '$lib/server/genius';
 import { redis } from '$lib/server/redis';
-import { fail } from '@sveltejs/kit';
 
 // TODO: difficulty levels
 // TODO: use random song
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('lyrics') || '{}');
-	const lineToGuess = parseInt(current_quiz?.lineToGuess || '85');
+	const lineToGuess = parseInt(current_quiz?.lineToGuess || '2');
 	const query = current_quiz?.query || {
 		title: 'New York State of Mind',
 		artist: 'Nas',
@@ -17,7 +16,7 @@ export const load = async ({ cookies }) => {
 
 	const { albumArt, lyrics, title } = await getSong(query);
 
-	const lines = getLines(lyrics);
+	const { lines, sections } = deconstructLyrics(lyrics);
 
 	const revealedLines = lines.slice(0, lineToGuess);
 
@@ -46,6 +45,7 @@ export const load = async ({ cookies }) => {
 		albumArt,
 		title,
 		revealedLines,
+		sections,
 		guessOptions,
 		totalLines: lines.length
 	};
@@ -62,7 +62,7 @@ export const actions = {
 		const user_id = answer.get('user_id') as string;
 
 		const { lyrics } = await getSong(query);
-		const lines = getLines(lyrics);
+		const { lines } = deconstructLyrics(lyrics);
 		const correctLine = lines[lineToGuess];
 		const result = correctLine === guess;
 
@@ -136,11 +136,23 @@ export const actions = {
 	}
 };
 
-const getLines = (lyrics: string) => {
+const deconstructLyrics = (
+	lyrics: string
+): { lines: string[]; sections: { [key: number]: string } } => {
 	let lines = lyrics.split('\n');
 	// filter out empty lines
 	lines = lines.filter((line) => line.length > 0);
-	// filter out lines that are just [Verse] or [Chorus]
-	lines = lines.filter((line) => !line.startsWith('['));
-	return lines;
+
+	// Sections key denote before which line a section starts
+	const sections: { [key: number]: string } = {};
+	const filteredLines = [];
+	for (let i = 0; i < lines.length; i++) {
+		if (lines[i].startsWith('[')) {
+			sections[filteredLines.length] = lines[i];
+		} else {
+			filteredLines.push(lines[i]);
+		}
+	}
+
+	return { lines: filteredLines, sections };
 };

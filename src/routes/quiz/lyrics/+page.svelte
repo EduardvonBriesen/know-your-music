@@ -22,6 +22,8 @@
 	afterUpdate(() => {
 		scrollToBottom(element);
 	});
+
+	$: console.log(form);
 </script>
 
 <div class="flex place-content-center">
@@ -39,12 +41,21 @@
 		</header>
 		<section class="p-4">
 			<div class="flex flex-col items-center overflow-y-auto max-h-64" bind:this={element}>
+				{#if data.sections[0]}
+					<span class="text-center">{data.sections[0]}</span>
+					<br />
+				{/if}
 				{#each data.revealedLines as line, i}
 					<span
 						class:text-primary-500={form?.progress.get(i)}
 						class:text-error-500={form?.progress.get(i) === false}
 						class="text-center">{line}</span
 					>
+					{#if data.sections[i + 1]}
+						<br />
+						<span class="text-center">{data.sections[i + 1]}</span>
+						<br />
+					{/if}
 				{/each}
 			</div>
 		</section>
