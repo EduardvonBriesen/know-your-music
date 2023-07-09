@@ -95,7 +95,7 @@
 						<span class="capitalize">{comboboxValue ?? 'Quiz'}</span>
 						<span>↓</span>
 					</button>
-					<div class="card shadow-xl variant-soft-surface" data-popup="popupCombobox">
+					<div class="card shadow-xl bg-[#ffffff] " data-popup="popupCombobox">
 						<ListBox rounded="rounded-none">
 							<a href="/quiz/popularity">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
@@ -119,7 +119,7 @@
 						<a href="/stats">Stats</a>
 					</button>
 					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
-						<a href="">Team</a>
+						<a href="/team">Team</a>
 					</button>
 					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
 						<a href="">About</a>
