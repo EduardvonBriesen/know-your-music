@@ -109,7 +109,7 @@
 				{#each items as item (item.id)}
 					<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
 						<Avatar
-							class="w-auto aspect-square max-h-[16rem]"
+							class="w-auto aspect-square"
 							rounded="rounded-xl"
 							border={!form
 								? ''
