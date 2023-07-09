@@ -18,13 +18,6 @@
 		filter: blur(3px);
 	}
 
-	.album-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 2rem;
-	}
-
 	.question {
 		font-size: 1.3rem;
 		margin-top: 1rem;
@@ -35,8 +28,8 @@
 {#if data && data.albums && data.albums.length > 0}
 	<div class="flex place-content-center">
 		<div class="card w-2/3 space-4 m-10 variant-glass-surface">
-			<header class="album-container">
-				<img class="w-1/2 aspect-square rounded-xl album-cover" src={data.albums[0].image} alt={data.albums[0].name} />
+			<header class="flex felx-col items-center p-8">
+				<img class="w-1/2 aspect-square rounded-xl album-cover p-" src={data.albums[0].image} alt={data.albums[0].name} />
 				<p class="question">Which album is this?</p>
 			</header>
 			<section class="p-4">

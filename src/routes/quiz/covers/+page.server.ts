@@ -16,7 +16,7 @@ export const load = async ({ cookies }) => {
 	const albumIds = current_quiz?.albums;
 
 	if (!current_quiz.artist) {
-		// get random artist     
+		// get random artist
 		const artist = await getRandomArtist();
 
 		// assert that artist is valid
@@ -106,13 +106,21 @@ export const actions = {
 		// evaluate answer
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
+		console.log(guess);
 
-		const albums = current_quiz.albums as { name: string }[];
+		const _albums = current_quiz.albums as string[];
+		console.log(_albums);
+
+		const spotifyToken = await getToken(cookies);
+		const albums = await getSeveralAlbums(spotifyToken, _albums);
+		console.log(albums);
 
 		// find current album
-		const currentAlbumName = albums.find(album => album.name === guess)?.name;
-		const correctAlbum = albums.find((album) => album.name === currentAlbumName);
+		const currentAlbumName = albums.albums.find((album) => album.name === guess)?.name;
+		const correctAlbum = albums.albums.find((album) => album.name === currentAlbumName);
 		const isCorrect = correctAlbum?.name === guess;
+
+		console.log(currentAlbumName, correctAlbum, isCorrect);
 
 		// Benutzer aktualisieren
 		await updateUser(isCorrect, answer.get('user_id') as string);
@@ -129,7 +137,7 @@ export const actions = {
 		}
 	}
 };
-  const updateUser = async (correct: boolean, user_id: string) => {
+const updateUser = async (correct: boolean, user_id: string) => {
 	const userRef = doc(db, 'users', user_id);
 	const userDoc = await getDoc(userRef);
 	if (!userDoc.exists()) return;
