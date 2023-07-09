@@ -65,7 +65,17 @@
 			<section class="p-6">
 				<p class="text-justify mt-0">
 					{#if !form}
-						{@html data.artist?.summary}
+						{#each data.bio?.split('<input />') || [] as slice}
+							{@html slice}
+							{#if slice !== data.bio?.split('<input />')[data.bio?.split('<input />').length - 1]}
+								<input
+									bind:value={guess}
+									class="input w-24 px-2"
+									name="answer"
+									autocomplete="off"
+								/>
+							{/if}
+						{/each}
 					{:else if form?.correct}
 						<div class="[&>em]:font-bold [&>em]:text-primary-500">
 							{@html form.bio}
@@ -79,9 +89,36 @@
 			</section>
 			<footer class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form? '' : (form?.correct? 'bg-success-200':'bg-error-200')}" >
 				{#if !form}
-				<div class="flex justify-center items-center w-full p-6">
-					<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
-				</div>
+					{#if data.options && data.options.length > 0}
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+							{#each data.options as option}
+								<button
+									class="btn disabled:opacity-100 variant-filled-primary"
+									type="submit"
+									name="answer"
+									value={option}
+									disabled={!!form}
+								>
+									<span class="text-sm line-clamp-1">{option}</span>
+								</button>
+							{/each}
+						</div>
+					{:else}
+						{#if data.bio?.split('<input').length === 1}
+							<input
+								bind:value={guess}
+								class="input px-2 w-48 m-2"
+								name="answer"
+								disabled={!!form}
+								autocomplete="off"
+							/>
+						{/if}
+						<button
+							class="btn variant-filled-primary w-fit"
+							type="submit"
+							disabled={guess.length < 1}>Submit</button
+						>
+					{/if}
 				{:else}
 				<div class="flex justify-between items-center w-full p-6">
 					{#if data.artist?.summary.split('<input').length === 1}

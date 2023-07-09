@@ -138,12 +138,10 @@
 					<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
 				</div>
 				{:else}
-				<div class="flex justify-between items-center w-full p-6">
-					{#if form?.correct}
-						<span class="w-3/4 font-bold text-success-500">{feedback}</span>
-					{:else}
-						<span class="w-3/4 font-bold text-error-500">{feedback}</span>
-					{/if}
+					<p class="text-center">
+						You scored <span class="text-primary-500">{form?.score}</span> out of
+						<span class="text-primary-500">{form?.result.size}</span> points!
+					</p>
 					<button
 					class="btn w-fit {form?.correct? 'variant-filled-success' : 'variant-filled-error'}"
 					type="button"

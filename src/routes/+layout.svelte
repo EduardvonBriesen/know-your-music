@@ -13,6 +13,7 @@
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
+	import { addNewHistory, saveHistory, initDataStructure } from '../lib/firebase/dataBaseLoadings';
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -28,23 +29,25 @@
 				return;
 			}
 
-			if (!user) return;
+			if (!user) {
+				authStore.set({ user: {} });
+				return;
+			}
 
 			let dataToSetStore: DocumentData;
 			const docRef = doc(db, 'users', user.uid);
 			const docSnap = await getDoc(docRef);
 
 			if (!docSnap.exists()) {
+				//signup
 				const userRef = doc(db, 'users', user.uid);
-				(dataToSetStore = {
-					email: user.email,
-					createdAt: new Date(),
-					updatedAt: new Date()
-				}),
-					await setDoc(userRef, dataToSetStore, { merge: true });
+				dataToSetStore = initDataStructure('tbd_name', user.email);
+				await setDoc(userRef, dataToSetStore, { merge: true });
 			} else {
+				//login
 				const userData = docSnap.data();
 				dataToSetStore = userData;
+				addNewHistory(user.uid, db, userData);
 			}
 
 			authStore.update((store) => {
@@ -58,7 +61,12 @@
 		return unsubscribe;
 	});
 
-	const logout = () => {
+	const logout = async () => {
+		let user_id = '';
+		authStore.subscribe((store: any) => {
+			user_id = store.user.uid;
+		});
+		await saveHistory(user_id, db);
 		authHandler.logout();
 	};
 
@@ -125,7 +133,7 @@
 						<a href="">About</a>
 					</button>
 				</nav>
-				<button on:click={logout} class="text-white rounded-xl h-8 px-4 bg-[#775AFF] hover:bg-[#6A4AFF] duration-300"> Logout </button>
+				<button on:click={logout} class="text-white rounded-xl h-8 px-4 bg-[#775AFF] hover:bg-[#6A4AFF] duration-300" class:invisible={!$authStore.user.uid}> Logout </button>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
