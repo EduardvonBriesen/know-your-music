@@ -11,6 +11,11 @@ export type UserData = {
 	email: string;
 	progress: {
 		overall_score: number;
+		shortterm_overall_history: {
+			MAX_HISTORY_LENGTH: number; // proposal =20
+			current_index: number; // index of the oldest element, if overall_questions<20 then index=-1
+			list_of_scores:number[];
+		},
 		overall_questions: number;
 		genre_scores: GenreScores;
 		music_period_scores: {
