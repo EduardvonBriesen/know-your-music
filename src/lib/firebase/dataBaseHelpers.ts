@@ -150,6 +150,8 @@ export function getUpdatedHistoryListOfGenres(
 
 export function getUpdatedScores(
 	oldGenreScores: GenreScores,
+	oldScoresHistory: number[],
+	oldScoresIndex: number,
 	genre: Genre,
 	oldGenreLevelCorrect: number,
 	genreLevelXCorrect: number,
@@ -172,6 +174,15 @@ export function getUpdatedScores(
 			newGenreScores.jazz +
 			newGenreScores.rap) /
 		6; // sum of all genre scores divide through number of genre
+	const newScoresHistory: number[] = oldScoresHistory;
+	let newScoresIndex = -1;
+	if (oldScoresIndex===-1){
+		newScoresHistory.push(newOverallScore);
+		if(newScoresHistory.length === MAX_HISTORY_LENGTH) newScoresIndex=0;
+	}else{
+		newScoresHistory[oldScoresIndex]=newOverallScore;
+		newScoresIndex = (oldScoresIndex + 1) % MAX_HISTORY_LENGTH;
+	}
 
 	const newGenreHistoryScores: number[] = oldGenreHistoryScoresList;
 	let newGenreHistoryScoresIndex = -1;
@@ -183,7 +194,7 @@ export function getUpdatedScores(
 		} // if not oldGenreHistoryScoresListIndex remains -1 as initialized
 	} else {
 		newGenreHistoryScores[oldGenreHistoryScoresListIndex] = newPoints;
-		newGenreHistoryScoresIndex = (oldGenreHistoryScoresListIndex + 1) % 20;
+		newGenreHistoryScoresIndex = (oldGenreHistoryScoresListIndex + 1) % MAX_HISTORY_GENRE_LENGTH;
 	}
 	let sum = 0;
 	newGenreHistoryScores.forEach((item) => {
@@ -193,6 +204,8 @@ export function getUpdatedScores(
 
 	return {
 		overall_score: newOverallScore,
+		list_of_scores:newScoresHistory,
+		scores_index: newScoresIndex,
 		genre_score: newGenreScore,
 		genre_level_correct: newGenreLevelCorrect,
 		genre_history_score: newGenreHistoryScore,

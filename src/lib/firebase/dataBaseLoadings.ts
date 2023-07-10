@@ -67,6 +67,11 @@ export const initDataStructure = (name: string, email: string) => {
 		email: email,
 		progress: {
 			overall_score: 0,
+			shortterm_overall_history: {
+				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
+				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
+				list_of_scores:[]
+			},//progress.shortterm_overall_history.current_index.list_of_scores
 			overall_questions: 0,
 			genre_scores: {
 				classic: 0,
@@ -399,6 +404,8 @@ export async function updateUserProgressData(
 
 	const {
 		overall_score,
+		list_of_scores,
+		scores_index,
 		genre_score,
 		genre_level_correct,
 		genre_history_score,
@@ -406,6 +413,8 @@ export async function updateUserProgressData(
 		genre_history_scores_index
 	} = getUpdatedScores(
 		data.progress.genre_scores,
+		data.progress.shortterm_overall_history.list_of_scores,
+		data.progress.shortterm_overall_history.current_index,
 		genre,
 		data.progress.genres[genre][level].correct,
 		genreLevelXCorrect,
@@ -419,6 +428,8 @@ export async function updateUserProgressData(
 	try {
 		await updateDoc(docRef, {
 			'progress.overall_score': overall_score,
+			'progress.shortterm_overall_history.list_of_scores': list_of_scores,
+			'progress.shortterm_overall_history.current_index':scores_index,
 			'progress.overall_questions': overall_questions,
 			[`progress.genre_scores.${genre}`]: genre_score,
 			[`progress.genres.${genre}.${level}.questions`]: genre_level_questions,

@@ -1,6 +1,6 @@
 /* Constants */
 export const MAX_HISTORY_LENGTH = 20;
-export const MAX_HISTORY_GENRE_LENGTH = 5;
+export const MAX_HISTORY_GENRE_LENGTH = 10;
 export const WEIGHT_QUESTIONS_OVERALL = 1;
 export const WEIGHT_SCORE_OVERALL = 1.5;
 export const WEIGHT_SCORE_HISTORY = 4;
