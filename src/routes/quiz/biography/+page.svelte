@@ -14,19 +14,15 @@
 		user_id = store.user.uid;
 	});
 
-	$: feedback = ""
+	$: feedback = '';
 
-	const positiveFeedback = [
-		"Good job!",
-		"Amazing!",
-		"Correct answer, keep going!"
- 	];
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
 
 	const negativeFeedback = [
-    	"Oups, the correct answer is ",
-    	"Wrong answer. The correct answer is: ",
-    	"Not quite there. The correct answer is: "
- 	];
+		'Oups, the correct answer is ',
+		'Wrong answer. The correct answer is: ',
+		'Not quite there. The correct answer is: '
+	];
 
 	$: {
 		if (form?.correct) {
@@ -35,7 +31,6 @@
 			feedback = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
 		}
 	}
-
 </script>
 
 <div class="flex place-content-center">
@@ -87,7 +82,13 @@
 					{/if}
 				</p>
 			</section>
-			<footer class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form? '' : (form?.correct? 'bg-success-200':'bg-error-200')}" >
+			<footer
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
+					? ''
+					: form?.correct
+					? 'bg-success-200'
+					: 'bg-error-200'}"
+			>
 				{#if !form}
 					{#if data.options && data.options.length > 0}
 						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -120,23 +121,29 @@
 						>
 					{/if}
 				{:else}
-				<div class="flex justify-between items-center w-full p-6">
-					{#if data.artist?.summary.split('<input').length === 1}
-						<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
-					{/if}
+					<div class="flex justify-between items-center w-full p-6">
+						{#if data.artist?.summary.split('<input').length === 1}
+							<input
+								bind:value={guess}
+								class="input px-2 w-48 m-2"
+								name="answer"
+								disabled={!!form}
+							/>
+						{/if}
 						{#if form?.correct}
 							<span class="w-3/4 font-bold text-success-500">{feedback}</span>
 						{:else}
 							<span class="w-3/4 font-bold text-error-500">{feedback} {form?.artist}</span>
 						{/if}
 						<button
-							class="btn w-fit {form?.correct? 'variant-filled-success' : 'variant-filled-error'}"
+							class="btn w-fit {form?.correct ? 'variant-filled-success' : 'variant-filled-error'}"
 							type="button"
 							on:click={() => {
 								window.location.reload();
-							}}>Continue
+							}}
+							>Continue
 						</button>
-				</div>
+					</div>
 				{/if}
 			</footer>
 		</form>

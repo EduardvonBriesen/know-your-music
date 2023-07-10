@@ -41,7 +41,7 @@
 			<div>
 				<lable class="label" for="email">
 					<span>Email</span>
-					<input 
+					<input
 						bind:value={email}
 						class="input"
 						type="email"

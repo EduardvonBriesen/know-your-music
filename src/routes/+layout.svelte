@@ -1,11 +1,9 @@
 <script lang="ts">
-	
 	import '../theme.postcss';
 	import '@skeletonlabs/skeleton/styles/skeleton.css';
 	import '../app.postcss';
 
-
-	import { AppBar, AppShell, ListBox, ListBoxItem} from '@skeletonlabs/skeleton';
+	import { AppBar, AppShell, ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { auth, db } from '$lib/firebase/firebase';
 	import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
@@ -70,7 +68,6 @@
 		authHandler.logout();
 	};
 
-
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	let comboboxValue: string;
@@ -81,29 +78,30 @@
 		placement: 'bottom',
 		closeQuery: '.listbox-item'
 	};
-
 </script>
-
 
 <AppShell>
 	<svelte:fragment slot="header">
 		<style>
 			.navbarr {
-				background-color: #ffffff; 
+				background-color: #ffffff;
 			}
 		</style>
 		<AppBar class="navbarr px-8 shadow-sm">
 			<svelte:fragment slot="lead">
 				<!--<img class="h-6 w-6 mr-4" src="/images/Facebook_logo_(square).png" alt="Logo"/> -->
 				<a class="text-[#775AFF] text-2xl font-bold" href="/">Know Your Music</a>
-			</svelte:fragment>			
+			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<nav>
-					<button class="rounded-xl h-8 px-4 justify-between bg-[#ffffff] hover:bg-[#E9E9E9] duration-300" use:popup={popupCombobox}>
+					<button
+						class="rounded-xl h-8 px-4 justify-between bg-[#ffffff] hover:bg-[#E9E9E9] duration-300"
+						use:popup={popupCombobox}
+					>
 						<span class="capitalize">{comboboxValue ?? 'Quiz'}</span>
 						<span>↓</span>
 					</button>
-					<div class="card shadow-xl bg-[#ffffff] " data-popup="popupCombobox">
+					<div class="card shadow-xl bg-[#ffffff]" data-popup="popupCombobox">
 						<ListBox rounded="rounded-none">
 							<a href="/quiz/popularity">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
@@ -111,15 +109,13 @@
 								</ListBoxItem>
 							</a>
 							<a href="/quiz/biography">
-								<ListBoxItem bind:group={comboboxValue} name="medium" value="Bio">
-									Bio
-								</ListBoxItem>
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Bio">Bio</ListBoxItem>
 							</a>
 							<a href="/quiz/discography">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Discography">
 									Discography
 								</ListBoxItem>
-							</a>							
+							</a>
 						</ListBox>
 						<div class="arrow bg-surface-100-800-token" />
 					</div>
@@ -133,7 +129,13 @@
 						<a href="">About</a>
 					</button>
 				</nav>
-				<button on:click={logout} class="text-white rounded-xl h-8 px-4 bg-[#775AFF] hover:bg-[#6A4AFF] duration-300" class:invisible={!$authStore.user.uid}> Logout </button>
+				<button
+					on:click={logout}
+					class="text-white rounded-xl h-8 px-4 bg-[#775AFF] hover:bg-[#6A4AFF] duration-300"
+					class:invisible={!$authStore.user.uid}
+				>
+					Logout
+				</button>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
@@ -142,5 +144,3 @@
 		<slot />
 	</main>
 </AppShell>
-
-

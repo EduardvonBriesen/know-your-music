@@ -34,19 +34,11 @@
 
 	$: console.log(form);
 
-		$: feedback = ""
+	$: feedback = '';
 
-	const positiveFeedback = [
-		"Good job!",
-		"Amazing!",
-		"Correct answer, keep going!"
- 	];
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
 
-	const negativeFeedback = [
-    	"Oups!",
-    	"Wrong answer.",
-    	"Not quite there."
- 	];
+	const negativeFeedback = ['Oups!', 'Wrong answer.', 'Not quite there.'];
 
 	$: {
 		if (form?.correct) {
@@ -63,7 +55,6 @@
 		target: 'popupHover',
 		placement: 'top'
 	};
-
 </script>
 
 <div class="flex place-content-center">
@@ -132,24 +123,29 @@
 				{/each}
 			</section>
 
-			<footer class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form? '' : (form?.correct? 'bg-success-200':'bg-error-200')}">
+			<footer
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
+					? ''
+					: form?.correct
+					? 'bg-success-200'
+					: 'bg-error-200'}"
+			>
 				{#if !form}
-				<div class="flex justify-center items-center w-full p-6">
-					<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
-				</div>
+					<div class="flex justify-center items-center w-full p-6">
+						<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
+					</div>
 				{:else}
 					<p class="text-center">
 						You scored <span class="text-primary-500">{form?.score}</span> out of
 						<span class="text-primary-500">{form?.result.size}</span> points!
 					</p>
 					<button
-					class="btn w-fit {form?.correct? 'variant-filled-success' : 'variant-filled-error'}"
-					type="button"
-					on:click={() => {
-						window.location.reload();
-					}}>Continue</button
+						class="btn w-fit {form?.correct ? 'variant-filled-success' : 'variant-filled-error'}"
+						type="button"
+						on:click={() => {
+							window.location.reload();
+						}}>Continue</button
 					>
-				</div>
 				{/if}
 			</footer>
 		</form>

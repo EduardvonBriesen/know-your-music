@@ -18,8 +18,18 @@
 		const winRate = stats.correct / (stats.correct + stats.incorrect);
 
 		conicStops = [
-			{ label: 'Correct', color: 'rgb(var(--color-success-500))', start: 0, end: Math.round(winRate * 100 *100)/100},
-			{ label: 'Incorrect', color: 'rgb(var(--color-error-500))', start: Math.round(winRate * 100 * 100)/100, end: 100 }
+			{
+				label: 'Correct',
+				color: 'rgb(var(--color-success-500))',
+				start: 0,
+				end: Math.round(winRate * 100 * 100) / 100
+			},
+			{
+				label: 'Incorrect',
+				color: 'rgb(var(--color-error-500))',
+				start: Math.round(winRate * 100 * 100) / 100,
+				end: 100
+			}
 		];
 	}
 

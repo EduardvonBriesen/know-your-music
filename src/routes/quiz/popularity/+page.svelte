@@ -13,25 +13,22 @@
 		user_id = store.user.uid;
 	});
 
-	$: feedback = ""
+	$: feedback = '';
 
-	const positiveFeedback = [
-		"Good job!",
-		"Amazing!",
-		"Correct answer, keep going!"
- 	];
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
 
 	const negativeFeedback = [
-    	"Oups, the correct answer is ",
-    	"Wrong answer. The correct answer is: ",
-    	"Not quite there. The most popular track is: "
- 	];
+		'Oups, the correct answer is ',
+		'Wrong answer. The correct answer is: ',
+		'Not quite there. The most popular track is: '
+	];
 
 	$: {
 		if (form?.false === null && form?.correct !== null) {
 			feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
 		} else {
-			feedback = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
+			feedback =
+				negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
 		}
 	}
 
@@ -42,7 +39,6 @@
 		target: 'popupHover',
 		placement: 'top'
 	};
-
 </script>
 
 <div class="flex place-content-center">
@@ -94,14 +90,24 @@
 			</form>
 		</section>
 		{#if !!form}
-			<footer class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {form?.false === null ? 'bg-success-200' : 'bg-error-200'}">
+			<footer
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {form?.false ===
+				null
+					? 'bg-success-200'
+					: 'bg-error-200'}"
+			>
 				<div class="flex justify-between items-center w-full p-6">
 					{#if form?.false === null}
 						<span class="w-3/4 font-bold text-success-500">{feedback}</span>
 					{:else if form?.false !== null}
 						<span class="w-3/4 font-bold text-error-500">{feedback}</span>
 					{/if}
-					<button class="btn w-fit {form?.false === null ? 'variant-filled-success' : 'variant-filled-error'}" on:click={() => window.location.reload()}>Continue</button> 
+					<button
+						class="btn w-fit {form?.false === null
+							? 'variant-filled-success'
+							: 'variant-filled-error'}"
+						on:click={() => window.location.reload()}>Continue</button
+					>
 				</div>
 			</footer>
 		{/if}
