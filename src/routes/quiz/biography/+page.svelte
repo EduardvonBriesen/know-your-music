@@ -146,7 +146,6 @@
 							>Continue
 						</button>
 					</div>
-					</div>
 				{/if}
 			</footer>
 		</form>
