@@ -4,7 +4,7 @@ import type { Options, Song } from './genius.types';
 import { redis } from './redis';
 
 export const getLyrics = async (options: Options): Promise<string> => {
-	const query = 'genius.getLyrics' + JSON.stringify(options);
+	const query = 'genius/getLyrics/' + JSON.stringify(options);
 	const cached = await redis.get(query);
 
 	if (cached) return cached;
@@ -20,7 +20,7 @@ export const getLyrics = async (options: Options): Promise<string> => {
 };
 
 export const getAlbumArt = async (options: Options): Promise<string> => {
-	const query = 'genius.getAlbumArt' + JSON.stringify(options);
+	const query = 'genius/getAlbumArt/' + JSON.stringify(options);
 	const cached = await redis.get(query);
 
 	if (cached) return cached;
@@ -36,7 +36,7 @@ export const getAlbumArt = async (options: Options): Promise<string> => {
 };
 
 export const getSong = async (options: Options): Promise<Song> => {
-	const query = 'genius.getSong' + JSON.stringify(options);
+	const query = 'genius/getSong/' + JSON.stringify(options);
 	const cached = await redis.get(query);
 
 	if (cached) return JSON.parse(cached);
