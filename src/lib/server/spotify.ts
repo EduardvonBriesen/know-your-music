@@ -40,7 +40,7 @@ export const getArtist = async (
 	const query = 'spotify/artist/' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const res = await fetch(`${baseUrl}artists/${artist_id}`, {
 		headers: {
@@ -49,7 +49,7 @@ export const getArtist = async (
 	});
 
 	const artist = await res.json();
-	redis.set(query, artist, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(artist), 'EX', 60 * 60 * 24);
 
 	return artist;
 };
@@ -61,7 +61,7 @@ export const getArtistTopTracks = async (
 	const query = 'spotify/artist/top-tracks' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const res = await fetch(`${baseUrl}artists/${artist_id}/top-tracks?market=DE`, {
 		headers: {
@@ -70,7 +70,7 @@ export const getArtistTopTracks = async (
 	});
 
 	const topTracks = await res.json();
-	redis.set(query, topTracks, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(topTracks), 'EX', 60 * 60 * 24);
 
 	return topTracks;
 };
@@ -82,7 +82,7 @@ export const getRelatedArtists = async (
 	const query = 'spotify/artist/related-artists' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const res = await fetch(`${baseUrl}artists/${artist_id}/related-artists`, {
 		headers: {
@@ -91,7 +91,7 @@ export const getRelatedArtists = async (
 	});
 
 	const relatedArtists = await res.json();
-	redis.set(query, relatedArtists, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(relatedArtists), 'EX', 60 * 60 * 24);
 
 	return relatedArtists;
 };
@@ -104,7 +104,7 @@ export const getTracks = async (
 	const query = 'spotify/tracks/' + JSON.stringify(track_ids);
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const res = await fetch(`${baseUrl}tracks?ids=${track_ids.join(',')}`, {
 		headers: {
@@ -113,7 +113,7 @@ export const getTracks = async (
 	});
 
 	const tracks = await res.json();
-	redis.set(query, tracks, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(tracks), 'EX', 60 * 60 * 24);
 
 	return await res.json();
 };
@@ -125,7 +125,7 @@ export const getArtistAlbums = async (
 	const query = 'spotify/artist/albums' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const url = new URL(`${baseUrl}artists/${artist_id}/albums`);
 	url.searchParams.append('include_groups', 'album');
@@ -136,7 +136,7 @@ export const getArtistAlbums = async (
 	});
 
 	const albums = await res.json();
-	redis.set(query, albums, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(albums), 'EX', 60 * 60 * 24);
 
 	return albums;
 };
@@ -149,7 +149,7 @@ export const getSeveralAlbums = async (
 	const query = 'spotify/albums/' + JSON.stringify(album_ids);
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const res = await fetch(`${baseUrl}albums?ids=${album_ids.join(',')}`, {
 		headers: {
@@ -158,7 +158,7 @@ export const getSeveralAlbums = async (
 	});
 
 	const albums = await res.json();
-	redis.set(query, albums, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(albums), 'EX', 60 * 60 * 24);
 
 	return albums;
 };

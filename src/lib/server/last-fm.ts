@@ -12,7 +12,7 @@ export const getArtistInfoById = async (
 	const query = 'lastfm/artist' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.getinfo');
@@ -22,7 +22,7 @@ export const getArtistInfoById = async (
 	const res = await fetch(url);
 
 	const artistInfo = await res.json();
-	redis.set(query, artistInfo, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(artistInfo), 'EX', 60 * 60 * 24);
 
 	return artistInfo;
 };
@@ -31,7 +31,7 @@ export const getArtistInfo = async (artist: string): Promise<ArtistInfo | lfmErr
 	const query = 'lastfm/artist/' + artist;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.getinfo');
@@ -41,7 +41,7 @@ export const getArtistInfo = async (artist: string): Promise<ArtistInfo | lfmErr
 	const res = await fetch(url);
 
 	const artistInfo = await res.json();
-	redis.set(query, artistInfo, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(artistInfo), 'EX', 60 * 60 * 24);
 
 	return artistInfo;
 };
@@ -53,7 +53,7 @@ export const getRandomArtist = async (): Promise<ArtistInfo | lfmError> => {
 	const cached = await redis.get(query);
 
 	if (cached) {
-		artists = cached;
+		artists = JSON.parse(cached);
 	} else {
 		const url = new URL(baseUrl);
 		url.searchParams.append('method', 'chart.gettopartists');
@@ -61,7 +61,7 @@ export const getRandomArtist = async (): Promise<ArtistInfo | lfmError> => {
 		url.searchParams.append('format', 'json');
 		const res = await fetch(url);
 		artists = (await res.json()).artists.artist;
-		redis.set(query, artists, 'EX', 60 * 60 * 24);
+		redis.set(query, JSON.stringify(artists), 'EX', 60 * 60 * 24);
 	}
 
 	const randomArtist = artists[Math.floor(Math.random() * artists.length)];
@@ -72,7 +72,7 @@ export const getTopTracks = async (artist_id: string): Promise<TopTracks | lfmEr
 	const query = 'lastfm/toptracks/' + artist_id;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'artist.gettoptracks');
@@ -82,7 +82,7 @@ export const getTopTracks = async (artist_id: string): Promise<TopTracks | lfmEr
 	const res = await fetch(url);
 
 	const topTracks = await res.json();
-	redis.set(query, topTracks, 'EX', 60 * 60 * 24);
+	redis.set(query, JSON.stringify(topTracks), 'EX', 60 * 60 * 24);
 
 	return topTracks;
 };
@@ -91,7 +91,7 @@ export const getTrackInfo = async (track: string, artist: string): Promise<Track
 	const query = 'lastfm/track/' + track + '/' + artist;
 	const cached = await redis.get(query);
 
-	if (cached) return cached;
+	if (cached) return JSON.parse(cached);
 
 	const url = new URL(baseUrl);
 	url.searchParams.append('method', 'track.getInfo');
