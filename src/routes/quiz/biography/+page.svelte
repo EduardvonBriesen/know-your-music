@@ -113,17 +113,19 @@
 								autocomplete="off"
 							/>
 						{/if}
-						<button
-							class="btn variant-filled-primary w-fit"
-							type="submit"
-							disabled={guess.length < 1}>Submit</button
-						>
+						<div class="flex justify-center items-center w-full p-6">
+							<button
+								class="btn variant-filled-surface w-fit"
+								type="submit"
+								disabled={guess.length < 1}>Submit</button
+							>
+						</div>
 					{/if}
 				{:else}
-				<div class="flex justify-between items-center w-full p-6">
-					{#if data.artist?.summary.split('<input').length === 1}
-						<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
-					{/if}
+					<div class="flex justify-between items-center w-full p-6">
+						{#if data.artist?.summary.split('<input').length === 1}
+							<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
+						{/if}
 						{#if form?.correct}
 							<span class="w-3/4 font-bold text-success-500">{feedback}</span>
 						{:else}
@@ -136,7 +138,7 @@
 								window.location.reload();
 							}}>Continue
 						</button>
-				</div>
+					</div>
 				{/if}
 			</footer>
 		</form>
