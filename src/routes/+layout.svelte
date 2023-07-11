@@ -94,7 +94,6 @@
 		</style>
 		<AppBar class="navbarr px-8 shadow-sm">
 			<svelte:fragment slot="lead">
-				<!--<img class="h-6 w-6 mr-4" src="/images/Facebook_logo_(square).png" alt="Logo"/> -->
 				<a class="text-[#775AFF] text-2xl font-bold" href="/">Know Your Music</a>
 			</svelte:fragment>			
 			<svelte:fragment slot="trail">
