@@ -5,7 +5,8 @@ import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/ser
 import type { Album } from '$lib/server/spotify.types';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
-
+import { read, MIME_JPEG } from 'jimp';
+ 
 const numberOfAlbums = 3;
 
 export const load = async ({ cookies }) => {
@@ -66,7 +67,7 @@ export const load = async ({ cookies }) => {
 
     albums = artistAlbums.items.slice(0, numberOfAlbums);
 
-    // Setze den Namen des aktuellen Albums
+    // set current album name
     currentAlbumName = albums[0].name;
   } else {
     // get albums from cookie
@@ -81,17 +82,23 @@ export const load = async ({ cookies }) => {
       currentAlbumName = currentAlbum?.name;
     }
   }
+    // load and blurr the picture
+    const image = await read(albums[0].images[0].url);
+    image.blur(8); // blur level
 
-  // save quiz to cookie
-  cookies.set(
-    'covers',
-    JSON.stringify({
+    // convert picture
+    const base64Image = await image.getBase64Async(MIME_JPEG);
+
+    // save quiz to cookie
+    cookies.set(
+      'covers',
+      JSON.stringify({
       artist: {
         name: artistName,
         id: artistId
       },
       albums: albums.map((album) => album.id),
-      currentAlbumName // Speichere den Namen des aktuellen Albums im Cookie
+      currentAlbumName // Save current album name in cookie
     }),
     {
       path: '/'
@@ -102,9 +109,10 @@ export const load = async ({ cookies }) => {
     albums: albums.map((album) => ({
       id: album.id,
       name: album.name,
-      image: album.images[0].url
+      image: album.images[0].url // use normal album cover
     })),
-    currentAlbumName // Gebe den Namen des aktuellen Albums zurück
+    blurredImage: base64Image, 
+    currentAlbumName // give back current album name
   };
 };
 
@@ -120,7 +128,7 @@ export const actions = {
 	  const albums = await getSeveralAlbums(spotifyToken, current_quiz.albums);
   
 	  // find current album
-	  const currentAlbumName = current_quiz.currentAlbumName; // Zugriff auf den zwischengespeicherten Namen des aktuellen Albums
+	  const currentAlbumName = current_quiz.currentAlbumName; // access to cached current album name 
 	  let correctAlbum;
 	  if ('albums' in albums) {
 		correctAlbum = albums.albums.find((album) => album.name === currentAlbumName);
@@ -128,10 +136,10 @@ export const actions = {
   
 	  const isCorrect = correctAlbum?.name === guess;
   
-	  // Benutzer aktualisieren
+	  // update user
 	  await updateUser(isCorrect, answer.get('user_id') as string);
   
-	  // Quiz zurücksetzen
+	  // reset quiz
 	  cookies.set('covers', '', {
 		path: '/'
 	  });

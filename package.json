@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"firebase": "^9.22.1"
+		"firebase": "^9.22.1",
+		"jimp": "^0.22.8"
 	}
 }
