@@ -1,5 +1,3 @@
-import { db } from '$lib/firebase/firebase';
-import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { fail } from '@sveltejs/kit';
 import { getArtistByGenre, getArtistTopTracks, getToken, getTracks } from '$lib/server/spotify';
 import type { Genre, Levels } from '$lib/firebase/dataBase.types.js';
@@ -104,7 +102,6 @@ export const actions = {
 		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
 
 		const data = await getGenreWithLevelForItem(answer.get('user_id') as string);
-		console.log(data);
 		if (data) {
 			cookies.set('genre', data.genre, {
 				path: '/'

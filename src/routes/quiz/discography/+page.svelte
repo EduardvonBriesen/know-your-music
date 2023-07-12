@@ -31,8 +31,6 @@
 			});
 		}
 	}
-
-	$: console.log(form);
 </script>
 
 <div class="flex place-content-center">
