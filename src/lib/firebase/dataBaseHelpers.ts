@@ -44,8 +44,9 @@ export function getGenreForItemtype(data: UserData) {
 	} else {
 		historyLength = MAX_HISTORY_LENGTH;
 	}
-	for (const genre in genres) {
-		const genreData: GenreData = extractRelevantGenreData(data, genre as Genre);
+
+	genres.forEach((genre) => {
+		const genreData: GenreData = extractRelevantGenreData(data, genre);
 		if (genreData.overallQuestions === 0) {
 			// first question ever
 			score = Math.random();
@@ -64,7 +65,8 @@ export function getGenreForItemtype(data: UserData) {
 				0.1 * Math.random();
 		}
 		scores.push(score);
-	}
+	});
+
 	return genres[scores.indexOf(Math.min(...scores))];
 }
 
