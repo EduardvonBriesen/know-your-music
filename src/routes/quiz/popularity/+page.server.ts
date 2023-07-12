@@ -3,13 +3,18 @@ import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { fail } from '@sveltejs/kit';
 import { getArtistByGenre, getArtistTopTracks, getToken, getTracks } from '$lib/server/spotify';
 import type { Genre, Levels } from '$lib/firebase/dataBase.types.js';
-import { getGenreWithLevelForItem } from '$lib/firebase/dataBaseLoadings.js';
+import {
+	getGenreWithLevelForItem,
+	updateUserProgressData
+} from '$lib/firebase/dataBaseLoadings.js';
 
 // TODO: difficulty levels
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
-	const genre: Genre = (cookies.get('genre') || 'rock') as Genre;
-	const level: Levels = (cookies.get('level') || 'level1') as Levels;
+	const genre: Genre = cookies.get('genre') as Genre;
+	if (!genre) cookies.set('genre', 'rock', { path: '/' });
+	const level: Levels = cookies.get('level') as Levels;
+	if (!level) cookies.set('level', 'level1', { path: '/' });
 
 	let artistName = current_quiz?.artist?.name;
 	let artistId = current_quiz?.artist?.id;
@@ -73,6 +78,9 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
+		// TODO: hide this from the user
+		const genre: Genre = cookies.get('genre') as Genre;
+		const level: Levels = cookies.get('level') as Levels;
 
 		// evaluate answer
 		const answer = await request.formData();
@@ -90,11 +98,13 @@ export const actions = {
 
 		const mostPopularTrack = trackInfos.sort((a, b) => b.popularity - a.popularity)[0];
 		const correct = mostPopularTrack.name === guess;
+		const score = correct ? 1 : 0;
 
 		// update user
-		await updateUser(correct, answer.get('user_id') as string);
+		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
 
 		const data = await getGenreWithLevelForItem(answer.get('user_id') as string);
+		console.log(data);
 		if (data) {
 			cookies.set('genre', data.genre, {
 				path: '/'
@@ -115,25 +125,4 @@ export const actions = {
 			return fail(200, { false: null, correct: mostPopularTrack.name });
 		}
 	}
-};
-
-const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'users', user_id);
-	const userDoc = await getDoc(userRef);
-	if (!userDoc.exists()) return;
-
-	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
-
-	await setDoc(
-		userRef,
-		{
-			stats: {
-				correct: newCorrect,
-				incorrect: newIncorrect
-			}
-		},
-		{ merge: true }
-	);
 };
