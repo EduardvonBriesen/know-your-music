@@ -70,9 +70,10 @@
 	];
 </script>
 
-<LineChart {data} {options} />
+
 <div class="flex place-content-center">
-	<div class="card p-4 w-2/3 text-token space-4 m-10">
+	<div class="card p-4 w-2/3 text-token space-4 m-10 grid">
+		<LineChart {data} {options} />
 		<ConicGradient width="w-48" stops={conicStops} legend>Your Scores</ConicGradient>
 	</div>
 </div>
