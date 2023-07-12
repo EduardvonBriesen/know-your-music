@@ -93,7 +93,6 @@ export const actions = {
 		// check if answer is correct
 		// filter out empty strings
 		const answer = response.getAll('answer').filter((answer) => answer !== '')[0] as string;
-		console.log('formData', answer);
 
 		const correctAnswer = LevenshteinDistance(answer.toLowerCase(), artistName.toLowerCase()) < 3;
 
@@ -107,7 +106,7 @@ export const actions = {
 		if (spotifyId) {
 			const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
 			if ('error' in spotifyArtist) return ''; // TODO: fallback image
-			artistImage = spotifyArtist.images[0].url;
+			artistImage = spotifyArtist.image;
 		}
 
 		let artistBio = artist.artist.bio.summary;

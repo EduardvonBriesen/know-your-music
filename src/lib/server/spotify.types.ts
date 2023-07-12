@@ -13,17 +13,13 @@ export type Track = {
 export type Artist = {
 	id: string;
 	name: string;
-	images: {
-		url: string;
-	}[];
+	image: string;
 };
 
 export type Album = {
 	id: string;
 	name: string;
-	images: {
-		url: string;
-	}[];
+	image: string;
 	release_date: string;
 };
 

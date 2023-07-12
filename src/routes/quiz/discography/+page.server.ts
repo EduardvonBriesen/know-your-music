@@ -44,32 +44,31 @@ export const load = async ({ cookies }) => {
 
 	const spotifyArtist = await getArtist(spotifyToken, spotifyId);
 	if ('error' in spotifyArtist) return { error: "Couldn't get artist" };
-	const artistImage = spotifyArtist.images[0].url;
+	const artistImage = spotifyArtist.image;
 
 	let albums: string[] | Album[] = [];
 	if (!albumIds) {
 		const artistAlbums = await getArtistAlbums(spotifyToken, spotifyArtist.id);
 		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
 
-		// FIlter out any names that contain the name of another album (gets rid of deluxe editions, etc.)
-		artistAlbums.items = artistAlbums.items.filter((album) => {
+		// Filter out any names that contain the name of another album (gets rid of deluxe editions, etc.)
+		const filteredAlbums = artistAlbums.filter((album) => {
 			const albumName = album.name.toLowerCase();
-			return !artistAlbums.items.some((otherAlbum) => {
+			return !artistAlbums.some((otherAlbum) => {
 				const otherAlbumName = otherAlbum.name.toLowerCase();
 				return albumName.includes(otherAlbumName) && albumName !== otherAlbumName;
 			});
 		});
 
 		// get random albums
-		artistAlbums.items.sort(() => Math.random() - 0.5);
-
-		albums = artistAlbums.items.slice(0, numberOfAlbums);
+		filteredAlbums.sort(() => Math.random() - 0.5);
+		albums = filteredAlbums.slice(0, numberOfAlbums);
 	} else {
 		// get albums from cookie
 		const artistAlbums = await getSeveralAlbums(spotifyToken, albumIds);
 		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
 
-		albums = artistAlbums.albums;
+		albums = artistAlbums;
 	}
 
 	// save quiz to cookie
@@ -95,7 +94,7 @@ export const load = async ({ cookies }) => {
 		albums: albums.map((album) => ({
 			id: album.id,
 			name: album.name,
-			image: album.images[0].url
+			image: album.image
 		}))
 	};
 };
@@ -111,11 +110,11 @@ export const actions = {
 		const submittedOrder: string[] = JSON.parse(response.get('answer') as string) || '';
 
 		// get album data in correct order
-		const correctOrder = albums.albums
+		const correctOrder = albums
 			.map((album) => ({
 				id: album.id,
 				name: album.name,
-				image: album.images[0].url,
+				image: album.image,
 				release_date: album.release_date
 			}))
 			.sort((a, b) => a.release_date.localeCompare(b.release_date));

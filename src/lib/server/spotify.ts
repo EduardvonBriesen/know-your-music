@@ -2,6 +2,7 @@ import { VITE_SPOTIFY_CLIENT_ID, VITE_SPOTIFY_CLIENT_SECRET } from '$env/static/
 import type { Cookies } from '@sveltejs/kit';
 import type { Album, Artist, SpotifyError, Token, Track } from './spotify.types';
 import { redis } from './redis';
+import type { Genre } from '$lib/firebase/dataBase.types';
 
 const baseUrl = 'https://api.spotify.com/v1/';
 
@@ -49,15 +50,20 @@ export const getArtist = async (
 	});
 
 	const artist = await res.json();
-	redis.set(query, JSON.stringify(artist), 'EX', 60 * 60 * 24);
+	const filteredArtist: Artist = {
+		id: artist.id,
+		name: artist.name,
+		image: artist.images[0].url
+	};
+	redis.set(query, JSON.stringify(filteredArtist), 'EX', 60 * 60 * 24);
 
-	return artist;
+	return filteredArtist;
 };
 
 export const getArtistTopTracks = async (
 	token: string,
 	artist_id: string
-): Promise<{ tracks: Track[] } | SpotifyError> => {
+): Promise<Track[] | SpotifyError> => {
 	const query = 'spotify/artist/top-tracks' + artist_id;
 	const cached = await redis.get(query);
 
@@ -70,15 +76,20 @@ export const getArtistTopTracks = async (
 	});
 
 	const topTracks = await res.json();
-	redis.set(query, JSON.stringify(topTracks), 'EX', 60 * 60 * 24);
+	const filteredTracks: Track[] = topTracks.tracks.map((track: any) => ({
+		id: track.id,
+		name: track.name,
+		popularity: track.popularity
+	}));
+	redis.set(query, JSON.stringify(filteredTracks), 'EX', 60 * 60 * 24);
 
-	return topTracks;
+	return filteredTracks;
 };
 
 export const getRelatedArtists = async (
 	token: string,
 	artist_id: string
-): Promise<{ artists: Artist[] } | SpotifyError> => {
+): Promise<Artist[] | SpotifyError> => {
 	const query = 'spotify/artist/related-artists' + artist_id;
 	const cached = await redis.get(query);
 
@@ -91,15 +102,21 @@ export const getRelatedArtists = async (
 	});
 
 	const relatedArtists = await res.json();
-	redis.set(query, JSON.stringify(relatedArtists), 'EX', 60 * 60 * 24);
+	const filteredArtists: Artist[] = relatedArtists.artists.map((artist: any) => ({
+		id: artist.id,
+		name: artist.name,
+		image: artist.images[0].url
+	}));
 
-	return relatedArtists;
+	redis.set(query, JSON.stringify(filteredArtists), 'EX', 60 * 60 * 24);
+
+	return filteredArtists;
 };
 
 export const getTracks = async (
 	token: string,
 	track_ids: string[]
-): Promise<{ tracks: Track[] } | SpotifyError> => {
+): Promise<Track[] | SpotifyError> => {
 	// TODO: cache individual tracks
 	const query = 'spotify/tracks/' + JSON.stringify(track_ids);
 	const cached = await redis.get(query);
@@ -113,15 +130,20 @@ export const getTracks = async (
 	});
 
 	const tracks = await res.json();
-	redis.set(query, JSON.stringify(tracks), 'EX', 60 * 60 * 24);
+	const filteredTracks: Track[] = tracks.tracks.map((track: any) => ({
+		id: track.id,
+		name: track.name,
+		popularity: track.popularity
+	}));
+	redis.set(query, JSON.stringify(filteredTracks), 'EX', 60 * 60 * 24);
 
-	return await res.json();
+	return filteredTracks;
 };
 
 export const getArtistAlbums = async (
 	token: string,
 	artist_id: string
-): Promise<{ items: Album[] } | SpotifyError> => {
+): Promise<Album[] | SpotifyError> => {
 	const query = 'spotify/artist/albums' + artist_id;
 	const cached = await redis.get(query);
 
@@ -136,15 +158,22 @@ export const getArtistAlbums = async (
 	});
 
 	const albums = await res.json();
-	redis.set(query, JSON.stringify(albums), 'EX', 60 * 60 * 24);
+	const filteredAlbums: Album[] = albums.items.map((album: any) => ({
+		id: album.id,
+		name: album.name,
+		image: album.images[0].url,
+		release_date: album.release_date
+	}));
 
-	return albums;
+	redis.set(query, JSON.stringify(filteredAlbums), 'EX', 60 * 60 * 24);
+
+	return filteredAlbums;
 };
 
 export const getSeveralAlbums = async (
 	token: string,
 	album_ids: string[]
-): Promise<{ albums: Album[] } | SpotifyError> => {
+): Promise<Album[] | SpotifyError> => {
 	// TODO: cache individual albums
 	const query = 'spotify/albums/' + JSON.stringify(album_ids);
 	const cached = await redis.get(query);
@@ -158,7 +187,48 @@ export const getSeveralAlbums = async (
 	});
 
 	const albums = await res.json();
-	redis.set(query, JSON.stringify(albums), 'EX', 60 * 60 * 24);
+	const filteredAlbums: Album[] = albums.albums.map((album: any) => ({
+		id: album.id,
+		name: album.name,
+		image: album.images[0].url,
+		release_date: album.release_date
+	}));
 
-	return albums;
+	redis.set(query, JSON.stringify(filteredAlbums), 'EX', 60 * 60 * 24);
+
+	return filteredAlbums;
+};
+
+export const getArtistByGenre = async (
+	token: string,
+	genre: Genre,
+	limit = 20,
+	offset = 0
+): Promise<Artist[] | SpotifyError> => {
+	const query = 'spotify/artist/genre/' + genre + '/' + limit + '/' + offset;
+	const cached = await redis.get(query);
+
+	if (cached) return JSON.parse(cached);
+
+	const url = new URL(`${baseUrl}search`);
+	url.searchParams.append('q', 'genre:' + genre);
+	url.searchParams.append('type', 'artist');
+	url.searchParams.append('limit', limit.toString());
+	url.searchParams.append('offset', offset.toString());
+
+	const res = await fetch(url, {
+		headers: {
+			Authorization: 'Bearer  ' + token
+		}
+	});
+
+	const artists = await res.json();
+	const filteredArtist: Artist[] = artists.artists.items.map((artist: any) => ({
+		id: artist.id,
+		name: artist.name,
+		image: artist.images[0].url
+	}));
+	redis.set(query, JSON.stringify(filteredArtist), 'EX', 60 * 60 * 24);
+
+	return filteredArtist;
 };
