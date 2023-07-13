@@ -122,10 +122,7 @@
 						<a href="/stats">Stats</a>
 					</button>
 					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
-						<a href="/team">Team</a>
-					</button>
-					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
-						<a href="">About</a>
+						<a href="/about">About</a>
 					</button>
 				</nav>
 				<button

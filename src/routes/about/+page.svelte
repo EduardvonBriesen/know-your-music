@@ -23,8 +23,9 @@
 	</div>
 	<div class="flex justify-center">
 		<p class="h4 max-w-xl mx-8">
-			Nunc blandit posuere metus quis maximus. Proin eleifend elit purus, in tempus justo facilisis
-			finibus. 👋
+			We are a talented team fueled by our love for music. 
+			Know Your Music is an engaging quiz that expands your knowledge of the music world. 
+			Explore and expand your musical knowledge with ease, supported by our insightful learning analytics. 👋
 		</p>
 	</div>
 </section>
