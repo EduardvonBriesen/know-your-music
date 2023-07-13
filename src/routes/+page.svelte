@@ -1,4 +1,5 @@
 <script>
+	import RotatingTitle from '../components/RotatingTitle.svelte';
 </script>
 
 <svelte:head>
@@ -6,27 +7,14 @@
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section class="text-center">
-	<div
-		class="wrapper text-5xl sm:text-7xl 2xl:text-8xl font-bold justify-center mt-16 mb-6 h-14 sm:h-20 2xl:h-28"
-	>
-		<p>Know your</p>
-		<div class="words">
-			<span class="span_titel text-left text-[#775AFF]">music</span>
-			<span class="span_titel text-left text-[#00B487]">artist</span>
-			<span class="span_titel text-left text-[#FFC549]">band</span>
-			<span class="span_titel text-left text-[#F23F3A]">lyrics</span>
-			<span class="span_titel text-left text-[#775AFF]">music</span>
-		</div>
-	</div>
-	<div class="flex justify-center">
-		<p class="h4 max-w-xl mx-8">
-			Unleash your musical expertise through captivating quizzes, from discography to karaoke
-			challenges. Elevate your music knowledge and let your passion shine.
-		</p>
-	</div>
-	<button class="btn variant-filled-secondary btn-lg variant-filled m-8"> Start quiz </button>
-</section>
+<RotatingTitle 
+	preTitle="Know your"
+	rotatingWords={['music', 'artist', 'band', 'lyrics']}
+	description="Unleash your musical expertise through captivating quizzes, from discography to karaoke
+	challenges. Elevate your music knowledge and let your passion shine."
+	showButton={true}>
+</RotatingTitle>
+
 <div class="flex justify-center items-center">
 	<div class="m-6 my-24 w-2/3 max-w-7xl">
 		<h2 class="text-3xl font-bold">Our quizzes</h2>

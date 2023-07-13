@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import RotatingTitle from '../../components/RotatingTitle.svelte';
 
 	let showSecondImage = false;
 
@@ -8,27 +9,14 @@
 	}
 </script>
 
-<section class="text-center">
-	<div
-		class="wrapper text-5xl sm:text-7xl 2xl:text-8xl font-bold justify-center mt-16 mb-6 h-14 sm:h-20 2xl:h-28"
-	>
-		<p>We are</p>
-		<div class="words">
-			<span class="span_titel text-left text-[#775AFF]">students</span>
-			<span class="span_titel text-left text-[#00B487]">developers</span>
-			<span class="span_titel text-left text-[#FFC549]">designers</span>
-			<span class="span_titel text-left text-[#F23F3A]">creators</span>
-			<span class="span_titel text-left text-[#775AFF]">students</span>
-		</div>
-	</div>
-	<div class="flex justify-center">
-		<p class="h4 max-w-xl mx-8">
-			We are a talented team fueled by our love for music. 
-			Know Your Music is an engaging quiz that expands your knowledge of the music world. 
-			Explore and expand your musical knowledge with ease, supported by our insightful learning analytics. 👋
-		</p>
-	</div>
-</section>
+<RotatingTitle 
+	preTitle="We are"
+	rotatingWords={['students', 'developers', 'designers', 'creators']}
+	description="We are a talented team fueled by our love for music. 
+	Know Your Music is an engaging quiz that expands your knowledge of the music world. 
+	Explore and expand your musical knowledge with ease, supported by our insightful learning analytics. 👋"
+	showButton={false}>
+</RotatingTitle>
 
 <div class="flex justify-center items-center">
 	<div class="m-6 my-14 w-2/3 max-w-8xl">
