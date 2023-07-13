@@ -115,6 +115,11 @@
 									Discography
 								</ListBoxItem>
 							</a>
+							<a href="/quiz/lyrics">
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Discography">
+									Discography
+								</ListBoxItem>
+							</a>
 						</ListBox>
 						<div class="arrow bg-surface-100-800-token" />
 					</div>

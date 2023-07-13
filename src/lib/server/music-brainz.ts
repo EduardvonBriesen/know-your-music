@@ -1,7 +1,12 @@
 import { MusicBrainzApi } from 'musicbrainz-api';
+import { redis } from './redis';
 
 export const mbidToSpotifyId = async (mbid: string): Promise<string | undefined> => {
-	console.log('mbidToSpotifyId', mbid);
+	const query = 'music-brainz/mbid2spotify/' + mbid;
+	const cached = await redis.get(query);
+
+	if (cached) return cached;
+
 	const mbApi = new MusicBrainzApi({
 		appName: 'know your music',
 		appVersion: '0.1.0',
@@ -17,6 +22,8 @@ export const mbidToSpotifyId = async (mbid: string): Promise<string | undefined>
 	const spotifyUrl = spotifyRel.url?.resource;
 	if (!spotifyUrl) return;
 	const spotifyId = spotifyUrl.split('/').pop();
-	console.log('spotifyId', spotifyId);
+	if (!spotifyId) return;
+
+	redis.set(query, spotifyId, 'EX', 60 * 60 * 24);
 	return spotifyId;
 };
