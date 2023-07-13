@@ -91,10 +91,9 @@
 		</section>
 		{#if !!form}
 			<footer
-				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {form?.false ===
-				null
-					? 'bg-success-200'
-					: 'bg-error-200'}"
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
+				class:bg-success-200={!form?.false}
+				class:bg-error-200={form?.false}
 			>
 				<div class="flex justify-between items-center w-full p-6">
 					{#if form?.false === null}
@@ -103,9 +102,9 @@
 						<span class="w-3/4 font-bold text-error-500">{feedback}</span>
 					{/if}
 					<button
-						class="btn w-fit {form?.false === null
-							? 'variant-filled-success'
-							: 'variant-filled-error'}"
+						class="btn w-fit"
+						class:variant-filled-success={!form?.false}
+						class:variant-filled-error={form?.false}
 						on:click={() => window.location.reload()}>Continue</button
 					>
 				</div>

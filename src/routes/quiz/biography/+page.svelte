@@ -83,11 +83,9 @@
 				</p>
 			</section>
 			<footer
-				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
-					? ''
-					: form?.correct
-					? 'bg-success-200'
-					: 'bg-error-200'}"
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
+				class:bg-success-200={!!form && form?.correct}
+				class:bg-error-200={!!form && !form?.correct}
 			>
 				{#if !form}
 					{#if data.options && data.options.length > 0}
@@ -138,7 +136,9 @@
 							<span class="w-3/4 font-bold text-error-500">{feedback} {form?.artist}</span>
 						{/if}
 						<button
-							class="btn w-fit {form?.correct ? 'variant-filled-success' : 'variant-filled-error'}"
+							class="btn w-fit"
+							class:variant-filled-success={form?.correct}
+							class:variant-filled-error={!form?.correct}
 							type="button"
 							on:click={() => {
 								window.location.reload();
