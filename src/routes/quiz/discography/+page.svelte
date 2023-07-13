@@ -33,20 +33,51 @@
 	}
 
 	$: console.log(form);
+
+	$: feedback = '';
+
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
+
+	const negativeFeedback = ['Oups!', 'Wrong answer.', 'Not quite there.'];
+
+	$: {
+		if (form?.correct) {
+			feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+		} else {
+			feedback = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
+		}
+	}
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'top'
+	};
 </script>
 
 <div class="flex place-content-center">
-	<div class="card w-2/3 space-4 m-10 variant-glass-surface">
+	<div class="card w-2/3 text-token bg-surface-50 space-4 m-12">
 		<header class="card-header flex flex-col items-center">
 			<Avatar
+				class="m-2"
 				rounded="rounded-xl"
 				width="w-1/3"
-				cursor="cursor-pointer"
 				src={data.artist?.image}
 				alt={data.artist?.name}
 			/>
-			<h3 class="h3">{data.artist?.name}</h3>
-			<span class="text-center">In what order were these albums released?</span>
+			<h3 class="h3 font-bold">{data.artist?.name}</h3>
+			<div class="mt-6 flex items-center">
+				<span class="h4 mr-2">In what order were these albums released?</span>
+				<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
+					<span class="badge-icon variant-soft-surface"> i </span>
+				</div>
+				<div class="card p-2 variant-filled-surface" data-popup="popupHover">
+					<p class="text-sm">From oldest to newest, left to right</p>
+					<div class="arrow variant-filled-surface" />
+				</div>
+			</div>
 		</header>
 		<form
 			method="POST"
@@ -56,7 +87,7 @@
 			}}
 		>
 			<section
-				class="flex flex-row justify-evenly gap-4 p-4"
+				class="flex flex-row justify-center gap-4 p-6"
 				use:dndzone={{
 					items,
 					flipDurationMs,
@@ -92,21 +123,31 @@
 				{/each}
 			</section>
 
-			<footer class="card-footer flex flex-col items-center">
+			<footer
+				class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
+					? ''
+					: form?.correct
+					? 'bg-success-200'
+					: 'bg-error-200'}"
+			>
 				{#if !form}
-					<button class="btn variant-filled-primary w-fit" type="submit">Submit</button>
+					<div class="flex justify-center items-center w-full p-6">
+						<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
+					</div>
 				{:else}
-					<p class="text-center">
-						You scored <span class="text-primary-500">{form?.score}</span> out of
-						<span class="text-primary-500">{form?.result.size}</span> points!
-					</p>
-					<button
-						class="btn variant-filled-primary w-fit"
+					<div class="flex justify-between items-center w-full p-6">
+						<p class="text-center">
+							You scored <span class="text-primary-500">{form?.score}</span> out of
+							<span class="text-primary-500">{form?.result.size}</span> points!
+						</p>
+						<button
+						class="btn w-fit {form?.correct? 'variant-filled-success' : 'variant-filled-error'}"
 						type="button"
 						on:click={() => {
 							window.location.reload();
-						}}>Try Again</button
-					>
+						}}>Continue</button
+						>
+					</div>
 				{/if}
 			</footer>
 		</form>
