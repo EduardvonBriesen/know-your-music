@@ -5,10 +5,11 @@
     export let showButton: boolean;
 
     const colorClasses = [
-        'text-[#775AFF]',
-        'text-[#00B487]',
-        'text-[#FFC549]',
-        'text-[#F23F3A]',
+        'text-secondary-500',
+        'text-error-500',
+        'text-tertiary-500',
+        'text-success-500',
+        'text-secondary-500',
     ];
 </script>
   

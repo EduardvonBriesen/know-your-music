@@ -11,7 +11,7 @@
 
 <RotatingTitle 
 	preTitle="We are"
-	rotatingWords={['students', 'developers', 'designers', 'creators']}
+	rotatingWords={['students', 'developers', 'designers', 'creators', 'students']}
 	description="We are a talented team fueled by our love for music. 
 	Know Your Music is an engaging quiz that expands your knowledge of the music world. 
 	Explore and expand your musical knowledge with ease, supported by our insightful learning analytics. 👋"

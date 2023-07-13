@@ -9,7 +9,7 @@
 
 <RotatingTitle 
 	preTitle="Know your"
-	rotatingWords={['music', 'artist', 'band', 'lyrics']}
+	rotatingWords={['music', 'artist', 'band', 'lyrics', 'music']}
 	description="Unleash your musical expertise through captivating quizzes, from discography to karaoke
 	challenges. Elevate your music knowledge and let your passion shine."
 	showButton={true}>
