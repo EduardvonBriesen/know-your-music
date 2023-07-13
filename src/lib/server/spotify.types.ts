@@ -8,6 +8,7 @@ export type Track = {
 	id: string;
 	name: string;
 	popularity: number;
+	artist: string;
 };
 
 export type Artist = {

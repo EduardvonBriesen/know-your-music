@@ -1,11 +1,6 @@
 import type { Genre, Levels } from '$lib/firebase/dataBase.types';
 import { updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
-import {
-	getToken,
-	getArtistAlbums,
-	getSeveralAlbums,
-	getArtistByGenre
-} from '$lib/server/spotify';
+import { getToken, getArtistAlbums, getSeveralAlbums, getArtistByGenre } from '$lib/server/spotify';
 import type { Album } from '$lib/server/spotify.types';
 import { kendallRankCorrelation } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';

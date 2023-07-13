@@ -205,14 +205,33 @@ export const getArtistByGenre = async (
 	limit = 20,
 	offset = 0
 ): Promise<Artist[] | SpotifyError> => {
-	const query = 'spotify/artist/genre/' + genre + '/' + limit + '/' + offset;
+	return getItemByGenre(token, genre, 'artist', limit, offset) as Promise<Artist[] | SpotifyError>;
+};
+
+export const getTrackByGenre = async (
+	token: string,
+	genre: Genre,
+	limit = 20,
+	offset = 0
+): Promise<Track[] | SpotifyError> => {
+	return getItemByGenre(token, genre, 'track', limit, offset) as Promise<Track[] | SpotifyError>;
+};
+
+export const getItemByGenre = async (
+	token: string,
+	genre: Genre,
+	type: 'artist' | 'track' | 'album',
+	limit = 20,
+	offset = 0
+): Promise<Artist[] | Track[] | Album[] | SpotifyError> => {
+	const query = 'spotify/item/genre/' + genre + '/' + type + '/' + limit + '/' + offset;
 	const cached = await redis.get(query);
 
 	if (cached) return JSON.parse(cached);
 
 	const url = new URL(`${baseUrl}search`);
 	url.searchParams.append('q', 'genre:' + genre);
-	url.searchParams.append('type', 'artist');
+	url.searchParams.append('type', type);
 	url.searchParams.append('limit', limit.toString());
 	url.searchParams.append('offset', offset.toString());
 
@@ -222,13 +241,34 @@ export const getArtistByGenre = async (
 		}
 	});
 
-	const artists = await res.json();
-	const filteredArtist: Artist[] = artists.artists.items.map((artist: any) => ({
-		id: artist.id,
-		name: artist.name,
-		image: artist.images[0].url
-	}));
-	redis.set(query, JSON.stringify(filteredArtist), 'EX', 60 * 60 * 24);
+	const items = await res.json();
+	const filteredItems: Artist[] | Track[] | Album[] = items[type + 's'].items.map((item: any) => {
+		if (type === 'artist') {
+			return {
+				id: item.id,
+				name: item.name,
+				image: item.images[0].url
+			};
+		}
+		if (type === 'track') {
+			console.log(item);
+			return {
+				id: item.id,
+				name: item.name,
+				popularity: item.popularity,
+				artist: item.artists[0].name
+			};
+		}
+		if (type === 'album') {
+			return {
+				id: item.id,
+				name: item.name,
+				image: item.images[0].url,
+				release_date: item.release_date
+			};
+		}
+	});
+	redis.set(query, JSON.stringify(filteredItems), 'EX', 60 * 60 * 24);
 
-	return filteredArtist;
+	return filteredItems;
 };
