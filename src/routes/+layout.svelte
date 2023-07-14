@@ -10,8 +10,12 @@
 	import { authHandler, authStore } from '../store/store';
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
-	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 	import { addNewHistory, saveHistory, initDataStructure } from '../lib/firebase/dataBaseLoadings';
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import Blobs from '../components/Blobs.svelte';
+
+	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	onMount(() => {
 		const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -68,8 +72,6 @@
 		authHandler.logout();
 	};
 
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	let comboboxValue: string;
 
 	const popupCombobox: PopupSettings = {
@@ -82,12 +84,7 @@
 
 <AppShell>
 	<svelte:fragment slot="header">
-		<style>
-			.navbarr {
-				background-color: #ffffff;
-			}
-		</style>
-		<AppBar class="navbarr px-8 shadow-sm">
+		<AppBar class="px-8 shadow-sm bg-surface-50">
 			<svelte:fragment slot="lead">
 				<a class="text-[#775AFF] text-2xl font-bold" href="/">Know Your Music</a>
 			</svelte:fragment>
@@ -144,4 +141,5 @@
 	<main>
 		<slot />
 	</main>
+	<Blobs color="magenta" />
 </AppShell>
