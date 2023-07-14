@@ -1,18 +1,37 @@
+import type { Genre } from '$lib/firebase/dataBase.types';
+import { updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
 import { getSong } from '$lib/server/genius';
 import { redis } from '$lib/server/redis';
+import { getToken, getTrackByGenre } from '$lib/server/spotify';
 
 // TODO: difficulty levels
 // TODO: use random song
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('lyrics') || '{}');
+
 	const lineToGuess = parseInt(current_quiz?.lineToGuess || '2');
-	const query = current_quiz?.query || {
-		title: 'New York State of Mind',
-		artist: 'Nas',
+
+	const spotifyToken = await getToken(cookies);
+
+	let trackName = current_quiz?.track?.name;
+	let trackArtist = current_quiz?.track?.artist;
+
+	if (!current_quiz.track) {
+		const genre: Genre = cookies.get('genre') as Genre;
+		if (!genre) cookies.set('genre', 'rock', { path: '/' });
+
+		const tracks = await getTrackByGenre(spotifyToken, genre);
+		if ('error' in tracks) return { error: "Couldn't get track" };
+		const track = tracks[Math.floor(Math.random() * tracks.length)];
+		trackArtist = track.artist;
+		trackName = track.name;
+	}
+	const query = {
+		title: trackName,
+		artist: trackArtist,
 		optimizeQuery: true
 	};
-	let guessOptions = current_quiz?.options || [];
 
 	const { albumArt, lyrics, title } = await getSong(query);
 
@@ -20,6 +39,7 @@ export const load = async ({ cookies }) => {
 
 	const revealedLines = lines.slice(0, lineToGuess);
 
+	let guessOptions = current_quiz?.options || [];
 	if (guessOptions.length === 0) {
 		// TODO: can be improved
 		guessOptions = [
@@ -34,7 +54,10 @@ export const load = async ({ cookies }) => {
 		JSON.stringify({
 			lineToGuess,
 			options: guessOptions,
-			query
+			track: {
+				name: trackName,
+				artist: trackArtist
+			}
 		}),
 		{
 			path: '/'
@@ -54,12 +77,19 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	guess: async ({ cookies, request }) => {
 		const current_quiz = JSON.parse(cookies.get('lyrics') || '{}');
-		const lineToGuess = parseInt(current_quiz?.lineToGuess || '2');
-		const query = current_quiz?.query;
+		const lineToGuess = parseInt(current_quiz?.lineToGuess);
+		const track = current_quiz?.track;
+		const genre: Genre = cookies.get('genre') as Genre;
 
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
 		const user_id = answer.get('user_id') as string;
+
+		const query = {
+			title: track.name,
+			artist: track.artist,
+			optimizeQuery: true
+		};
 
 		const { lyrics } = await getSong(query);
 		const { lines } = deconstructLyrics(lyrics);
@@ -78,27 +108,17 @@ export const actions = {
 		progress.set(lineToGuess, result);
 		redis.set(user_id + '-lyrics', JSON.stringify(Array.from(progress.entries())));
 
-		// calculate user score as percentage of correct lines
-		const correctLines = Array.from(progress.values()).filter((line) => line).length;
-		const incorrectLines = Array.from(progress.values()).filter((line) => !line).length;
-		const score = Math.round((correctLines / (correctLines + incorrectLines)) * 100);
-
-		cookies.set(
-			'lyrics',
-			JSON.stringify({
-				lineToGuess: lineToGuess + 1,
-				options: [],
-				query
-			}),
-			{
-				path: '/'
-			}
-		);
-
 		let finished = false;
-
+		let score = 0;
 		if (lineToGuess >= lines.length - 1) {
+			// calculate user score as percentage of correct lines
+			const correctLines = Array.from(progress.values()).filter((line) => line).length;
+			const incorrectLines = Array.from(progress.values()).filter((line) => !line).length;
+			score = Math.round((correctLines / (correctLines + incorrectLines)) * 100) || 0;
 			redis.del(user_id + '-lyrics');
+
+			await updateUserProgressData(answer.get('user_id') as string, score / 100, genre, 'level2');
+
 			finished = true;
 		} else {
 			cookies.set(
@@ -106,7 +126,7 @@ export const actions = {
 				JSON.stringify({
 					lineToGuess: lineToGuess + 1,
 					options: [],
-					query
+					track
 				}),
 				{
 					path: '/'
@@ -117,7 +137,28 @@ export const actions = {
 		return {
 			finished,
 			result,
-			correctLine,
+			progress,
+			score
+		};
+	},
+	forfeit: async ({ request, cookies }) => {
+		const answer = await request.formData();
+		const user_id = answer.get('user_id') as string;
+		const genre: Genre = cookies.get('genre') as Genre;
+
+		const userProgress = await redis.get(user_id + '-lyrics');
+		const progress = new Map(JSON.parse(userProgress || '[]'));
+		redis.del(user_id + '-lyrics');
+
+		// calculate user score as percentage of correct lines
+		const correctLines = Array.from(progress.values()).filter((line) => line).length;
+		const incorrectLines = Array.from(progress.values()).filter((line) => !line).length;
+		const score = Math.round((correctLines / (correctLines + incorrectLines)) * 100) || 0;
+
+		await updateUserProgressData(answer.get('user_id') as string, score / 100, genre, 'level2');
+
+		return {
+			finished: true,
 			progress,
 			score
 		};
@@ -126,13 +167,7 @@ export const actions = {
 		cookies.set('lyrics', '', {
 			path: '/'
 		});
-
-		return {
-			finished: false,
-			result: false,
-			correctLine: '',
-			progress: new Map()
-		};
+		return;
 	}
 };
 

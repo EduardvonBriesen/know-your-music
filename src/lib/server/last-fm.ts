@@ -41,9 +41,11 @@ export const getArtistInfo = async (artist: string): Promise<ArtistInfo | lfmErr
 	const res = await fetch(url);
 
 	const artistInfo = await res.json();
-	redis.set(query, JSON.stringify(artistInfo), 'EX', 60 * 60 * 24);
+	const filteredArtistInfo = artistInfo.artist;
 
-	return artistInfo;
+	redis.set(query, JSON.stringify(filteredArtistInfo), 'EX', 60 * 60 * 24);
+
+	return filteredArtistInfo;
 };
 
 export const getRandomArtist = async (): Promise<ArtistInfo | lfmError> => {

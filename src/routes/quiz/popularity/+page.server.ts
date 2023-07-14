@@ -1,20 +1,31 @@
-import { db } from '$lib/firebase/firebase';
-import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { fail } from '@sveltejs/kit';
-import { getToken, getArtist as spotifyGetArtist } from '$lib/server/spotify';
-import { getRandomArtist, getTopTracks, getTrackInfo } from '$lib/server/last-fm';
-import { mbidToSpotifyId } from '$lib/server/music-brainz';
+import { getArtistByGenre, getArtistTopTracks, getToken, getTracks } from '$lib/server/spotify';
+import type { Genre, Levels } from '$lib/firebase/dataBase.types.js';
+import {
+	getGenreWithLevelForItem,
+	updateUserProgressData
+} from '$lib/firebase/dataBaseLoadings.js';
 
+// TODO: difficulty levels
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
+	const genre: Genre = cookies.get('genre') as Genre;
+	if (!genre) cookies.set('genre', 'rock', { path: '/' });
+	const level: Levels = cookies.get('level') as Levels;
+	if (!level) cookies.set('level', 'level1', { path: '/' });
 
 	let artistName = current_quiz?.artist?.name;
 	let artistId = current_quiz?.artist?.id;
+	let artistImage = current_quiz?.artist?.image;
 	let tracks = current_quiz?.tracks;
+
+	const spotifyToken = await getToken(cookies);
 
 	if (!current_quiz.artist) {
 		// get random artist
-		const artist = await getRandomArtist();
+		const artists = await getArtistByGenre(spotifyToken, genre);
+		if ('error' in artists) return { error: "Couldn't get artist" };
+		const artist = artists[Math.floor(Math.random() * artists.length)];
 
 		// assert that artist is valid
 		if ('error' in artist)
@@ -23,17 +34,18 @@ export const load = async ({ cookies }) => {
 			};
 
 		artistName = artist.name;
-		artistId = artist.mbid;
+		artistId = artist.id;
+		artistImage = artist.image;
 	}
 
 	if (!current_quiz.tracks) {
 		// get random top tracks
-		const topTracks = await getTopTracks(artistId);
+		const topTracks = await getArtistTopTracks(spotifyToken, artistId);
 		if ('error' in topTracks) return { error: "Couldn't get top track" };
-
-		const randomTracks = topTracks.toptracks.track?.sort(() => Math.random() - 0.5).slice(0, 3);
+		const randomTracks = topTracks.sort(() => Math.random() - 0.5).slice(0, 3);
 		tracks = randomTracks.map((track) => ({
-			name: track?.name
+			id: track.id,
+			name: track.name
 		}));
 
 		cookies.set(
@@ -41,7 +53,8 @@ export const load = async ({ cookies }) => {
 			JSON.stringify({
 				artist: {
 					id: artistId,
-					name: artistName
+					name: artistName,
+					image: artistImage
 				},
 				tracks: tracks
 			}),
@@ -49,15 +62,6 @@ export const load = async ({ cookies }) => {
 				path: '/'
 			}
 		);
-	}
-
-	let artistImage = '';
-	const spotifyToken = await getToken(cookies);
-	const spotifyId = await mbidToSpotifyId(artistId);
-	if (spotifyId) {
-		const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
-		if ('error' in spotifyArtist) return { error: "Couldn't get artist" };
-		artistImage = spotifyArtist.images[0].url;
 	}
 
 	return {
@@ -72,32 +76,40 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const current_quiz = JSON.parse(cookies.get('popularity') || '{}');
+		// TODO: hide this from the user
+		const genre: Genre = cookies.get('genre') as Genre;
+		const level: Levels = cookies.get('level') as Levels;
 
 		// evaluate answer
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
 
-		const tracks = current_quiz.tracks as { name: string }[];
-		const trackInfos = await Promise.all(
-			tracks.map(async (track) => {
-				const info = await getTrackInfo(track.name, current_quiz.artist.name);
-				if ('error' in info)
-					return {
-						name: track.name,
-						playcount: 0
-					};
-				return {
-					name: info.track?.name,
-					playcount: info.track?.playcount
-				};
-			})
+		const spotifyToken = await getToken(cookies);
+
+		const tracks = current_quiz.tracks as { id: string; name: string }[];
+		const trackInfos = await getTracks(
+			spotifyToken,
+			tracks.map((track) => track.id)
 		);
 
-		const mostPopularTrack = trackInfos.sort((a, b) => b.playcount - a.playcount)[0];
+		if ('error' in trackInfos) return fail(400, { error: 'Could not get track infos' });
+
+		const mostPopularTrack = trackInfos.sort((a, b) => b.popularity - a.popularity)[0];
 		const correct = mostPopularTrack.name === guess;
+		const score = correct ? 1 : 0;
 
 		// update user
-		await updateUser(correct, answer.get('user_id') as string);
+		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
+
+		const data = await getGenreWithLevelForItem(answer.get('user_id') as string);
+		if (data) {
+			cookies.set('genre', data.genre, {
+				path: '/'
+			});
+			cookies.set('level', data.level, {
+				path: '/'
+			});
+		}
 
 		// reset quiz
 		cookies.set('popularity', '', {
@@ -110,25 +122,4 @@ export const actions = {
 			return fail(200, { false: null, correct: mostPopularTrack.name });
 		}
 	}
-};
-
-const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'users', user_id);
-	const userDoc = await getDoc(userRef);
-	if (!userDoc.exists()) return;
-
-	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
-
-	await setDoc(
-		userRef,
-		{
-			stats: {
-				correct: newCorrect,
-				incorrect: newIncorrect
-			}
-		},
-		{ merge: true }
-	);
 };
