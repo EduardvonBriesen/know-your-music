@@ -113,8 +113,8 @@
 								</ListBoxItem>
 							</a>
 							<a href="/quiz/lyrics">
-								<ListBoxItem bind:group={comboboxValue} name="medium" value="Discography">
-									Discography
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Lyrics">
+									Lyrics
 								</ListBoxItem>
 							</a>
 						</ListBox>
@@ -141,5 +141,5 @@
 	<main>
 		<slot />
 	</main>
-	<Blobs color="magenta" />
+	<Blobs color="yellow" />
 </AppShell>
