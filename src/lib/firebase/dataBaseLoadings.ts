@@ -1,6 +1,10 @@
 import { doc, getDoc, updateDoc, type DocumentData, Firestore } from 'firebase/firestore';
 import { MAX_HISTORY_LENGTH } from './dataBase.types';
-import type { UserData, Genre, Levels, LevelData } from './dataBase.types';
+import type { UserData, Genre, Levels, LevelData, ItemTypes } from './dataBase.types';
+import {	WEIGHT_ITEM_QUESTIONS_HISTORY,
+			WEIGHT_ITEM_QUESTIONS_OVERALL,
+			WEIGHT_ITEM_SCORE_HISTORY,
+			WEIGHT_ITEM_SCORE_OVERALL} from './dataBase.types'
 import {
 	newHistoryArrayElement,
 	newSessionsArrayElement,
@@ -26,10 +30,13 @@ export const saveHistory = async (docName: string, db: Firestore) => {
 			// @ts-ignore: suppress implicit any errors
 			const duration = Math.round(date.valueOf() / 1000) - begin.seconds;
 			sessions[sessions.length - 1].duration = duration;
+			sessions[sessions.length - 1].final_score = data.progress.overall_score;
+			sessions[sessions.length - 1].final_history_score = data.progress.shortterm_overall_history.score;
 			history[history.length - 1].sessions = sessions;
 			const newAccumulateDuration = history[history.length - 1].accumulated_duration + duration;
 			history[history.length - 1].accumulated_duration = newAccumulateDuration;
 			const overAllDuration = docSnap.data().logs.overall_duration + duration;
+
 			await updateDoc(docRef, {
 				'logs.history': history,
 				'logs.overall_duration': overAllDuration
@@ -72,7 +79,8 @@ export const initDataStructure = (name: string, email: string) => {
 			shortterm_overall_history: {
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
-				list_of_scores:[]
+				list_of_scores:[],
+				score: 0
 			},//progress.shortterm_overall_history.current_index.list_of_scores
 			overall_questions: 0,
 			genre_scores: {
@@ -374,6 +382,7 @@ export const initDataStructure = (name: string, email: string) => {
 							begin: new Date(),
 							duration: 0,
 							final_score: 0,
+							final_history_score: 0
 						}
 					]
 				}
@@ -382,6 +391,47 @@ export const initDataStructure = (name: string, email: string) => {
 	};
 	return data;
 };
+
+
+export async function getNextItem(docName: string, db: Firestore){
+	const collectionsName = 'users';
+	const docRef = doc(db, collectionsName, docName);
+	const docSnap = await getDoc(docRef);
+	if (!docSnap.exists()) {
+		return;
+	}
+	const userData = docSnap.data() as UserData;
+	const items: ItemTypes[] = ['Biography', 'Discography','Popularity', 'Lyrics','Coverguess'];
+	const itemHistory = userData.progress.shortterm_itemtype_history.list_of_items;
+	const overall_questions = userData.progress.overall_questions;
+	const overall_score = userData.progress.overall_score;
+	const history_score = userData.progress.shortterm_overall_history.score;
+
+	let historyLength: number;
+	if (userData.progress.shortterm_genre_history.current_index === -1) {
+		historyLength = userData.progress.shortterm_genre_history.list_of_genre.length;
+	} else {
+		historyLength = MAX_HISTORY_LENGTH;
+	}
+
+	const weights: number[] = [];
+	for (const item in items){
+		const history_count = itemHistory.filter( (g) => g === item).length;
+		const item_data = userData.progress.itemtypes[item];
+		let weight =  history_count
+		if (overall_questions===0 || item_data.overallQuestions===0){
+			weight = Math.random();
+		}else{
+			weight = 
+			  WEIGHT_ITEM_QUESTIONS_OVERALL * item_data.overallQuestions/overall_questions 
+			+ WEIGHT_ITEM_QUESTIONS_HISTORY * history_count/historyLength
+			+ WEIGHT_ITEM_SCORE_OVERALL * item_data.overallScore/overall_score
+			+ WEIGHT_ITEM_SCORE_HISTORY * item_data.historyScore/history_score;	
+		}
+		weights.push(weight);
+	}
+	return items[weights.indexOf(Math.min(...weights))];
+}
 
 /**
  * Function to determine the genre with a level for the next quetsions
