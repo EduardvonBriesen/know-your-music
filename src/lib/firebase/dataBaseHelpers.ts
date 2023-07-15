@@ -6,7 +6,7 @@ import {
 	WEIGHT_SCORE_HISTORY,
 	WEIGHT_QUESTIONS_HISTORY
 } from './dataBase.types';
-import type { UserData, Genre, LevelData, GenreData, GenreScores } from './dataBase.types';
+import type { UserData, Genre, LevelData, GenreData, GenreScores, ItemTypes } from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {
 	const newHistory = {
@@ -15,7 +15,8 @@ export function newHistoryArrayElement(date: Date) {
 		sessions: [
 			{
 				begin: date,
-				duration: 0
+				duration: 0,
+				final_score: 0
 			}
 		]
 	};
@@ -25,7 +26,8 @@ export function newHistoryArrayElement(date: Date) {
 export function newSessionsArrayElement(date: Date) {
 	const newSession = {
 		begin: date,
-		duration: 0
+		duration: 0,
+		final_score: 0
 	};
 	return newSession;
 }
@@ -146,6 +148,67 @@ export function getUpdatedHistoryListOfGenres(
 		list_of_genre: newListOfGenre,
 		history_current_index: newIndex
 	};
+}
+
+export function getUpdatedHistoryListOfItems(
+	listOfItems: ItemTypes[],
+	index: number,
+	newItem: ItemTypes
+) {
+	const newListOfItems: ItemTypes[] = listOfItems;
+	let newIndex = 0;
+	if (index === -1) {
+		// lesser than MAX_HISTORY_LENGTH questions are answered
+		newListOfItems.push(newItem);
+		if (newListOfItems.length === MAX_HISTORY_LENGTH) {
+			newIndex = 0; //index 0 should be the oldest element
+		} else {
+			newIndex = -1; //still lesser than MAX_HISTORY_LENGTH questions answered
+		}
+	} else {
+		// MAX_HISTORY_LENGTH are already answered
+		newListOfItems[index] = newItem;
+		if (index === MAX_HISTORY_LENGTH - 1) {
+			newIndex = 0;
+		} else {
+			newIndex = index + 1;
+		}
+	}
+	return {
+		list_of_items: newListOfItems,
+		items_index: newIndex
+	};
+}
+
+export function getUpdatedItemtypeData(
+	newPoints: number,
+	oldItemScore: number,
+	oldItemScores: number[],
+	oldItemIndex: number,
+	itemQuestions: number,
+	MAX_ITEM_HISTORY_LENGTH: number
+){
+	const newItemScore:number = (oldItemScore*itemQuestions + newPoints)/(itemQuestions+1);
+	const newHistoryScores: number[] = oldItemScores;
+	let newIndex = -1;
+	if (oldItemIndex===-1){
+		newHistoryScores.push(newPoints);
+		if (newHistoryScores.length===MAX_ITEM_HISTORY_LENGTH){
+			newIndex = 0;
+		}
+	}else{
+		newHistoryScores[oldItemIndex] = newPoints;
+		newIndex = (oldItemIndex + 1)%MAX_ITEM_HISTORY_LENGTH;
+	}
+	
+	const newHistoryScore  = newHistoryScores.reduce((a, b) => a + b, 0) / newHistoryScores.length;
+	
+	return {
+		item_score: newItemScore,
+		item_history_score: newHistoryScore,
+		item_history_scores: newHistoryScores,
+		item_index: newIndex
+	}
 }
 
 export function getUpdatedScores(
