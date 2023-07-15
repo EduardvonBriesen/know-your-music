@@ -253,6 +253,69 @@ export const initDataStructure = (name: string, email: string) => {
 					overall_questions: 0
 				}
 			},
+			itemtypes:{
+				Biography: {
+					overallQuestions: 70,
+					overallScore: 0.56,
+					historyScore: 0.5,
+					historyScores: [0.8, 0.5, 1, 0, 1, 0.3, 0.3, 0.8, 0, 0.3],
+					index: 0
+				},
+				Discography:{
+					overallQuestions: 88,
+					overallScore: 0.33,
+					historyScore: 0.6,
+					historyScores: [1, 0.3, 0, 1, 1, 0.8, 0.3, 0.8, 0, 0.8],
+					index: 8
+				},
+				Popularity:{
+					overallQuestions: 65,
+					overallScore: 0.67,
+					historyScore: 0.64,
+					historyScores: [0.5, 0.3, 0, 1, 1, 0.3, 1, 0.8, 0.5, 1],
+					index: 5
+				},
+				Lyrics:{
+					overallQuestions: 77,
+					overallScore: 0.2,
+					historyScore: 0.55,
+					historyScores: [0.3, 1, 0, 0.8, 0.8, 0, 0.5, 0.8, 1, 0.3],
+					index: 7
+				},
+				Coverguess:{
+					overallQuestions: 90,
+					overallScore: 0.485,
+					historyScore: 0.55,
+					historyScores: [1, 1, 0.3, 0.5, 0.3, 0.8, 0, 0.3, 0.8, 0.5],
+					index: 0
+				},
+			},
+			shortterm_itemtype_history:{
+				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH,
+				current_index: 10,
+				list_of_items: [
+					'Biography',
+					'Coverguess',
+					'Lyrics',
+					'Lyrics',
+					'Popularity',
+					'Coverguess',
+					'Discography',
+					'Discography',
+					'Lyrics',
+					'Biography',
+					'Popularity',
+					'Biography',
+					'Lyrics',
+					'Popularity',
+					'Coverguess',
+					'Discography',
+					'Coverguess',
+					'Discography',
+					'Lyrics',
+					'Popularity'
+				]
+			},
 			shortterm_genre_history: {
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: 10, // index of the oldest element, if overall_questions<20 then index=-1
@@ -290,7 +353,8 @@ export const initDataStructure = (name: string, email: string) => {
 					sessions: [
 						{
 							begin: new Date(),
-							duration: 0
+							duration: 0,
+							final_score: 0
 						}
 					]
 				}

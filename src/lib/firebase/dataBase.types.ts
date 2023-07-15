@@ -31,6 +31,14 @@ export type UserData = {
 		music_periods: {
 			[period: string]: historyLevelData;
 		};
+		itemtypes: {
+			[item: string]: itemTypeData;
+		};
+		shortterm_itemtype_history:{
+			MAX_HISTORY_LENGTH: number;
+			current_index: number;
+			list_of_items: ItemTypes[];
+		};
 		shortterm_genre_history: {
 			MAX_HISTORY_LENGTH: number; // proposal =20
 			current_index: number; // index of the oldest element, if overall_questions<20 then index=-1
@@ -46,6 +54,7 @@ export type UserData = {
 			sessions: {
 				begin: Date;
 				duration: number;
+				final_score: number;
 			}[];
 		}[];
 	};
@@ -80,6 +89,14 @@ export type historyLevelData = LevelData & {
 	};
 };
 
+export type itemTypeData = {
+	overallQuestions: number;
+	overallScore: number;
+	historyScore: number;
+	historyScores: number[];
+	index: number;
+}
+
 export type GenreData = {
 	overallScore: number;
 	overallQuestions: number;
@@ -97,3 +114,5 @@ export type GenreScores = {
 	rap: number;
 	folk_music: number;
 };
+
+export type ItemTypes = 'Biography' | 'Discography' | 'Popularity' | 'Lyrics' | 'Coverguess' ;

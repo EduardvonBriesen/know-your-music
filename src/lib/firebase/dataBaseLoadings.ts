@@ -22,6 +22,8 @@ export const saveHistory = async (docName: string, db: Firestore) => {
 			const sessions = history[historyLength - 1].sessions;
 			const begin: Date = sessions[sessions.length - 1].begin;
 			const date = new Date();
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore: suppress implicit any errors
 			const duration = Math.round(date.valueOf() / 1000) - begin.seconds;
 			sessions[sessions.length - 1].duration = duration;
 			history[history.length - 1].sessions = sessions;
@@ -312,6 +314,48 @@ export const initDataStructure = (name: string, email: string) => {
 					overall_questions: 0
 				}
 			},
+			itemtypes:{
+				Biography: {
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				},
+				Discography:{
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				},
+				Popularity:{
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				},
+				Lyrics:{
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				},
+				Coverguess:{
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				},
+			},
+			shortterm_itemtype_history:{
+				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH,
+				current_index:-1,
+				list_of_items: []
+			},
 			shortterm_genre_history: {
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
@@ -328,7 +372,8 @@ export const initDataStructure = (name: string, email: string) => {
 					sessions: [
 						{
 							begin: new Date(),
-							duration: 0
+							duration: 0,
+							final_score: 0,
 						}
 					]
 				}
