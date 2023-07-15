@@ -41,7 +41,6 @@
 	}
 
 	function animate() {
-		console.log('animate');
 		orbs = orbs.map((orb) => {
 			return {
 				...orb,
