@@ -6,7 +6,7 @@ import {
 	WEIGHT_SCORE_HISTORY,
 	WEIGHT_QUESTIONS_HISTORY
 } from './dataBase.types';
-import type { UserData, Genre, LevelData, GenreData, GenreScores } from './dataBase.types';
+import type { UserData, Genre, LevelData, GenreData, GenreScores, Levels } from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {
 	const newHistory = {
@@ -44,8 +44,9 @@ export function getGenreForItemtype(data: UserData) {
 	} else {
 		historyLength = MAX_HISTORY_LENGTH;
 	}
-	for (const genre in genres) {
-		const genreData: GenreData = extractRelevantGenreData(data, genre as Genre);
+
+	genres.forEach((genre) => {
+		const genreData: GenreData = extractRelevantGenreData(data, genre);
 		if (genreData.overallQuestions === 0) {
 			// first question ever
 			score = Math.random();
@@ -64,7 +65,8 @@ export function getGenreForItemtype(data: UserData) {
 				0.1 * Math.random();
 		}
 		scores.push(score);
-	}
+	});
+
 	return genres[scores.indexOf(Math.min(...scores))];
 }
 
@@ -72,10 +74,10 @@ export function getGenreForItemtype(data: UserData) {
  * Function to determine the level of the next quetsions (of type genre)
  * @returns {string}
  */
-export function getLevelForGenre(genreLevelData: LevelData) {
-	const level1_score: number = genreLevelData.level1.correct / genreLevelData.level1.questions;
-	const level2_score: number = genreLevelData.level2.correct / genreLevelData.level2.questions;
-	const level3_score: number = genreLevelData.level3.correct / genreLevelData.level3.questions;
+export function getLevelForGenre(genreLevelData: LevelData): Levels {
+	const level1_score: number = genreLevelData.level1.correct / genreLevelData.level1.questions || 0;
+	const level2_score: number = genreLevelData.level2.correct / genreLevelData.level2.questions || 0;
+	const level3_score: number = genreLevelData.level3.correct / genreLevelData.level3.questions || 0;
 	const diff1_2: number = level1_score - level2_score;
 	const diff1_3: number = level1_score - level3_score;
 	const diff2_3: number = level2_score - level3_score;
@@ -87,13 +89,13 @@ export function getLevelForGenre(genreLevelData: LevelData) {
 		const scores: number[] = [];
 		scores.push(Math.random() + level1_score + diff1_2);
 		scores.push(Math.random() + level2_score - diff1_2);
-		return `level${scores.indexOf(Math.min(...scores)) + 1}`;
+		return `level${scores.indexOf(Math.min(...scores)) + 1}` as Levels;
 	} else {
 		const scores: number[] = [];
 		scores.push(0.3 * Math.random() + level1_score + 0.5 * diff1_2 + 0.3 * diff1_3);
 		scores.push(0.5 * Math.random() + level2_score - 0.5 * diff1_2 + 0.3 * diff2_3);
 		scores.push(Math.random() + level3_score - 0.3 * diff1_3 + 0.3 * diff2_3);
-		return `level${scores.indexOf(Math.min(...scores)) + 1}`;
+		return `level${scores.indexOf(Math.min(...scores)) + 1}` as Levels;
 	}
 }
 

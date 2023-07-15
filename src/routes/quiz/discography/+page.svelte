@@ -4,6 +4,8 @@
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store.js';
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
 
 	export let data;
 	export let form;
@@ -32,8 +34,6 @@
 		}
 	}
 
-	$: console.log(form);
-
 	$: feedback = '';
 
 	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
@@ -48,8 +48,6 @@
 		}
 	}
 
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	const popupHover: PopupSettings = {
 		event: 'hover',
 		target: 'popupHover',
