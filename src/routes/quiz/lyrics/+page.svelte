@@ -22,8 +22,6 @@
 	afterUpdate(() => {
 		scrollToBottom(element);
 	});
-
-	$: console.log(form);
 </script>
 
 <header class="card-header flex flex-col items-center">
@@ -39,17 +37,17 @@
 </header>
 <section class="p-4">
 	<div class="flex flex-col items-center overflow-y-auto max-h-64" bind:this={element}>
-		{#if data.sections[0]}
+		{#if data.sections && data.sections[0]}
 			<span class="text-center">{data.sections[0]}</span>
 			<br />
 		{/if}
-		{#each data.revealedLines as line, i}
+		{#each data.revealedLines ?? [] as line, i}
 			<span
 				class:text-primary-500={form?.progress.get(i)}
 				class:text-error-500={form?.progress.get(i) === false}
 				class="text-center">{line}</span
 			>
-			{#if data.sections[i + 1]}
+			{#if data.sections?.[i + 1]}
 				<br />
 				<span class="text-center">{data.sections[i + 1]}</span>
 				<br />
@@ -61,7 +59,7 @@
 	{#if !form || form?.finished === false}
 		<ProgressBar
 			class="my-8"
-			value={data.revealedLines.length}
+			value={data.revealedLines?.length ?? 0}
 			max={data.totalLines}
 			meter="bg-surface-400"
 			track="bg-surface-50"
@@ -84,6 +82,15 @@
 				{/each}
 			</div>
 		</form>
+		<form
+			action="?/forfeit"
+			method="POST"
+			use:enhance={({ formData }) => {
+				formData.set('user_id', user_id);
+			}}
+		>
+			<button class="btn mt-4 whitespace-pre-wrap variant-soft-error" type="submit">Give up</button>
+		</form>
 	{:else}
 		<ProgressBar
 			class="mt-8"
@@ -104,9 +111,8 @@
 				formData.set('user_id', user_id);
 			}}
 		>
-			<button
-				class="btn disabled:opacity-100 variant-filled-primary whitespace-pre-wrap"
-				type="submit">Try Again</button
+			<button class="btn mt-4 whitespace-pre-wrap variant-soft-success" type="submit"
+				>Play again</button
 			>
 		</form>
 	{/if}
