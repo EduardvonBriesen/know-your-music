@@ -4,12 +4,19 @@
 
 	export let color;
 
+	const amount = 8;
+	const speed = 0.004;
+	const frameTime = 100;
+	const radius = [200, 400];
+	const colorVariation = 20;
+
 	const bounds = {
 		top: 100,
 		left: 100,
 		width: 700,
 		height: 700
 	};
+
 	const noise = new Noise(Math.random());
 	let orbs: {
 		x: number;
@@ -21,15 +28,15 @@
 		hueShift: number;
 	}[] = [];
 
-	for (let i = 0; i < 8; i++) {
+	for (let i = 0; i < amount; i++) {
 		orbs.push({
 			x: Math.random() * bounds.width,
 			y: Math.random() * bounds.height,
 			xOff: Math.random() * 1000,
 			yOff: Math.random() * 1000,
-			r: Math.random() * 100 + 100,
+			r: Math.random() * (radius[1] - radius[0]) + radius[0],
 			color: color,
-			hueShift: Math.round((Math.random() - 0.5) * 4) * 20
+			hueShift: Math.round((Math.random() - 0.5) * 4) * colorVariation
 		});
 	}
 
@@ -40,15 +47,15 @@
 				...orb,
 				x: map(noise.simplex2(orb.xOff, orb.yOff), -1, 1, bounds.left, bounds.left + bounds.width),
 				y: map(noise.simplex2(orb.yOff, orb.xOff), -1, 1, bounds.top, bounds.top + bounds.height),
-				xOff: (orb.xOff + 0.01) % 10000,
-				yOff: (orb.yOff + 0.01) % 10000,
-				r: map(noise.simplex2(orb.xOff, orb.yOff), -1, 1, 200, 400)
+				xOff: (orb.xOff + speed) % 10000,
+				yOff: (orb.yOff + speed) % 10000,
+				r: map(noise.simplex2(orb.xOff, orb.yOff), -1, 1, radius[0], radius[1])
 			};
 		});
 		noise.seed(noise.seed());
 		setTimeout(() => {
 			animate();
-		}, 150);
+		}, frameTime);
 	}
 
 	onMount(() => {
@@ -72,7 +79,7 @@
       top: {orb.y + bounds.top}px;
       left: {orb.x + bounds.left}px;
       transform: translate(-50%, -50%);
-      filter: hue-rotate({orb.hueShift}deg) blur(40px);
+      filter: hue-rotate({orb.hueShift}deg) blur(50px);
       opacity: 0.5;
     "
 		/>

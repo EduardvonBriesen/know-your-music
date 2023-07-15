@@ -86,18 +86,15 @@
 	<svelte:fragment slot="header">
 		<AppBar class="px-8 shadow-sm bg-surface-50">
 			<svelte:fragment slot="lead">
-				<a class="text-[#775AFF] text-2xl font-bold" href="/">Know Your Music</a>
+				<a class="text-secondary-500 text-2xl font-bold" href="/">Know Your Music</a>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<nav>
-					<button
-						class="rounded-xl h-8 px-4 justify-between bg-[#ffffff] hover:bg-[#E9E9E9] duration-300"
-						use:popup={popupCombobox}
-					>
+					<button class="btn variant-filled-surface btn-sm" use:popup={popupCombobox}>
 						<span class="capitalize">{comboboxValue ?? 'Quiz'}</span>
 						<span>↓</span>
 					</button>
-					<div class="card shadow-xl bg-[#ffffff]" data-popup="popupCombobox">
+					<div class="card variant-filled-surface-50" data-popup="popupCombobox">
 						<ListBox rounded="rounded-none">
 							<a href="/quiz/popularity">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
@@ -118,22 +115,21 @@
 								</ListBoxItem>
 							</a>
 						</ListBox>
-						<div class="arrow bg-surface-100-800-token" />
 					</div>
-					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
+					<button class="btn variant-filled-surface btn-sm">
 						<a href="/stats">Stats</a>
 					</button>
-					<button class="rounded-xl h-8 px-4 bg-[#ffffff] hover:bg-[#E9E9E9] duration-300">
+					<button class="btn variant-filled-surface btn-sm">
 						<a href="/about">About</a>
 					</button>
+					<button
+						on:click={logout}
+						class="btn variant-filled-secondary btn-sm"
+						class:invisible={!$authStore.user.uid}
+					>
+						Logout
+					</button>
 				</nav>
-				<button
-					on:click={logout}
-					class="text-white rounded-xl h-8 px-4 bg-[#775AFF] hover:bg-[#6A4AFF] duration-300"
-					class:invisible={!$authStore.user.uid}
-				>
-					Logout
-				</button>
 			</svelte:fragment>
 		</AppBar>
 	</svelte:fragment>
@@ -141,5 +137,5 @@
 	<main>
 		<slot />
 	</main>
-	<Blobs color="yellow" />
+	<Blobs color="magenta" />
 </AppShell>
