@@ -21,7 +21,7 @@
 		hueShift: number;
 	}[] = [];
 
-	for (let i = 0; i < 5; i++) {
+	for (let i = 0; i < 8; i++) {
 		orbs.push({
 			x: Math.random() * bounds.width,
 			y: Math.random() * bounds.height,
@@ -34,18 +34,21 @@
 	}
 
 	function animate() {
+		console.log('animate');
 		orbs = orbs.map((orb) => {
 			return {
 				...orb,
 				x: map(noise.simplex2(orb.xOff, orb.yOff), -1, 1, bounds.left, bounds.left + bounds.width),
 				y: map(noise.simplex2(orb.yOff, orb.xOff), -1, 1, bounds.top, bounds.top + bounds.height),
-				xOff: (orb.xOff + 0.001) % 10000,
-				yOff: (orb.yOff + 0.001) % 10000,
+				xOff: (orb.xOff + 0.01) % 10000,
+				yOff: (orb.yOff + 0.01) % 10000,
 				r: map(noise.simplex2(orb.xOff, orb.yOff), -1, 1, 200, 400)
 			};
 		});
 		noise.seed(noise.seed());
-		requestAnimationFrame(animate);
+		setTimeout(() => {
+			animate();
+		}, 150);
 	}
 
 	onMount(() => {
