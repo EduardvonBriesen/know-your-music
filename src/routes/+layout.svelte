@@ -76,7 +76,10 @@
 				<a class="btn variant-soft" href="/quiz/biography">Bio Quiz</a>
 				<a class="btn variant-soft" href="/quiz/discography">Discography Quiz</a>
 				<a class="btn variant-soft" href="/quiz/lyrics">Lyrics Quiz</a>
-				<a class="btn variant-soft" href="/stats">Stats</a>
+				<a class="btn variant-soft" href="/stats/general">General</a>
+				<a class="btn variant-soft" href="/stats/history">History</a>
+				<a class="btn variant-soft" href="/stats/genres">Genres</a>
+				<a class="btn variant-soft" href="/stats/levels">Levels</a>
 			</nav>
 			<svelte:fragment slot="trail">
 				<button on:click={logout} class="btn variant-ghost" class:invisible={!$authStore.user.uid}>
