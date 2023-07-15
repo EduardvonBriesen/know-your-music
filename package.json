@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"crypto-js": "^4.1.1",
 		"firebase": "^9.22.1",
 		"jimp": "^0.22.8"
 	}

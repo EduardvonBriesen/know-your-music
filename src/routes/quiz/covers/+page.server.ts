@@ -9,6 +9,10 @@ import { read, MIME_JPEG } from 'jimp';
  
 const numberOfAlbums = 3;
 
+// definine player level
+// To Do: compare with stats?
+const playerLevel = 3;
+
 export const load = async ({ cookies }) => {
   const current_quiz = JSON.parse(cookies.get('covers') || '{}');
 
@@ -76,17 +80,25 @@ export const load = async ({ cookies }) => {
 
     albums = artistAlbums.albums;
 
-    // Setze den Namen des aktuellen Albums, falls er nicht bereits gespeichert ist
+    // set current album name if not already saved
     if (!currentAlbumName) {
       const currentAlbum = albums.find((album) => album.id === albumIds[0]);
       currentAlbumName = currentAlbum?.name;
     }
   }
-    // load and blurr the picture
+    // load and change the cover based on player's level
     const image = await read(albums[0].images[0].url);
-    image.blur(8); // blur level
-
-    // convert picture
+    if(Number(playerLevel) === 1) {
+      // black and white
+      image.greyscale(); 
+    } else if (Number(playerLevel) >= 3) {
+      // pixel picture
+      image.pixelate(10); 
+    } else {
+      image.blur(8); // blur level
+    }
+    
+       // convert picture
     const base64Image = await image.getBase64Async(MIME_JPEG);
 
     // save quiz to cookie
@@ -105,14 +117,29 @@ export const load = async ({ cookies }) => {
     }
   );
 
+  let blackAndWhiteImage = '';
+  let pixelatedImage = '';
+
+  if (Number(playerLevel) === 1) {
+    const blackAndWhiteImageJimp = await read(albums[0].images[0].url);
+    blackAndWhiteImageJimp.greyscale();
+    blackAndWhiteImage = await blackAndWhiteImageJimp.getBase64Async(MIME_JPEG);
+  } else if (Number(playerLevel) >= 3) {
+    const pixelatedImageJimp = await read(albums[0].images[0].url);
+    pixelatedImageJimp.pixelate(10);
+    pixelatedImage = await pixelatedImageJimp.getBase64Async(MIME_JPEG);
+  }
+
   return {
     albums: albums.map((album) => ({
       id: album.id,
       name: album.name,
       image: album.images[0].url // use normal album cover
     })),
-    blurredImage: base64Image, 
-    currentAlbumName // give back current album name
+    blurredImage: base64Image,
+    currentAlbumName, // give back current album name
+    blackAndWhiteImage, // give back black and white image
+    pixelatedImage // give back pixelated image
   };
 };
 
@@ -123,7 +150,6 @@ export const actions = {
 	  // evaluate answer
 	  const answer = await request.formData();
 	  const guess = answer.get('answer') as string;
-  
 	  const spotifyToken = await getToken(cookies);
 	  const albums = await getSeveralAlbums(spotifyToken, current_quiz.albums);
   
