@@ -135,7 +135,13 @@ export const actions = {
 		score = score < 0 ? 0 : score;
 
 		// update user stats
-		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
+		await updateUserProgressData(
+			response.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Discography'
+		);
 
 		cookies.set('discography', '', {
 			path: '/'
