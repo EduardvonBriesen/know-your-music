@@ -124,3 +124,7 @@ export type GenreScores = {
 };
 
 export type ItemTypes = 'Biography' | 'Discography' | 'Popularity' | 'Lyrics' | 'Coverguess' ;
+
+export type ScoreType = 'Overall' | 'History';
+
+export type ScoreHistoryType = 'Genre' | 'Itemtype' | 'Overall';
