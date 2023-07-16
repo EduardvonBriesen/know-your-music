@@ -2,6 +2,44 @@ import type { UserData } from './dataBase.types';
 
 const MAX_HISTORY_LENGTH = 20;
 
+type HistoryElement = {
+		date: string,
+		accumulated_duration: number;
+		sessions: SessionElement[];
+}
+
+type SessionElement = {
+	begin: Date;
+	duration: number;
+	final_score: number;
+	final_history_score: number;
+}
+
+
+const dates: Date[] = [
+	new Date("2022-06-01T00:00:00.000Z"),
+	new Date("2022-10-31T10:30:00"),
+
+]
+
+function generateRandomHistory():HistoryElement[]{
+	const history: HistoryElement[] = [];
+	for (const itr=0; itr<30;){
+		const date: Date = new Date("somethingToDo");
+		const accumulateDuration = 0;
+		const newSessions: SessionElement[] = [];
+
+		const newHistory: HistoryElement = {
+			date: date.toLocaleDateString(),
+			accumulated_duration: accumulateDuration,
+			sessions: newSessions
+		}
+		history.push(newHistory)
+	}
+	return history;
+
+}
+
 export const initDataStructure = (name: string, email: string) => {
 	const data: UserData = {
 		name: name,
@@ -350,6 +388,18 @@ export const initDataStructure = (name: string, email: string) => {
 			registered_since: new Date(),
 			overall_duration: 0,
 			history: [
+				{
+					date: new Date().toLocaleDateString(),
+					accumulated_duration: 0,
+					sessions: [
+						{
+							begin: new Date(),
+							duration: 0,
+							final_score: 0,
+							final_history_score: 0
+						}
+					]
+				},
 				{
 					date: new Date().toLocaleDateString(),
 					accumulated_duration: 0,
