@@ -1,9 +1,9 @@
-import type { Firestore } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import type { UserData, Genre, ScoreType, Levels, ScoreHistoryType, ItemTypes } from "./dataBase.types";
 import type {DonutChartOptions,ChartTabularData, RadarChartOptions, GaugeChartOptions, LineChartOptions, BarChartOptions } from '@carbon/charts-svelte';
+import { db } from './firebase';
 
-export async function getGenreQuestionsDonutChart(docName: string, db: Firestore){
+export async function getGenreQuestionsDonutChart(docName: string){
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -40,6 +40,7 @@ export async function getGenreQuestionsDonutChart(docName: string, db: Firestore
         }
     ];
 
+
     const options: DonutChartOptions = {
         "title": "Blub",
         "resizable": true,
@@ -54,7 +55,7 @@ export async function getGenreQuestionsDonutChart(docName: string, db: Firestore
     return {data, options};
 }
 
-export async function getGenreScoresOverallAndHistoryRadarChart(docName: string, db: Firestore){
+export async function getGenreScoresOverallAndHistoryRadarChart(docName: string){
     const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -140,7 +141,7 @@ export async function getGenreScoresOverallAndHistoryRadarChart(docName: string,
     return {data, options}
 }
 
-export async function getScoreGaugeChart(docName: string, db: Firestore, scoreType:ScoreType ){
+export async function getScoreGaugeChart(docName: string, scoreType:ScoreType ){
     const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -185,7 +186,7 @@ export async function getScoreGaugeChart(docName: string, db: Firestore, scoreTy
 
 }
 
-export async function getLevelGenreVerticalGroupedBarChart(docName: string, db: Firestore){
+export async function getLevelGenreVerticalGroupedBarChart(docName: string){
     const collectionsName = 'users';
     const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -231,7 +232,7 @@ export async function getLevelGenreVerticalGroupedBarChart(docName: string, db: 
 
 }
 
-export async function getScoresHistoryLineChart(docName: string, db: Firestore, type: ScoreHistoryType){
+export async function getScoresHistoryLineChart(docName: string, type: ScoreHistoryType){
     const collectionsName = 'users';
     const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
