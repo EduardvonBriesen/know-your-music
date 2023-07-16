@@ -8,22 +8,19 @@ export type Track = {
 	id: string;
 	name: string;
 	popularity: number;
+	artist: string;
 };
 
 export type Artist = {
 	id: string;
 	name: string;
-	images: {
-		url: string;
-	}[];
+	image: string;
 };
 
 export type Album = {
 	id: string;
 	name: string;
-	images: {
-		url: string;
-	}[];
+	image: string;
 	release_date: string;
 };
 

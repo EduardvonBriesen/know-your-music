@@ -15,6 +15,7 @@ import {
 	getUpdatedHistoryListOfItems,
 	getUpdatedItemtypeData
 } from './dataBaseHelpers';
+import { db } from './firebase';
 
 export const saveHistory = async (docName: string, db: Firestore) => {
 	const collectionsName = 'users';
@@ -439,7 +440,7 @@ export async function getNextItem(docName: string, db: Firestore){
  * Function to determine the genre with a level for the next quetsions
  * @returns {Genre, Levels} //delivers the configuration for a item type
  */
-export async function getGenreWithLevelForItem(docName: string, db: Firestore) {
+export async function getGenreWithLevelForItem(docName: string) {
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -459,7 +460,6 @@ export async function getGenreWithLevelForItem(docName: string, db: Firestore) {
 }
 
 export async function updateUserProgressData(
-	db: Firestore,
 	docName: string,
 	relativePoints: number,
 	genre: Genre,
