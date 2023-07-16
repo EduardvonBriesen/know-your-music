@@ -12,7 +12,7 @@ const numberOfAlbums = 3;
 
 // definine player level
 // To Do: compare with stats?
-const playerLevel = 1;
+const playerLevel = 3;
 
 export const load = async ({ cookies }) => {
   const current_quiz = JSON.parse(cookies.get('covers') || '{}');
