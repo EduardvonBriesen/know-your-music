@@ -113,11 +113,13 @@ export const actions = {
 		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
 		// update user stats
-		try {
-			await updateUserProgressData(response.get('user_id') as string, score, genre, level);
-		} catch (e) {
-			console.log(e);
-		}
+		await updateUserProgressData(
+			response.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Biography'
+		);
 
 		const data = await getGenreWithLevelForItem(response.get('user_id') as string);
 		if (data) {

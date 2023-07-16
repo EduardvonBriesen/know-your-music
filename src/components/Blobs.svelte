@@ -58,7 +58,7 @@
 	}
 
 	onMount(() => {
-		animate();
+		// animate();
 	});
 
 	// map a number from 1 range to another
