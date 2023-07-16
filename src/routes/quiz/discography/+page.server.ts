@@ -1,75 +1,62 @@
-import { db } from '$lib/firebase/firebase';
-import { getRandomArtist } from '$lib/server/last-fm';
-import { mbidToSpotifyId } from '$lib/server/music-brainz';
-import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/server/spotify';
+import type { Genre, Levels } from '$lib/firebase/dataBase.types';
+import { updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
+import { getToken, getArtistAlbums, getSeveralAlbums, getArtistByGenre } from '$lib/server/spotify';
 import type { Album } from '$lib/server/spotify.types';
 import { kendallRankCorrelation } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
-import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
-
-// This can be changed to adjust the difficulty of the quiz
-const numberOfAlbums = 3;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('discography') || '{}');
+	const genre: Genre = cookies.get('genre') as Genre;
+	if (!genre) cookies.set('genre', 'rock', { path: '/' });
+	const level: Levels = cookies.get('level') as Levels;
+	if (!level) cookies.set('level', 'level1', { path: '/' });
 
 	let artistName = current_quiz?.artist?.name;
 	let artistId = current_quiz?.artist?.id;
+	let artistImage = current_quiz?.artist?.image;
 	const albumIds = current_quiz?.albums;
 
+	const spotifyToken = await getToken(cookies);
 	if (!current_quiz.artist) {
 		// get random artist
-		const artist = await getRandomArtist();
+		const artists = await getArtistByGenre(spotifyToken, genre);
+		if ('error' in artists) return { error: "Couldn't get artist" };
+		const artist = artists[Math.floor(Math.random() * artists.length)];
 
 		// assert that artist is valid
-		if ('error' in artist)
-			return {
-				error: "Couldn't get artist"
-			};
+		if ('error' in artist) return { error: "Couldn't get artist" };
 
 		artistName = artist.name;
-		artistId = artist.mbid;
+		artistId = artist.id;
+		artistImage = artist.image;
 	}
-
-	const spotifyToken = await getToken(cookies);
-	let spotifyId;
-	try {
-		spotifyId = await mbidToSpotifyId(artistId);
-	} catch (e) {
-		console.log(e);
-		return { error: "Couldn't get Spotify ID" };
-	}
-
-	if (!spotifyId) return { error: "Couldn't get Spotify ID" };
-
-	const spotifyArtist = await getArtist(spotifyToken, spotifyId);
-	if ('error' in spotifyArtist) return { error: "Couldn't get artist" };
-	const artistImage = spotifyArtist.images[0].url;
 
 	let albums: string[] | Album[] = [];
 	if (!albumIds) {
-		const artistAlbums = await getArtistAlbums(spotifyToken, spotifyArtist.id);
+		const artistAlbums = await getArtistAlbums(spotifyToken, artistId);
 		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
 
-		// FIlter out any names that contain the name of another album (gets rid of deluxe editions, etc.)
-		artistAlbums.items = artistAlbums.items.filter((album) => {
+		// Filter out any names that contain the name of another album (gets rid of deluxe editions, etc.)
+		const filteredAlbums = artistAlbums.filter((album) => {
 			const albumName = album.name.toLowerCase();
-			return !artistAlbums.items.some((otherAlbum) => {
+			return !artistAlbums.some((otherAlbum) => {
 				const otherAlbumName = otherAlbum.name.toLowerCase();
 				return albumName.includes(otherAlbumName) && albumName !== otherAlbumName;
 			});
 		});
 
-		// get random albums
-		artistAlbums.items.sort(() => Math.random() - 0.5);
+		const numberOfAlbums = level === 'level1' ? 3 : level === 'level2' ? 4 : 5;
 
-		albums = artistAlbums.items.slice(0, numberOfAlbums);
+		// get random albums
+		filteredAlbums.sort(() => Math.random() - 0.5);
+		albums = filteredAlbums.slice(0, numberOfAlbums);
 	} else {
 		// get albums from cookie
 		const artistAlbums = await getSeveralAlbums(spotifyToken, albumIds);
 		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
 
-		albums = artistAlbums.albums;
+		albums = artistAlbums;
 	}
 
 	// save quiz to cookie
@@ -78,7 +65,8 @@ export const load = async ({ cookies }) => {
 		JSON.stringify({
 			artist: {
 				name: artistName,
-				id: artistId
+				id: artistId,
+				image: artistImage
 			},
 			albums: albums.map((album) => album.id)
 		}),
@@ -95,7 +83,7 @@ export const load = async ({ cookies }) => {
 		albums: albums.map((album) => ({
 			id: album.id,
 			name: album.name,
-			image: album.images[0].url
+			image: album.image
 		}))
 	};
 };
@@ -103,6 +91,9 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const albumIds = JSON.parse(cookies.get('discography') || '{}').albums;
+		// TODO: hide this from the user
+		const genre: Genre = cookies.get('genre') as Genre;
+		const level: Levels = cookies.get('level') as Levels;
 		const response = await request.formData();
 
 		const albums = await getSeveralAlbums(await getToken(cookies), albumIds);
@@ -111,11 +102,11 @@ export const actions = {
 		const submittedOrder: string[] = JSON.parse(response.get('answer') as string) || '';
 
 		// get album data in correct order
-		const correctOrder = albums.albums
+		const correctOrder = albums
 			.map((album) => ({
 				id: album.id,
 				name: album.name,
-				image: album.images[0].url,
+				image: album.image,
 				release_date: album.release_date
 			}))
 			.sort((a, b) => a.release_date.localeCompare(b.release_date));
@@ -141,14 +132,10 @@ export const actions = {
 			correctOrder.map((album, index) => index)
 		);
 
-		score = score < 0 ? 0 : score * numberOfAlbums;
-		score = Math.round(score);
+		score = score < 0 ? 0 : score;
 
 		// update user stats
-		updateUser(
-			[...result.values()].every((album) => album.correct),
-			response.get('user_id') as string
-		);
+		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
 
 		cookies.set('discography', '', {
 			path: '/'
@@ -159,25 +146,4 @@ export const actions = {
 			score
 		});
 	}
-};
-
-const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'users', user_id);
-	const userDoc = await getDoc(userRef);
-	if (!userDoc.exists()) return;
-
-	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
-
-	await setDoc(
-		userRef,
-		{
-			stats: {
-				correct: newCorrect,
-				incorrect: newIncorrect
-			}
-		},
-		{ merge: true }
-	);
 };

@@ -12,68 +12,109 @@
 	authStore.subscribe((store) => {
 		user_id = store.user.uid;
 	});
+
+	$: feedback = '';
+
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
+
+	const negativeFeedback = [
+		'Oups, the correct answer is ',
+		'Wrong answer. The correct answer is: ',
+		'Not quite there. The most popular track is: '
+	];
+
+	$: {
+		if (form?.false === null && form?.correct !== null) {
+			feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+		} else {
+			feedback =
+				negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
+		}
+	}
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'top'
+	};
 </script>
 
-<div class="flex place-content-center">
-	<div class="card p-4 w-2/3 variant-glass-surface space-4 m-10">
-		<header class="card-header flex flex-col items-center">
-			<Avatar
-				rounded="rounded-xl"
-				width="w-1/3"
-				cursor="cursor-pointer"
-				src={data.artist?.image}
-				alt={data.artist?.name}
-			/>
-			<h3 class="h3">{data.artist?.name}</h3>
-			<span class="text-center">Which of the following tracks is most popular?</span>
-		</header>
-		<section class="p-4">
-			<form
-				method="POST"
-				use:enhance={({ formData }) => {
-					formData.set('user_id', user_id);
-				}}
-			>
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-					{#each data.tracks ?? [] as track}
-						<button
-							class="btn disabled:opacity-100"
-							class:variant-filled-primary={form?.correct !== track.name &&
-								form?.false !== track.name}
-							class:variant-filled-success={form?.correct === track.name}
-							class:variant-filled-error={form?.false === track.name}
-							type="submit"
-							name="answer"
-							value={track.name}
-							disabled={!!form}
-						>
-							<span class="text-sm break-words whitespace-normal">{track.name}</span>
-						</button>
-					{/each}
-				</div>
-			</form>
-		</section>
-		{#if !!form}
-			<footer class="card-footer flex flex-col items-center">
-				{#if form?.false === null}
-					<span class="text-center">You chose correct!</span>
-				{:else if form?.false !== null}
-					<span class="text-center">You chose wrong!</span>
-				{/if}
-				<button class="btn variant-filled-primary w-fit" on:click={() => window.location.reload()}
-					>Play again</button
-				>
-			</footer>
-		{/if}
+<header class="card-header flex flex-col items-center">
+	<Avatar
+		class="m-2"
+		rounded="rounded-xl"
+		width="w-1/3"
+		src={data.artist?.image}
+		alt={data.artist?.name}
+	/>
+	<h3 class="h3 font-bold">{data.artist?.name}</h3>
+	<div class="h4 mt-6 mb-0 flex items-center">
+		<span class="mr-2">Which of the following tracks is most popular?</span>
+		<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
+			<span class="badge-icon variant-soft-surface"> i </span>
+		</div>
+		<div class="card p-2 variant-filled-surface" data-popup="popupHover">
+			<p class="text-sm">Popularity is measured by the number of streams</p>
+			<div class="arrow variant-filled-surface" />
+		</div>
 	</div>
-	{#if form?.false === null}
-		<div
-			style="position: absolute; left: 50%; top: 30%"
-			use:confetti={{
-				force: 0.7,
-				stageWidth: window.innerWidth,
-				stageHeight: window.innerHeight
-			}}
-		/>
-	{/if}
-</div>
+</header>
+<section class="p-6 pt-4">
+	<form
+		method="POST"
+		use:enhance={({ formData }) => {
+			formData.set('user_id', user_id);
+		}}
+	>
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+			{#each data.tracks ?? [] as track}
+				<button
+					class="btn btn-lg disabled:opacity-100"
+					class:variant-soft-surface={form?.correct !== track.name && form?.false !== track.name}
+					class:variant-filled-success={form?.correct === track.name}
+					class:variant-filled-error={form?.false === track.name}
+					type="submit"
+					name="answer"
+					value={track.name}
+					disabled={!!form}
+				>
+					<span class="text-sm break-words whitespace-normal">{track.name}</span>
+				</button>
+			{/each}
+		</div>
+	</form>
+</section>
+{#if !!form}
+	<footer
+		class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
+		class:bg-success-200={!form?.false}
+		class:bg-error-200={form?.false}
+	>
+		<div class="flex justify-between items-center w-full p-6">
+			{#if form?.false === null}
+				<span class="w-3/4 font-bold text-success-500">{feedback}</span>
+			{:else if form?.false !== null}
+				<span class="w-3/4 font-bold text-error-500">{feedback}</span>
+			{/if}
+			<button
+				class="btn w-fit"
+				class:variant-filled-success={!form?.false}
+				class:variant-filled-error={form?.false}
+				on:click={() => window.location.reload()}>Continue</button
+			>
+		</div>
+	</footer>
+{/if}
+
+{#if form?.false === null}
+	<div
+		style="position: absolute; left: 50%; top: 30%"
+		use:confetti={{
+			force: 0.7,
+			stageWidth: window.innerWidth,
+			stageHeight: window.innerHeight
+		}}
+	/>
+{/if}

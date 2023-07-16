@@ -1,16 +1,27 @@
+import type { Genre, Levels } from '$lib/firebase/dataBase.types';
+import { getGenreWithLevelForItem, updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
 import { db } from '$lib/firebase/firebase';
-import { getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
+import { getArtistInfo, getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
 import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
-import { getArtist as spotifyGetArtist, getToken } from '$lib/server/spotify';
+import {
+	getArtist as spotifyGetArtist,
+	getToken,
+	getArtistByGenre,
+	getArtist
+} from '$lib/server/spotify';
 import { LevenshteinDistance } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
-import { doc, getDoc, type DocumentData, setDoc } from 'firebase/firestore';
 
-// This can be changed to adjust the difficulty of the quiz
-const difficulty: 1 | 2 | 3 = 2;
+// TODO: let user adjust difficulty levels
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
+	const genre: Genre = cookies.get('genre') as Genre;
+	if (!genre) cookies.set('genre', 'rock', { path: '/' });
+	const level: Levels = cookies.get('level') as Levels;
+	if (!level) cookies.set('level', 'level1', { path: '/' });
+
+	const spotifyToken = await getToken(cookies);
 
 	let artistName = '';
 	let artistId = '';
@@ -19,24 +30,25 @@ export const load = async ({ cookies }) => {
 
 	if (!current_quiz.artist) {
 		// get random artist, check if bio is long enough
-		while (artistBio.length < 10) {
-			const artist = await getRandomArtist();
-			if ('error' in artist) return { error: "Couldn't get artist" };
-			artistName = artist.name;
-			artistId = artist.mbid;
-			const artistInfo = await getArtistInfoById(artistId);
-			if ('error' in artistInfo) return { error: "Couldn't get artist info" };
-			artistBio = artistInfo.artist?.bio?.summary || '';
+		const artists = await getArtistByGenre(spotifyToken, genre);
+		if ('error' in artists) return { error: "Couldn't get artist" };
 
-			if (difficulty === 1) {
-				const relatedArtists =
-					artistInfo.artist?.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
-				options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
-			}
+		const artist = artists[Math.floor(Math.random() * artists.length)];
+		artistName = artist.name;
+		artistId = artist.id;
 
-			if (difficulty === 3) {
-				artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
-			}
+		const artistInfo = await getArtistInfo(artistName);
+		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
+		artistBio = artistInfo.bio?.summary || '';
+
+		if (level === 'level1') {
+			const relatedArtists =
+				artistInfo.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
+			options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
+		}
+
+		if (level === 'level3') {
+			artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
 		}
 
 		cookies.set(
@@ -52,19 +64,19 @@ export const load = async ({ cookies }) => {
 	} else {
 		// get artist from cookie
 		artistId = current_quiz.artist;
-		const artist = await getArtistInfoById(artistId);
+		const artist = await getArtist(spotifyToken, artistId);
 		if ('error' in artist) return { error: "Couldn't get artist" };
-		artistName = artist.artist.name;
-		const artistInfo = await getArtistInfoById(artistId);
+		artistName = artist.name;
+		const artistInfo = await getArtistInfo(artistName);
 		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
-		artistBio = artistInfo.artist?.bio?.summary || '';
+		artistBio = artistInfo.bio?.summary || '';
 	}
 
 	const inputField = '<input />';
 	const blurredField = '<b class="blur">Asdfasdf</b>';
 
 	// obfuscate artist name
-	artistBio = artistBio.replaceAll(artistName, difficulty === 1 ? blurredField : inputField);
+	artistBio = artistBio.replaceAll(artistName, level === 'level1' ? blurredField : inputField);
 	// obfuscate substrings of artist name
 	artistName.split(' ').forEach((word) => {
 		if (word.length <= 3) return;
@@ -82,39 +94,41 @@ export const load = async ({ cookies }) => {
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const artistId = JSON.parse(cookies.get('biography') || '{}').artist;
+		const genre: Genre = cookies.get('genre') as Genre;
+		const level: Levels = cookies.get('level') as Levels;
+
 		const response = await request.formData();
+		const spotifyToken = await getToken(cookies);
 
-		console.log(response);
-
-		const artist = await getArtistInfoById(artistId);
-		if ('error' in artist) return fail(500, { error: "Couldn't get artist" });
-		const artistName = artist.artist.name;
+		const artist = await getArtist(spotifyToken, artistId);
+		if ('error' in artist) return { error: "Couldn't get artist" };
+		const artistInfo = await getArtistInfo(artist.name);
+		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
 
 		// check if answer is correct
 		// filter out empty strings
 		const answer = response.getAll('answer').filter((answer) => answer !== '')[0] as string;
-		console.log('formData', answer);
 
-		const correctAnswer = LevenshteinDistance(answer.toLowerCase(), artistName.toLowerCase()) < 3;
+		const correctAnswer = LevenshteinDistance(answer.toLowerCase(), artist.name.toLowerCase()) < 3;
+		const score = correctAnswer ? 1 : 0;
 
-		// update user stats
-		updateUser(correctAnswer, response.get('user_id') as string);
-
-		// get artist image
-		let artistImage = '';
-		const spotifyToken = await getToken(cookies);
-		const spotifyId = await mbidToSpotifyId(artistId);
-		if (spotifyId) {
-			const spotifyArtist = await spotifyGetArtist(spotifyToken, spotifyId);
-			if ('error' in spotifyArtist) return ''; // TODO: fallback image
-			artistImage = spotifyArtist.images[0].url;
-		}
-
-		let artistBio = artist.artist.bio.summary;
-
-		artistBio = artistBio.replaceAll(artistName, `<em>${artistName}</em>`);
+		let artistBio = artistInfo.bio.summary;
+		artistBio = artistBio.replaceAll(artist.name, `<em>${artist.name}</em>`);
 		// cut out anchor tags
 		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
+
+		// update user stats
+		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
+
+		const data = await getGenreWithLevelForItem(response.get('user_id') as string);
+		if (data) {
+			cookies.set('genre', data.genre, {
+				path: '/'
+			});
+			cookies.set('level', data.level, {
+				path: '/'
+			});
+		}
 
 		// reset quiz
 		cookies.set('biography', '', {
@@ -123,30 +137,9 @@ export const actions = {
 
 		return fail(200, {
 			correct: correctAnswer,
-			artist: artistName,
-			image: artistImage,
+			artist: artist.name,
+			image: artist.image,
 			bio: artistBio
 		});
 	}
-};
-
-const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'users', user_id);
-	const userDoc = await getDoc(userRef);
-	if (!userDoc.exists()) return;
-
-	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
-
-	await setDoc(
-		userRef,
-		{
-			stats: {
-				correct: newCorrect,
-				incorrect: newIncorrect
-			}
-		},
-		{ merge: true }
-	);
 };
