@@ -128,3 +128,5 @@ export type ItemTypes = 'Biography' | 'Discography' | 'Popularity' | 'Lyrics' | 
 export type ScoreType = 'Overall' | 'History';
 
 export type ScoreHistoryType = 'Genre' | 'Itemtype' | 'Overall';
+
+export type ItemGenreType = 'Genre' | 'Itemtype';
