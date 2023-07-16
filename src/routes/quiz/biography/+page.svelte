@@ -45,6 +45,7 @@
 </header>
 <form
 	method="POST"
+	action="?/guess"
 	use:enhance={({ formData }) => {
 		formData.set('user_id', user_id);
 	}}
@@ -76,16 +77,16 @@
 	>
 		{#if !form}
 			{#if data.options && data.options.length > 0}
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3 p-4">
 					{#each data.options as option}
 						<button
-							class="btn disabled:opacity-100 variant-filled-primary"
+							class="btn btn-lg variant-filled-secondary whitespace-pre-wrap"
 							type="submit"
 							name="answer"
 							value={option}
 							disabled={!!form}
 						>
-							<span class="text-sm line-clamp-1">{option}</span>
+							<span class="text-sm">{option}</span>
 						</button>
 					{/each}
 				</div>
@@ -99,10 +100,21 @@
 						autocomplete="off"
 					/>
 				{/if}
-				<div class="flex justify-center items-center w-full p-6">
-					<button class="btn variant-soft-surface w-fit" type="submit" disabled={guess.length < 1}
-						>Submit</button
+				<div class="flex justify-center items-center w-full p-6 gap-2">
+					<button
+						class="btn variant-filled-secondary w-fit"
+						type="submit"
+						disabled={guess.length < 1}>Submit</button
 					>
+					<form
+						action="?/hint"
+						method="POST"
+						use:enhance={({ formData }) => {
+							formData.set('user_id', user_id);
+						}}
+					>
+						<button class="btn variant-soft-secondary" type="submit"> Get Help </button>
+					</form>
 				</div>
 			{/if}
 		{:else}

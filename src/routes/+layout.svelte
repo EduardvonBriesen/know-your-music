@@ -119,6 +119,11 @@
 									Song
 								</ListBoxItem>
 							</a>
+							<a href="/quiz/covers">
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Covers">
+									Covers
+								</ListBoxItem>
+							</a>
 						</ListBox>
 					</div>
 					<button class="btn variant-filled-surface btn-sm">

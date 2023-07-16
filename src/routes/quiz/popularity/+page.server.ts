@@ -99,7 +99,13 @@ export const actions = {
 		const score = correct ? 1 : 0;
 
 		// update user
-		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
+		await updateUserProgressData(
+			answer.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Popularity'
+		);
 
 		const data = await getGenreWithLevelForItem(answer.get('user_id') as string);
 		if (data) {
