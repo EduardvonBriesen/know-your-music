@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { Avatar } from '@skeletonlabs/skeleton';
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { Avatar } from '@skeletonlabs/skeleton';
 
 	export let data;
 	export let form;
@@ -33,54 +31,41 @@
 				negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
 		}
 	}
-
-	const popupHover: PopupSettings = {
-		event: 'hover',
-		target: 'popupHover',
-		placement: 'top'
-	};
 </script>
 
 <header class="card-header flex flex-col items-center">
 	<Avatar
 		class="m-2"
 		rounded="rounded-xl"
-		width="w-1/3"
-		src={data.artist?.image}
-		alt={data.artist?.name}
+		width="w-2/3"
+		src={!!form ? form.cover : data.cover}
+		alt="cover"
 	/>
-	<h3 class="h3 font-bold">{data.artist?.name}</h3>
 	<div class="h4 mt-6 mb-0 flex items-center">
-		<span class="mr-2">Which of the following tracks is most popular?</span>
-		<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
-			<span class="badge-icon variant-soft-surface"> i </span>
-		</div>
-		<div class="card p-2 variant-filled-surface" data-popup="popupHover">
-			<p class="text-sm">Popularity is measured by the number of streams</p>
-			<div class="arrow variant-filled-surface" />
-		</div>
+		<span class="mr-2">Do you know the name of this album?</span>
 	</div>
 </header>
-<section class="p-6 pt-4">
+<section class="p-4">
 	<form
 		method="POST"
 		use:enhance={({ formData }) => {
 			formData.set('user_id', user_id);
 		}}
 	>
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-			{#each data.tracks ?? [] as track}
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			{#each data.albums ?? [] as albumItem}
 				<button
-					class="btn btn-lg disabled:opacity-100"
-					class:variant-soft-surface={form?.correct !== track.name && form?.false !== track.name}
-					class:variant-filled-success={form?.correct === track.name}
-					class:variant-filled-error={form?.false === track.name}
+					class="btn disabled:opacity-100"
+					class:variant-soft-surface={form?.correct !== albumItem.name &&
+						form?.false !== albumItem.name}
+					class:variant-filled-success={form?.correct === albumItem.name}
+					class:variant-filled-error={form?.false === albumItem.name}
 					type="submit"
 					name="answer"
-					value={track.name}
+					value={albumItem.name}
 					disabled={!!form}
 				>
-					<span class="text-sm break-words whitespace-normal">{track.name}</span>
+					<span class="text-sm break-words whitespace-normal">{albumItem.name}</span>
 				</button>
 			{/each}
 		</div>
@@ -107,7 +92,6 @@
 		</div>
 	</footer>
 {/if}
-
 {#if form?.false === null}
 	<div
 		style="position: absolute; left: 50%; top: 30%"
@@ -118,3 +102,11 @@
 		}}
 	/>
 {/if}
+
+<style>
+	.question {
+		font-size: 1.3rem;
+		margin-top: 1rem;
+		text-align: center;
+	}
+</style>

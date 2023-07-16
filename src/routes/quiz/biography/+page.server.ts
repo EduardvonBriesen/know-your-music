@@ -1,14 +1,7 @@
 import type { Genre, Levels } from '$lib/firebase/dataBase.types';
 import { getGenreWithLevelForItem, updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
-import { db } from '$lib/firebase/firebase';
-import { getArtistInfo, getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
-import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
-import {
-	getArtist as spotifyGetArtist,
-	getToken,
-	getArtistByGenre,
-	getArtist
-} from '$lib/server/spotify';
+import { getArtistInfo } from '$lib/server/last-fm';
+import { getToken, getArtistByGenre, getArtist } from '$lib/server/spotify';
 import { LevenshteinDistance } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
 
@@ -118,7 +111,13 @@ export const actions = {
 		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
 		// update user stats
-		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
+		await updateUserProgressData(
+			response.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Biography'
+		);
 
 		const data = await getGenreWithLevelForItem(response.get('user_id') as string);
 		if (data) {
