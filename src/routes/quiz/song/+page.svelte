@@ -33,10 +33,17 @@
 
 	import { Avatar, popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { onMount } from 'svelte';
 	const popupHover: PopupSettings = {
 		event: 'hover',
 		target: 'popupHover',
 		placement: 'top'
+	};
+
+	let start: number;
+
+	const startTimer = () => {
+		if (!start) start = Date.now();
 	};
 </script>
 
@@ -59,13 +66,20 @@
 			<div class="arrow variant-filled-surface" />
 		</div>
 	</div>
-	<audio src={data.trackPreview} controls controlslist="noplaybackrate nodownload" class="w-1/2" />
+	<audio
+		class="w-1/2"
+		src={data.trackPreview}
+		controls
+		controlslist="noplaybackrate nodownload"
+		on:play={startTimer}
+	/>
 </header>
 <section class="m-6">
 	<form
 		method="POST"
 		use:enhance={({ formData }) => {
 			formData.set('user_id', user_id);
+			formData.set('time', JSON.stringify(Date.now() - start));
 		}}
 	>
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -93,11 +107,15 @@
 		class:bg-error-200={form?.false}
 	>
 		<div class="flex justify-between items-center w-full p-6">
-			{#if form?.false === null}
-				<span class="w-3/4 font-bold text-success-500">{feedback}</span>
-			{:else if form?.false !== null}
-				<span class="w-3/4 font-bold text-error-500">{feedback}</span>
-			{/if}
+			<span
+				class="w-1/2 font-bold"
+				class:text-success-500={!form?.false}
+				class:text-error-500={form?.false}
+				>{feedback}
+				<br />
+				It took you only {form?.time} s
+			</span>
+
 			<button
 				class="btn w-fit"
 				class:variant-filled-success={!form?.false}

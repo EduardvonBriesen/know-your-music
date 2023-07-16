@@ -68,6 +68,10 @@ export const actions = {
 		// evaluate answer
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
+		let time = answer.get('time') as unknown as number;
+		time = Math.round(time / 10) / 100 || 0;
+
+		console.log(guess, time);
 
 		const spotifyToken = await getToken(cookies);
 
@@ -104,9 +108,19 @@ export const actions = {
 		});
 
 		if (!correct) {
-			return fail(400, { false: guess, correct: correctTrack.name, image: correctTrack.image });
+			return fail(400, {
+				false: guess,
+				correct: correctTrack.name,
+				image: correctTrack.image,
+				time
+			});
 		} else {
-			return fail(200, { false: null, correct: correctTrack.name, image: correctTrack.image });
+			return fail(200, {
+				false: null,
+				correct: correctTrack.name,
+				image: correctTrack.image,
+				time
+			});
 		}
 	}
 };
