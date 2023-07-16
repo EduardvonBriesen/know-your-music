@@ -2,9 +2,11 @@
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
+	import { Avatar, popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
 
-	export let data;
 	export let form;
+	export let data;
 
 	let user_id = '';
 
@@ -31,14 +33,18 @@
 		}
 	}
 
-	import { Avatar, popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { onMount } from 'svelte';
 	const popupHover: PopupSettings = {
 		event: 'hover',
 		target: 'popupHover',
 		placement: 'top'
 	};
+
+	let started = false;
+	$: {
+		if (form?.start) {
+			started = true;
+		}
+	}
 
 	let start: number;
 
@@ -57,7 +63,7 @@
 		alt={'cover'}
 	/>
 	<div class="h4 m-6 flex items-center">
-		<span class="mr-2">How fast can you guess this track?</span>
+		<span class="mr-2">How fast can you guess the track?</span>
 		<div class="[&>*]:pointer-events-none" use:popup={popupHover}>
 			<span class="badge-icon variant-soft-surface"> i </span>
 		</div>
@@ -66,41 +72,61 @@
 			<div class="arrow variant-filled-surface" />
 		</div>
 	</div>
-	<audio
-		class="w-1/2"
-		src={data.trackPreview}
-		controls
-		controlslist="noplaybackrate nodownload"
-		on:play={startTimer}
-	/>
+
+	{#if !started}
+		<form
+			method="POST"
+			action="?/start"
+			use:enhance={({ formData }) => {
+				formData.set('user_id', user_id);
+			}}
+		>
+			<button class="btn btn-lg variant-filled-surface">Start</button>
+		</form>
+	{/if}
+
+	{#if started}
+		<audio
+			class="w-1/2"
+			src={data.trackPreview}
+			controls
+			autoplay
+			controlslist="noplaybackrate nodownload"
+			on:play={startTimer}
+		/>
+	{/if}
 </header>
 <section class="m-6">
-	<form
-		method="POST"
-		use:enhance={({ formData }) => {
-			formData.set('user_id', user_id);
-			formData.set('time', JSON.stringify(Date.now() - start));
-		}}
-	>
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-			{#each data.options ?? [] as option}
-				<button
-					class="btn btn-lg disabled:opacity-100"
-					class:variant-soft-surface={form?.correct !== option.name && form?.false !== option.name}
-					class:variant-filled-success={form?.correct === option.name}
-					class:variant-filled-error={form?.false === option.name}
-					type="submit"
-					name="answer"
-					value={option.id}
-					disabled={!!form}
-				>
-					<span class="text-sm break-words whitespace-normal">{option.name}</span>
-				</button>
-			{/each}
-		</div>
-	</form>
+	{#if started}
+		<form
+			method="POST"
+			action="?/submit"
+			use:enhance={({ formData }) => {
+				formData.set('user_id', user_id);
+				formData.set('time', JSON.stringify(Date.now() - start));
+			}}
+		>
+			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+				{#each data.options ?? [] as option}
+					<button
+						class="btn btn-lg disabled:opacity-100"
+						class:variant-soft-surface={form?.correct !== option.name &&
+							form?.false !== option.name}
+						class:variant-filled-success={form?.correct === option.name}
+						class:variant-filled-error={form?.false === option.name}
+						type="submit"
+						name="answer"
+						value={option.id}
+						disabled={!!form && !!form.correct}
+					>
+						<span class="text-sm break-words whitespace-normal">{option.name}</span>
+					</button>
+				{/each}
+			</div>
+		</form>
+	{/if}
 </section>
-{#if !!form}
+{#if !!form && !!form.correct}
 	<footer
 		class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
 		class:bg-success-200={!form?.false}
@@ -108,12 +134,14 @@
 	>
 		<div class="flex justify-between items-center w-full p-6">
 			<span
-				class="w-1/2 font-bold"
+				class="w-3/4 font-bold"
 				class:text-success-500={!form?.false}
 				class:text-error-500={form?.false}
 				>{feedback}
-				<br />
-				It took you only {form?.time} s
+				{#if !form?.false}
+					<br />
+					It took you only {form?.time} s
+				{/if}
 			</span>
 
 			<button

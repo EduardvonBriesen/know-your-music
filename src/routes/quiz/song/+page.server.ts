@@ -5,6 +5,7 @@ import {
 	getGenreWithLevelForItem,
 	updateUserProgressData
 } from '$lib/firebase/dataBaseLoadings.js';
+import { redis } from '$lib/server/redis.js';
 
 // TODO: difficulty levels
 export const load = async ({ cookies }) => {
@@ -29,7 +30,6 @@ export const load = async ({ cookies }) => {
 			.sort(() => Math.random() - 0.5);
 		if (!filteredTracks.length) return { error: "Couldn't get track" };
 		const track = filteredTracks[0];
-		console.log(track);
 
 		trackId = track.id;
 		trackPreview = track.preview_url;
@@ -59,7 +59,15 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	start: async ({ request }) => {
+		const answer = await request.formData();
+		const userId = answer.get('user_id');
+		const query = 'song/' + userId;
+		await redis.set(query, Date.now(), 'EX', 60 * 60);
+
+		return fail(200, { start: true });
+	},
+	submit: async ({ request, cookies }) => {
 		const current_quiz = JSON.parse(cookies.get('song') || '{}');
 		// TODO: hide this from the user
 		const genre: Genre = cookies.get('genre') as Genre;
@@ -68,10 +76,18 @@ export const actions = {
 		// evaluate answer
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
-		let time = answer.get('time') as unknown as number;
-		time = Math.round(time / 10) / 100 || 0;
 
-		console.log(guess, time);
+		const clientTime = answer.get('time') as unknown as number;
+
+		const serverStart = await redis.get('song/' + answer.get('user_id'));
+		redis.del('song/' + answer.get('user_id'));
+		if (!serverStart) return fail(400, { error: 'Could not find server time' });
+		const serverTime = Date.now() - parseInt(serverStart);
+
+		const isSus = Math.abs(clientTime - serverTime) > 1000;
+
+		let time = isSus ? serverTime : clientTime;
+		time = Math.round(time / 100) / 10;
 
 		const spotifyToken = await getToken(cookies);
 
@@ -87,7 +103,9 @@ export const actions = {
 		if (!correctTrack) return fail(400, { error: 'Could not find correct track' });
 
 		const correct = correctTrack.id === guess;
-		const score = correct ? 1 : 0;
+
+		// get score based on time, correct answer always give 0.5 points
+		const score = correct ? Math.max(0, 1 - time / 10) : 0;
 
 		// update user
 		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
@@ -116,7 +134,7 @@ export const actions = {
 			});
 		} else {
 			return fail(200, {
-				false: null,
+				false: false,
 				correct: correctTrack.name,
 				image: correctTrack.image,
 				time
