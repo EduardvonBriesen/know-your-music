@@ -6,7 +6,7 @@ import {
 	WEIGHT_SCORE_HISTORY,
 	WEIGHT_QUESTIONS_HISTORY
 } from './dataBase.types';
-import type { UserData, Genre, LevelData, GenreData, GenreScores, ItemTypes } from './dataBase.types';
+import type { UserData, Genre, LevelData, GenreData, GenreScores, ItemTypes, Levels } from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {
 	const newHistory = {
