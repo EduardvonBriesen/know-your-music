@@ -22,6 +22,7 @@ export type Album = {
 	name: string;
 	image: string;
 	release_date: string;
+	album_type: string;
 };
 
 export type SpotifyError = {

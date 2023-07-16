@@ -1,171 +1,149 @@
-import { db } from '$lib/firebase/firebase';
-import { getRandomArtist } from '$lib/server/last-fm';
-import { mbidToSpotifyId } from '$lib/server/music-brainz';
-import { getToken, getArtist, getArtistAlbums, getSeveralAlbums } from '$lib/server/spotify';
-import type { Album } from '$lib/server/spotify.types';
+import type { Genre, Levels } from '$lib/firebase/dataBase.types';
+import { getToken, getSeveralAlbums, getArtistByGenre, getArtistAlbums } from '$lib/server/spotify';
 import { fail } from '@sveltejs/kit';
-import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { read, MIME_JPEG } from 'jimp';
 import CryptoJS from 'crypto-js';
-
-const numberOfAlbums = 3;
-
-// definine player level
-// To Do: compare with stats?
-const playerLevel = 3;
+import { getGenreWithLevelForItem, updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('covers') || '{}');
 
-	let artistName = current_quiz?.artist?.name;
-	let artistId = current_quiz?.artist?.id;
-	const albumIds = current_quiz?.albums;
-	let currentAlbumName = current_quiz?.currentAlbumName;
+	const genre: Genre = cookies.get('genre') as Genre;
+	if (!genre) cookies.set('genre', 'rock', { path: '/' });
+	const level: Levels = cookies.get('level') as Levels;
+	if (!level) cookies.set('level', 'level1', { path: '/' });
 
-	if (!current_quiz.artist) {
-		// get random artist
-		const artist = await getRandomArtist();
-
-		// assert that artist is valid
-		if ('error' in artist)
-			return {
-				error: "Couldn't get artist"
-			};
-
-		artistName = artist.name;
-		artistId = artist.mbid;
-	}
+	let albumIds = current_quiz?.albums;
+	let encryptedAlbumName = current_quiz?.encryptedAlbumName;
 
 	// get spotify token
 	const spotifyToken = await getToken(cookies);
-	let spotifyId;
-	try {
-		spotifyId = await mbidToSpotifyId(artistId);
-	} catch (e) {
-		console.log(e);
-		return { error: "Couldn't get Spotify ID" };
-	}
-
-	if (!spotifyId) return { error: "Couldn't get Spotify ID" };
-
-	// spotify get Artist
-	const spotifyArtist = await getArtist(spotifyToken, spotifyId);
-	if ('error' in spotifyArtist) return { error: "Couldn't get artist" };
-	const artistImage = spotifyArtist.images[0].url;
 
 	let albums = [];
+	let currentAlbumName = '';
+	let albumCover = '';
+
 	if (!albumIds) {
-		const artistAlbums = await getArtistAlbums(spotifyToken, spotifyArtist.id);
+		const artists = await getArtistByGenre(spotifyToken, genre);
+		if ('error' in artists) return { error: "Couldn't get artist" };
+		const artist = artists[Math.floor(Math.random() * artists.length)];
+
+		// get albums
+		const artistAlbums = await getArtistAlbums(spotifyToken, artist.id);
 		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
 
 		// Filter out any names that contain the name of another album (gets rid of deluxe editions, etc.)
-		artistAlbums.items = artistAlbums.items.filter((album) => {
-			const albumName = album.name.toLowerCase();
-			return !artistAlbums.items.some((otherAlbum) => {
-				const otherAlbumName = otherAlbum.name.toLowerCase();
-				return albumName.includes(otherAlbumName) && albumName !== otherAlbumName;
+		const filteredAlbums = artistAlbums
+			.filter((album) => album.album_type === 'album')
+			.filter((album) => {
+				const albumName = album.name.toLowerCase();
+				return !artistAlbums.some((otherAlbum) => {
+					const otherAlbumName = otherAlbum.name.toLowerCase();
+					return albumName.includes(otherAlbumName) && albumName !== otherAlbumName;
+				});
 			});
-		});
 
-		// get random albums
-		artistAlbums.items.sort(() => Math.random() - 0.5);
+		albums = filteredAlbums.sort(() => Math.random() - 0.5).slice(0, 3);
+		albumIds = albums.map((album) => album.id);
+		const currentAlbum = albums[Math.floor(Math.random() * albums.length)];
+		currentAlbumName = currentAlbum.name;
+		albumCover = currentAlbum.image;
 
-		albums = artistAlbums.items.slice(0, numberOfAlbums);
+		// Encrypt album name
+		encryptedAlbumName = CryptoJS.AES.encrypt(currentAlbumName, 'secret key 123').toString();
 
-		// set current album name
-		currentAlbumName = albums[0].name;
+		// save quiz to cookie
+		cookies.set(
+			'covers',
+			JSON.stringify({
+				albums: albumIds,
+				encryptedAlbumName // Save encrypted current album name in cookie
+			}),
+			{
+				path: '/'
+			}
+		);
 	} else {
 		// get albums from cookie
-		const artistAlbums = await getSeveralAlbums(spotifyToken, albumIds);
-		if ('error' in artistAlbums) return { error: "Couldn't get artist albums" };
+		const _albums = await getSeveralAlbums(spotifyToken, albumIds);
+		if ('error' in _albums) return { error: "Couldn't get artist albums" };
+		albums = _albums;
 
-		albums = artistAlbums.albums;
+		currentAlbumName = CryptoJS.AES.decrypt(encryptedAlbumName, 'secret key 123').toString(
+			CryptoJS.enc.Utf8
+		);
 
-		// set current album name if not already saved
-		if (!currentAlbumName) {
-			const currentAlbum = albums.find((album) => album.id === albumIds[0]);
-			currentAlbumName = currentAlbum?.name;
-		}
+		albumCover = albums.find((album) => album.name === currentAlbumName)?.image || '';
 	}
+
 	// load and change the cover based on player's level
-	const image = await read(albums[0].images[0].url);
-	if (Number(playerLevel) === 1) {
-		// black and white
-		image.greyscale();
-	} else if (Number(playerLevel) >= 3) {
-		// pixel picture
-		image.pixelate(10);
-	} else {
-		image.blur(8); // blur level
+	const image = await read(albumCover);
+
+	switch (level) {
+		case 'level1':
+			image.blur(8);
+			break;
+		case 'level2':
+			image.pixelate(50);
+			break;
+		case 'level3':
+			image.pixelate(50);
+			image.invert();
+			break;
+		default:
+			break;
 	}
 
-	// convert picture
-	const base64Image = await image.getBase64Async(MIME_JPEG);
-
-	// Encrypt album name
-	const encryptedAlbumName = CryptoJS.AES.encrypt(currentAlbumName, 'secret key 123').toString();
-
-	// save quiz to cookie
-	cookies.set(
-		'covers',
-		JSON.stringify({
-			artist: {
-				name: artistName,
-				id: artistId
-			},
-			albums: albums.map((album) => album.id),
-			currentAlbumName: encryptedAlbumName // Save encrypted current album name in cookie
-		}),
-		{
-			path: '/'
-		}
-	);
-
-	let blackAndWhiteImage = '';
-	let pixelatedImage = '';
-
-	if (Number(playerLevel) === 1) {
-		const blackAndWhiteImageJimp = await read(albums[0].images[0].url);
-		blackAndWhiteImageJimp.greyscale();
-		blackAndWhiteImage = await blackAndWhiteImageJimp.getBase64Async(MIME_JPEG);
-	} else if (Number(playerLevel) >= 3) {
-		const pixelatedImageJimp = await read(albums[0].images[0].url);
-		pixelatedImageJimp.pixelate(15);
-		pixelatedImage = await pixelatedImageJimp.getBase64Async(MIME_JPEG);
-	}
+	const encryptedCover = await image.getBase64Async(MIME_JPEG);
 
 	return {
 		albums: albums.map((album) => ({
 			id: album.id,
-			name: album.name,
-			image: album.images[0].url // use normal album cover
+			name: album.name
 		})),
-		blurredImage: base64Image,
-		currentAlbumName, // give back current album name
-		blackAndWhiteImage, // give back black and white image
-		pixelatedImage // give back pixelated image
+		cover: encryptedCover
 	};
 };
 
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const current_quiz = JSON.parse(cookies.get('covers') || '{}');
+		const encryptedAlbumName = current_quiz?.encryptedAlbumName;
+		const albumIds = current_quiz?.albums;
+		const genre: Genre = cookies.get('genre') as Genre;
+		const level: Levels = cookies.get('level') as Levels;
 
 		// Decrypt album name
-		const decryptedAlbumName = CryptoJS.AES.decrypt(
-			current_quiz.currentAlbumName,
-			'secret key 123'
-		).toString(CryptoJS.enc.Utf8);
+		const decryptedAlbumName = CryptoJS.AES.decrypt(encryptedAlbumName, 'secret key 123').toString(
+			CryptoJS.enc.Utf8
+		);
+
+		const spotifyToken = await getToken(cookies);
+		const albums = await getSeveralAlbums(spotifyToken, albumIds);
+		if ('error' in albums) return { error: "Couldn't get artist albums" };
+		const albumCover = albums.find((album) => album.name === decryptedAlbumName)?.image || '';
 
 		// evaluate answer
 		const answer = await request.formData();
 		const guess = answer.get('answer') as string;
+		const user_id = answer.get('user_id') as string;
 
 		// compare answers
 		const isCorrect = decryptedAlbumName === guess;
+		const score = isCorrect ? 1 : 0;
 
 		// update user
-		await updateUser(isCorrect, answer.get('user_id') as string);
+		await updateUserProgressData(user_id, score, genre, level, 'Coverguess');
+
+		const data = await getGenreWithLevelForItem(user_id);
+		if (data) {
+			cookies.set('genre', data.genre, {
+				path: '/'
+			});
+			cookies.set('level', data.level, {
+				path: '/'
+			});
+		}
 
 		// reset quiz
 		cookies.set('covers', '', {
@@ -173,30 +151,9 @@ export const actions = {
 		});
 
 		if (!isCorrect) {
-			return fail(400, { false: guess, correct: decryptedAlbumName });
+			return fail(400, { false: guess, correct: decryptedAlbumName, cover: albumCover });
 		} else {
-			return fail(200, { false: null, correct: decryptedAlbumName });
+			return fail(200, { false: null, correct: decryptedAlbumName, cover: albumCover });
 		}
 	}
-};
-
-const updateUser = async (correct: boolean, user_id: string) => {
-	const userRef = doc(db, 'users', user_id);
-	const userDoc = await getDoc(userRef);
-	if (!userDoc.exists()) return;
-
-	const userData = userDoc.data() as DocumentData;
-	const newCorrect = (userData.stats?.correct || 0) + (correct ? 1 : 0);
-	const newIncorrect = (userData.stats?.incorrect || 0) + (correct ? 0 : 1);
-
-	await setDoc(
-		userRef,
-		{
-			stats: {
-				correct: newCorrect,
-				incorrect: newIncorrect
-			}
-		},
-		{ merge: true }
-	);
 };

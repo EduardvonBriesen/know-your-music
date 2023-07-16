@@ -3,6 +3,8 @@
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
 
 	export let data;
 	export let form;
@@ -13,7 +15,7 @@
 		user_id = store.user.uid;
 	});
 
-	$: feedback = '';
+	let feedback = '';
 
 	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
 
@@ -32,8 +34,6 @@
 		}
 	}
 
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	const popupHover: PopupSettings = {
 		event: 'hover',
 		target: 'popupHover',

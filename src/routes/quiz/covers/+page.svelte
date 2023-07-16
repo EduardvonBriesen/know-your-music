@@ -2,7 +2,7 @@
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
-	import { onMount } from 'svelte';
+	import { Avatar } from '@skeletonlabs/skeleton';
 
 	export let data;
 	export let form;
@@ -13,90 +13,94 @@
 		user_id = store.user.uid;
 	});
 
-	let playerLevel = 0;
-	onMount(async () => {
-		// ask player level from back end
-		const response = await fetch('/api/player-level');
-		const { level } = await response.json();
-		playerLevel = level;
-	});
+	let feedback = '';
+
+	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
+
+	const negativeFeedback = [
+		'Oups, the correct answer is ',
+		'Wrong answer. The correct answer is: ',
+		'Not quite there. The most popular track is: '
+	];
+
+	$: {
+		if (form?.false === null && form?.correct !== null) {
+			feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+		} else {
+			feedback =
+				negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
+		}
+	}
 </script>
 
-{#if data && data.albums && data.albums.length > 0}
-	<div class="flex place-content-center">
-		<div class="card w-2/3 space-4 m-10 variant-glass-surface">
-			<header class="flex felx-col items-center justify-center p-8">
-				{#if playerLevel === 1}
-					<img
-						class="w-1/2 aspect-square rounded-xl album-cover p-"
-						src={data.blackAndWhiteImage}
-						alt={data.currentAlbumName}
-					/>
-				{:else if playerLevel >= 3}
-					<img
-						class="w-1/2 aspect-square rounded-xl album-cover p-"
-						src={data.pixelatedImage}
-						alt={data.currentAlbumName}
-					/>
-				{:else}
-					<img
-						class="w-1/2 aspect-square rounded-xl album-cover p-"
-						src={data.blurredImage}
-						alt={data.currentAlbumName}
-					/>
-				{/if}
-			</header>
-			<section class="p-4">
-				<p class="question">Choose the right album cover!</p>
-				<form
-					method="POST"
-					use:enhance={({ formData }) => {
-						formData.set('user_id', user_id);
-					}}
-				>
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-						{#each data.albums ?? [] as albumItem}
-							<button
-								class="btn disabled:opacity-100"
-								class:variant-filled-primary={form?.correct !== albumItem.name &&
-									form?.false !== albumItem.name}
-								class:variant-filled-success={form?.correct === albumItem.name}
-								class:variant-filled-error={form?.false === albumItem.name}
-								type="submit"
-								name="answer"
-								value={albumItem.name}
-								disabled={!!form}
-							>
-								<span class="text-sm break-words whitespace-normal">{albumItem.name}</span>
-							</button>
-						{/each}
-					</div>
-				</form>
-			</section>
-			{#if !!form}
-				<footer class="card-footer flex flex-col items-center">
-					{#if form?.false === null}
-						<span class="text-center">You chose correct!</span>
-					{:else if form?.false !== null}
-						<span class="text-center">You chose incorrect!</span>
-					{/if}
-					<button class="btn variant-filled-primary w-fit" on:click={() => window.location.reload()}
-						>Play again</button
-					>
-				</footer>
-			{/if}
-		</div>
-		{#if form?.false === null}
-			<div
-				style="position: absolute; left: 50%; top: 30%"
-				use:confetti={{
-					force: 0.7,
-					stageWidth: window.innerWidth,
-					stageHeight: window.innerHeight
-				}}
-			/>
-		{/if}
+<header class="card-header flex flex-col items-center">
+	<Avatar
+		class="m-2"
+		rounded="rounded-xl"
+		width="w-2/3"
+		src={!!form ? form.cover : data.cover}
+		alt="cover"
+	/>
+	<div class="h4 mt-6 mb-0 flex items-center">
+		<span class="mr-2">Do you know the name of this album?</span>
 	</div>
+</header>
+<section class="p-4">
+	<form
+		method="POST"
+		use:enhance={({ formData }) => {
+			formData.set('user_id', user_id);
+		}}
+	>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			{#each data.albums ?? [] as albumItem}
+				<button
+					class="btn disabled:opacity-100"
+					class:variant-soft-surface={form?.correct !== albumItem.name &&
+						form?.false !== albumItem.name}
+					class:variant-filled-success={form?.correct === albumItem.name}
+					class:variant-filled-error={form?.false === albumItem.name}
+					type="submit"
+					name="answer"
+					value={albumItem.name}
+					disabled={!!form}
+				>
+					<span class="text-sm break-words whitespace-normal">{albumItem.name}</span>
+				</button>
+			{/each}
+		</div>
+	</form>
+</section>
+{#if !!form}
+	<footer
+		class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
+		class:bg-success-200={!form?.false}
+		class:bg-error-200={form?.false}
+	>
+		<div class="flex justify-between items-center w-full p-6">
+			{#if form?.false === null}
+				<span class="w-3/4 font-bold text-success-500">{feedback}</span>
+			{:else if form?.false !== null}
+				<span class="w-3/4 font-bold text-error-500">{feedback}</span>
+			{/if}
+			<button
+				class="btn w-fit"
+				class:variant-filled-success={!form?.false}
+				class:variant-filled-error={form?.false}
+				on:click={() => window.location.reload()}>Continue</button
+			>
+		</div>
+	</footer>
+{/if}
+{#if form?.false === null}
+	<div
+		style="position: absolute; left: 50%; top: 30%"
+		use:confetti={{
+			force: 0.7,
+			stageWidth: window.innerWidth,
+			stageHeight: window.innerHeight
+		}}
+	/>
 {/if}
 
 <style>
