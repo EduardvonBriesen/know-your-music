@@ -1,9 +1,9 @@
 import { doc, getDoc } from "firebase/firestore";
-import type { UserData, Genre, ScoreType, Levels, ScoreHistoryType, ItemTypes } from "./dataBase.types";
+import type { UserData, Genre, ScoreType, Levels, ScoreHistoryType, ItemTypes, ItemGenreType } from "./dataBase.types";
 import type {DonutChartOptions,ChartTabularData, RadarChartOptions, GaugeChartOptions, LineChartOptions, BarChartOptions } from '@carbon/charts-svelte';
 import { db } from './firebase';
 
-export async function getGenreQuestionsDonutChart(docName: string){
+export async function getGenreOrItemtypeQuestionsDonutChart(docName: string, type: ItemGenreType){
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -12,34 +12,27 @@ export async function getGenreQuestionsDonutChart(docName: string){
 	}
 	const userData: UserData = docSnap.data() as UserData;
     const genres: Genre[] = ["rock", "classic", "folk_music", "jazz", "rap", "pop"];
+    const items: ItemTypes[] = ["Biography", "Coverguess", "Discography", "Lyrics", "Popularity"];
 
-    const data: ChartTabularData = [ 
-        {
-            group: genres[0],
-            value: userData.progress.genres[genres[0]].overall_questions
-        },
-        {
-            group: genres[1],
-            value: userData.progress.genres[genres[1]].overall_questions
-        },
-        {
-            group: genres[2],
-            value: userData.progress.genres[genres[2]].overall_questions
-        },
-        {
-            group: genres[3],
-            value: userData.progress.genres[genres[3]].overall_questions
-        },
-        {
-            group: genres[4],
-            value: userData.progress.genres[genres[4]].overall_questions
-        },
-        {
-            group: genres[5],
-            value: userData.progress.genres[genres[5]].overall_questions
+    const data: ChartTabularData = [];
+    
+    if (type==="Genre"){
+        for(const genre of genres){
+            const dataElement = {
+                group: genre,
+                value: userData.progress.genres[genre].overall_questions
+            };
+            data.push(dataElement);
         }
-    ];
-
+    }else{ //type===Itemtype
+        for(const item of items){
+            const dataElement = {
+                group: item,
+                value: userData.progress.itemtypes[item].overallQuestions
+            };
+            data.push(dataElement);
+        }
+    }
 
     const options: DonutChartOptions = {
         "title": "Blub",
@@ -55,7 +48,7 @@ export async function getGenreQuestionsDonutChart(docName: string){
     return {data, options};
 }
 
-export async function getGenreScoresOverallAndHistoryRadarChart(docName: string){
+export async function getGenreOrItemtypeScoresOverallAndHistoryRadarChart(docName: string, type: ItemGenreType){
     const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -64,69 +57,40 @@ export async function getGenreScoresOverallAndHistoryRadarChart(docName: string)
 	}
 	const userData: UserData = docSnap.data() as UserData;
     const genres: Genre[] = ["rock", "classic", "folk_music", "jazz", "rap", "pop"];
+    const items: ItemTypes[] = ["Biography", "Coverguess", "Discography", "Lyrics", "Popularity"];
 
-    const data: ChartTabularData = [ 
-        {
-            group: "Overall Score",
-            feature: genres[0],
-            value: userData.progress.genre_scores[genres[0]]
-        },
-        {
-            group: "Overall Score",
-            feature: genres[1],
-            value: userData.progress.genre_scores[genres[1]]
-        },
-        {
-            group: "Overall Score",
-            feature: genres[2],
-            value: userData.progress.genre_scores[genres[2]]
-        },
-        {
-            group: "Overall Score",
-            feature: genres[3],
-            value: userData.progress.genre_scores[genres[3]]
-        },
-        {
-            group: "Overall Score",
-            feature: genres[4],
-            value: userData.progress.genre_scores[genres[4]]
-        },
-        {
-            group: "Overall Score",
-            feature: genres[5],
-            value: userData.progress.genre_scores[genres[5]]
-        },
-        {
-            group: "History Score",
-            feature: genres[0],
-            value: userData.progress.genres[genres[0]].history_score
-        },
-        {
-            group: "History Score",
-            feature: genres[1],
-            value: userData.progress.genres[genres[1]].history_score
-        },
-        {
-            group: "History Score",
-            feature: genres[2],
-            value: userData.progress.genres[genres[2]].history_score
-        },
-        {
-            group: "History Score",
-            feature: genres[3],
-            value: userData.progress.genres[genres[3]].history_score
-        },
-        {
-            group: "History Score",
-            feature: genres[4],
-            value: userData.progress.genres[genres[4]].history_score
-        },
-        {
-            group: "History Score",
-            feature: genres[5],
-            value: userData.progress.genres[genres[5]].history_score
+    const data: ChartTabularData = [];
+    if (type==="Genre"){
+        for(const genre of genres){
+            let dataElement = {
+                group: "Overall Score",
+                feature: genre,
+                value: userData.progress.genre_scores[genre]
+            };
+            data.push(dataElement);
+            dataElement = {
+                group: "History Score",
+                feature: genre,
+                value: userData.progress.genres[genre].history_score
+            };
+            data.push(dataElement);
         }
-    ];
+    }else{ //type===Itemtype
+        for(const item of items){
+            let dataElement = {
+                group: "Overall Score",
+                feature: item,
+                value: userData.progress.itemtypes[item].overallScore
+            };
+            data.push(dataElement);
+            dataElement = {
+                group: "History Score",
+                feature: item,
+                value: userData.progress.itemtypes[item].historyScore
+            };
+            data.push(dataElement);
+        }
+    }
 
     const options:RadarChartOptions = {
         "title": "Genre Scores - Alltime vs. short-term History",
@@ -319,9 +283,3 @@ export async function getScoresHistoryLineChart(docName: string, type: ScoreHist
     };
 
 }
-
-
-
-
-
-
