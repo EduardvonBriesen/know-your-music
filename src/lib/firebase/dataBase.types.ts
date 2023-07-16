@@ -1,10 +1,16 @@
 /* Constants */
 export const MAX_HISTORY_LENGTH = 20;
 export const MAX_HISTORY_GENRE_LENGTH = 10;
+export const MAX_ITEM_HISTORY_LENGTH = 10;
 export const WEIGHT_QUESTIONS_OVERALL = 1;
 export const WEIGHT_SCORE_OVERALL = 1.5;
 export const WEIGHT_SCORE_HISTORY = 4;
 export const WEIGHT_QUESTIONS_HISTORY = 3.5;
+
+export const WEIGHT_ITEM_QUESTIONS_HISTORY =4.5;
+export const WEIGHT_ITEM_QUESTIONS_OVERALL =2;
+export const WEIGHT_ITEM_SCORE_HISTORY =2.5;
+export const WEIGHT_ITEM_SCORE_OVERALL = 1;
 
 export type UserData = {
 	name: string;
@@ -15,6 +21,7 @@ export type UserData = {
 			MAX_HISTORY_LENGTH: number; // proposal =20
 			current_index: number; // index of the oldest element, if overall_questions<20 then index=-1
 			list_of_scores:number[];
+			score: number;
 		},
 		overall_questions: number;
 		genre_scores: GenreScores;
@@ -55,6 +62,7 @@ export type UserData = {
 				begin: Date;
 				duration: number;
 				final_score: number;
+				final_history_score: number;
 			}[];
 		}[];
 	};

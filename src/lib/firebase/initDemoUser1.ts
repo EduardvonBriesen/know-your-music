@@ -8,10 +8,11 @@ export const initDataStructure = (name: string, email: string) => {
 		email: email,
 		progress: {
 			overall_score: 0.449,
-			shortterm_overall_history: {
+			shortterm_overall_history: { // this in independent of item/genre
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
-				list_of_scores:[]
+				list_of_scores:[],
+				score:0
 			},
 			overall_questions: 390,
 			genre_scores: {
@@ -354,7 +355,8 @@ export const initDataStructure = (name: string, email: string) => {
 						{
 							begin: new Date(),
 							duration: 0,
-							final_score: 0
+							final_score: 0,
+							final_history_score: 0
 						}
 					]
 				}

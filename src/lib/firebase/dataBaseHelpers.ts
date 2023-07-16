@@ -200,7 +200,7 @@ export function getUpdatedItemtypeData(
 		newHistoryScores[oldItemIndex] = newPoints;
 		newIndex = (oldItemIndex + 1)%MAX_ITEM_HISTORY_LENGTH;
 	}
-	
+
 	const newHistoryScore  = newHistoryScores.reduce((a, b) => a + b, 0) / newHistoryScores.length;
 	
 	return {
@@ -246,6 +246,7 @@ export function getUpdatedScores(
 		newScoresHistory[oldScoresIndex]=newOverallScore;
 		newScoresIndex = (oldScoresIndex + 1) % MAX_HISTORY_LENGTH;
 	}
+	const newOverallHistoryScore = newScoresHistory.reduce((a, b) => a + b, 0) / newScoresHistory.length;
 
 	const newGenreHistoryScores: number[] = oldGenreHistoryScoresList;
 	let newGenreHistoryScoresIndex = -1;
@@ -267,6 +268,7 @@ export function getUpdatedScores(
 
 	return {
 		overall_score: newOverallScore,
+		overall_history_score: newOverallHistoryScore,
 		list_of_scores:newScoresHistory,
 		scores_index: newScoresIndex,
 		genre_score: newGenreScore,

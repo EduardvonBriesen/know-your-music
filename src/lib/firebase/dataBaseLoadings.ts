@@ -1,5 +1,5 @@
 import { doc, getDoc, updateDoc, type DocumentData, Firestore } from 'firebase/firestore';
-import { MAX_HISTORY_LENGTH } from './dataBase.types';
+import { MAX_HISTORY_LENGTH, MAX_ITEM_HISTORY_LENGTH } from './dataBase.types';
 import type { UserData, Genre, Levels, LevelData, ItemTypes } from './dataBase.types';
 import {	WEIGHT_ITEM_QUESTIONS_HISTORY,
 			WEIGHT_ITEM_QUESTIONS_OVERALL,
@@ -11,7 +11,9 @@ import {
 	getGenreForItemtype,
 	getLevelForGenre,
 	getUpdatedHistoryListOfGenres,
-	getUpdatedScores
+	getUpdatedScores,
+	getUpdatedHistoryListOfItems,
+	getUpdatedItemtypeData
 } from './dataBaseHelpers';
 
 export const saveHistory = async (docName: string, db: Firestore) => {
@@ -461,7 +463,8 @@ export async function updateUserProgressData(
 	docName: string,
 	relativePoints: number,
 	genre: Genre,
-	level: Levels
+	level: Levels,
+	item: ItemTypes
 ) {
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
@@ -471,17 +474,25 @@ export async function updateUserProgressData(
 		console.log('No such document!');
 	}
 	const data: UserData = docSnap.data() as UserData;
+	data.progress.itemtypes[item].overallQuestions
 
 	//simple increments
 	const overall_questions: number = data.progress.overall_questions + 1;
 	const genre_questions: number = data.progress.genres[genre].overall_questions + 1;
 	const genre_level_questions: number = data.progress.genres[genre][level].questions + 1;
+	const item_question: number = data.progress.itemtypes[item].overallQuestions+1;
 
 	const { list_of_genre, history_current_index } = getUpdatedHistoryListOfGenres(
 		data.progress.shortterm_genre_history.list_of_genre,
 		data.progress.shortterm_genre_history.current_index,
 		genre
 	);
+
+	const {list_of_items, items_index} = getUpdatedHistoryListOfItems(
+		data.progress.shortterm_itemtype_history.list_of_items,
+		data.progress.shortterm_itemtype_history.current_index,
+		item
+	)
 
 	let genreLevelXCorrect = 0;
 	let genreLevelYCorrect = 0;
@@ -499,6 +510,7 @@ export async function updateUserProgressData(
 
 	const {
 		overall_score,
+		overall_history_score,
 		list_of_scores,
 		scores_index,
 		genre_score,
@@ -520,9 +532,24 @@ export async function updateUserProgressData(
 		relativePoints
 	);
 
+	const {
+		item_score,
+		item_history_score,
+		item_history_scores,
+		item_index
+	}= getUpdatedItemtypeData(
+		relativePoints,
+		data.progress.itemtypes[item].overallScore,
+		data.progress.itemtypes[item].historyScores,
+		data.progress.itemtypes[item].index,
+		data.progress.itemtypes[item].overallQuestions,
+		MAX_ITEM_HISTORY_LENGTH
+	)
+
 	try {
 		await updateDoc(docRef, {
 			'progress.overall_score': overall_score,
+			'progress.shortterm_overall_history.score': overall_history_score,
 			'progress.shortterm_overall_history.list_of_scores': list_of_scores,
 			'progress.shortterm_overall_history.current_index':scores_index,
 			'progress.overall_questions': overall_questions,
@@ -534,7 +561,18 @@ export async function updateUserProgressData(
 			'progress.shortterm_genre_history.current_index': history_current_index,
 			'progress.shortterm_genre_history.list_of_genre': list_of_genre,
 			[`progress.genres.${genre}.history.scores`]: genre_history_scores,
-			[`progress.genres.${genre}.history.index_oldest_score`]: genre_history_scores_index
+			[`progress.genres.${genre}.history.index_oldest_score`]: genre_history_scores_index,
+
+			[`progress.itemtypes.${item}.overallQuestions`] : item_question,
+			[`progress.itemtypes.${item}.overallScore`] : item_score,
+			[`progress.itemtypes.${item}.historyScore`] : item_history_score,
+			[`progress.itemtypes.${item}.historyScores`] : item_history_scores,
+			[`progress.itemtypes.${item}.index`] : item_index,
+			'progress.shortterm_itemtype_history.list_of_items' : list_of_items,
+			'progress.shortterm_itemtype_history.current_index': items_index,
+
+
+
 		});
 	} catch (e) {
 		console.error(e);
