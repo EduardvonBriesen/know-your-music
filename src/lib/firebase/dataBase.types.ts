@@ -123,4 +123,10 @@ export type GenreScores = {
 	folk_music: number;
 };
 
-export type ItemTypes = 'Biography' | 'Discography' | 'Popularity' | 'Lyrics' | 'Coverguess';
+export type ItemTypes =
+	| 'Biography'
+	| 'Discography'
+	| 'Popularity'
+	| 'Lyrics'
+	| 'Coverguess'
+	| 'Song';

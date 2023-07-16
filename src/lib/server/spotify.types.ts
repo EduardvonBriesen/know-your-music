@@ -9,6 +9,8 @@ export type Track = {
 	name: string;
 	popularity: number;
 	artist: string;
+	preview_url: string;
+	image: string;
 };
 
 export type Artist = {

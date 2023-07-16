@@ -363,6 +363,13 @@ export const initDataStructure = (name: string, email: string) => {
 					historyScore: 0,
 					historyScores: [],
 					index: 0
+				},
+				Song: {
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
 				}
 			},
 			shortterm_itemtype_history: {
@@ -406,7 +413,14 @@ export async function getNextItem(docName: string, db: Firestore) {
 		return;
 	}
 	const userData = docSnap.data() as UserData;
-	const items: ItemTypes[] = ['Biography', 'Discography', 'Popularity', 'Lyrics', 'Coverguess'];
+	const items: ItemTypes[] = [
+		'Biography',
+		'Discography',
+		'Popularity',
+		'Lyrics',
+		'Coverguess',
+		'Song'
+	];
 	const itemHistory = userData.progress.shortterm_itemtype_history.list_of_items;
 	const overall_questions = userData.progress.overall_questions;
 	const overall_score = userData.progress.overall_score;

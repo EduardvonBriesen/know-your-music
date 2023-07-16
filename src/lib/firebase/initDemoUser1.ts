@@ -292,6 +292,13 @@ export const initDataStructure = (name: string, email: string) => {
 					historyScore: 0.55,
 					historyScores: [1, 1, 0.3, 0.5, 0.3, 0.8, 0, 0.3, 0.8, 0.5],
 					index: 0
+				},
+				Song: {
+					overallQuestions: 90,
+					overallScore: 0.485,
+					historyScore: 0.55,
+					historyScores: [1, 1, 0.3, 0.5, 0.3, 0.8, 0, 0.3, 0.8, 0.5],
+					index: 0
 				}
 			},
 			shortterm_itemtype_history: {
@@ -315,6 +322,7 @@ export const initDataStructure = (name: string, email: string) => {
 					'Coverguess',
 					'Discography',
 					'Coverguess',
+					'Song',
 					'Discography',
 					'Lyrics',
 					'Popularity'
