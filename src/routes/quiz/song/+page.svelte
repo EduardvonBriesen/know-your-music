@@ -14,9 +14,13 @@
 		user_id = store.user.uid;
 	});
 
-	$: feedback = '';
+	let feedback = '';
 
-	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
+	const positiveFeedback = [
+		'Good job! and it only took you ',
+		'Amazing! so fast, only ',
+		'Correct answer, keep going! Your time was'
+	];
 
 	const negativeFeedback = [
 		'Oups, the correct answer is ',
@@ -25,8 +29,12 @@
 	];
 
 	$: {
-		if (form?.false === null && form?.correct !== null) {
-			feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+		if (!form?.false) {
+			feedback =
+				positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)] +
+				' ' +
+				form?.time +
+				's';
 		} else {
 			feedback =
 				negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)] + form?.correct;
@@ -138,10 +146,6 @@
 				class:text-success-500={!form?.false}
 				class:text-error-500={form?.false}
 				>{feedback}
-				{#if !form?.false}
-					<br />
-					It took you only {form?.time} s
-				{/if}
 			</span>
 
 			<button

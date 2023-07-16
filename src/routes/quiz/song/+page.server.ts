@@ -81,13 +81,16 @@ export const actions = {
 
 		const serverStart = await redis.get('song/' + answer.get('user_id'));
 		redis.del('song/' + answer.get('user_id'));
-		if (!serverStart) return fail(400, { error: 'Could not find server time' });
-		const serverTime = Date.now() - parseInt(serverStart);
 
-		const isSus = Math.abs(clientTime - serverTime) > 1000;
-
-		let time = isSus ? serverTime : clientTime;
-		time = Math.round(time / 100) / 10;
+		let time;
+		if (serverStart) {
+			const serverTime = Date.now() - parseInt(serverStart);
+			const isSus = Math.abs(clientTime - serverTime) > 1000;
+			time = isSus ? serverTime : clientTime;
+		} else {
+			time = clientTime;
+		}
+		time = Math.round(time / 10) / 100;
 
 		const spotifyToken = await getToken(cookies);
 
@@ -111,7 +114,7 @@ export const actions = {
 		await updateUserProgressData(answer.get('user_id') as string, score, genre, level);
 
 		const data = await getGenreWithLevelForItem(answer.get('user_id') as string);
-		if (data) {
+		if (data?.genre && data?.level) {
 			cookies.set('genre', data.genre, {
 				path: '/'
 			});
