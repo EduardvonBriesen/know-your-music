@@ -31,7 +31,7 @@
 		}
 	}
 
-	import { popup } from '@skeletonlabs/skeleton';
+	import { Avatar, popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	const popupHover: PopupSettings = {
 		event: 'hover',
@@ -41,6 +41,14 @@
 </script>
 
 <header class="card-header flex flex-col items-center">
+	<Avatar
+		class="m-2"
+		rounded="rounded-xl"
+		width="w-1/2"
+		src={form ? form.image : ''}
+		initials={'?'}
+		alt={'cover'}
+	/>
 	<div class="h4 m-6 flex items-center">
 		<span class="mr-2">How fast can you guess this track?</span>
 		<div class="[&>*]:pointer-events-none" use:popup={popupHover}>

@@ -104,9 +104,9 @@ export const actions = {
 		});
 
 		if (!correct) {
-			return fail(400, { false: guess, correct: correctTrack.name });
+			return fail(400, { false: guess, correct: correctTrack.name, image: correctTrack.image });
 		} else {
-			return fail(200, { false: null, correct: correctTrack.name });
+			return fail(200, { false: null, correct: correctTrack.name, image: correctTrack.image });
 		}
 	}
 };

@@ -79,7 +79,10 @@ export const getArtistTopTracks = async (
 	const filteredTracks: Track[] = topTracks.tracks.map((track: any) => ({
 		id: track.id,
 		name: track.name,
-		popularity: track.popularity
+		popularity: track.popularity,
+		preview_url: track.preview_url,
+		artist: track.artists[0].name,
+		image: track.album.images[0].url
 	}));
 	redis.set(query, JSON.stringify(filteredTracks), 'EX', 60 * 60 * 24);
 
@@ -135,7 +138,8 @@ export const getTracks = async (
 		name: track.name,
 		popularity: track.popularity,
 		preview_url: track.preview_url,
-		artist: track.artists[0].name
+		artist: track.artists[0].name,
+		image: track.album.images[0].url
 	}));
 	redis.set(query, JSON.stringify(filteredTracks), 'EX', 60 * 60 * 24);
 
@@ -253,13 +257,13 @@ export const getItemByGenre = async (
 			};
 		}
 		if (type === 'track') {
-			console.log(item);
 			return {
 				id: item.id,
 				name: item.name,
 				popularity: item.popularity,
 				artist: item.artists[0].name,
-				preview_url: item.preview_url
+				preview_url: item.preview_url,
+				image: item.album.images[0].url
 			};
 		}
 		if (type === 'album') {

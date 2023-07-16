@@ -10,6 +10,7 @@ export type Track = {
 	popularity: number;
 	artist: string;
 	preview_url: string;
+	image: string;
 };
 
 export type Artist = {
