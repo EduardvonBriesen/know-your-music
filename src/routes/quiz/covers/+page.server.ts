@@ -6,12 +6,13 @@ import type { Album } from '$lib/server/spotify.types';
 import { fail } from '@sveltejs/kit';
 import { doc, getDoc, setDoc, type DocumentData } from 'firebase/firestore';
 import { read, MIME_JPEG } from 'jimp';
+import CryptoJS from 'crypto-js';
  
 const numberOfAlbums = 3;
 
 // definine player level
 // To Do: compare with stats?
-const playerLevel = 3;
+const playerLevel = 1;
 
 export const load = async ({ cookies }) => {
   const current_quiz = JSON.parse(cookies.get('covers') || '{}');
@@ -101,16 +102,19 @@ export const load = async ({ cookies }) => {
        // convert picture
     const base64Image = await image.getBase64Async(MIME_JPEG);
 
+    // Encrypt album name
+    const encryptedAlbumName = CryptoJS.AES.encrypt(currentAlbumName, 'secret key 123').toString();
+
     // save quiz to cookie
-    cookies.set(
-      'covers',
-      JSON.stringify({
+  cookies.set(
+    'covers',
+    JSON.stringify({
       artist: {
         name: artistName,
         id: artistId
       },
       albums: albums.map((album) => album.id),
-      currentAlbumName // Save current album name in cookie
+      currentAlbumName: encryptedAlbumName // Save encrypted current album name in cookie
     }),
     {
       path: '/'
@@ -126,7 +130,7 @@ export const load = async ({ cookies }) => {
     blackAndWhiteImage = await blackAndWhiteImageJimp.getBase64Async(MIME_JPEG);
   } else if (Number(playerLevel) >= 3) {
     const pixelatedImageJimp = await read(albums[0].images[0].url);
-    pixelatedImageJimp.pixelate(10);
+    pixelatedImageJimp.pixelate(15);
     pixelatedImage = await pixelatedImageJimp.getBase64Async(MIME_JPEG);
   }
 
@@ -144,39 +148,34 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	default: async ({ request, cookies }) => {
-	  const current_quiz = JSON.parse(cookies.get('covers') || '{}');
-  
-	  // evaluate answer
-	  const answer = await request.formData();
-	  const guess = answer.get('answer') as string;
-	  const spotifyToken = await getToken(cookies);
-	  const albums = await getSeveralAlbums(spotifyToken, current_quiz.albums);
-  
-	  // find current album
-	  const currentAlbumName = current_quiz.currentAlbumName; // access to cached current album name 
-	  let correctAlbum;
-	  if ('albums' in albums) {
-		correctAlbum = albums.albums.find((album) => album.name === currentAlbumName);
-	  }
-  
-	  const isCorrect = correctAlbum?.name === guess;
-  
-	  // update user
-	  await updateUser(isCorrect, answer.get('user_id') as string);
-  
-	  // reset quiz
-	  cookies.set('covers', '', {
-		path: '/'
-	  });
-  
-	  if (!isCorrect) {
-		return fail(400, { false: guess, correct: correctAlbum?.name });
-	  } else {
-		return fail(200, { false: null, correct: correctAlbum?.name });
-	  }
-	}
-  };
+  default: async ({ request, cookies }) => {
+    const current_quiz = JSON.parse(cookies.get('covers') || '{}');
+
+    // Decrypt album name
+    const decryptedAlbumName = CryptoJS.AES.decrypt(current_quiz.currentAlbumName, 'secret key 123').toString(CryptoJS.enc.Utf8);
+
+    // evaluate answer
+    const answer = await request.formData();
+    const guess = answer.get('answer') as string;
+
+    // compare answers
+    const isCorrect = decryptedAlbumName === guess;
+
+    // update user
+    await updateUser(isCorrect, answer.get('user_id') as string);
+
+    // reset quiz
+    cookies.set('covers', '', {
+      path: '/'
+    });
+
+    if (!isCorrect) {
+      return fail(400, { false: guess, correct: decryptedAlbumName });
+    } else {
+      return fail(200, { false: null, correct: decryptedAlbumName });
+    }
+  }
+};
   
 const updateUser = async (correct: boolean, user_id: string) => {
 	const userRef = doc(db, 'users', user_id);
