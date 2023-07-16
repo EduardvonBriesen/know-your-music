@@ -11,8 +11,10 @@ export const initDataStructure = (name: string, email: string) => {
 			shortterm_overall_history: { // this in independent of item/genre
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
-				list_of_scores:[],
-				score:0
+				list_of_scores:[
+					0.8, 0.8, 1, 0, 0.5, 0.5, 0.3, 1, 1, 1,  0.8, 1, 0.5, 1, 0.8, 0.3, 0, 1, 0.8, 1
+				],
+				score:0.7
 			},
 			overall_questions: 390,
 			genre_scores: {
