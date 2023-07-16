@@ -6,7 +6,7 @@ import {
 	WEIGHT_SCORE_HISTORY,
 	WEIGHT_QUESTIONS_HISTORY
 } from './dataBase.types';
-import type { UserData, Genre, LevelData, GenreData, GenreScores, Levels } from './dataBase.types';
+import type { UserData, Genre, LevelData, GenreData, GenreScores, ItemTypes} from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {
 	const newHistory = {
@@ -15,7 +15,8 @@ export function newHistoryArrayElement(date: Date) {
 		sessions: [
 			{
 				begin: date,
-				duration: 0
+				duration: 0,
+				final_score: 0
 			}
 		]
 	};
@@ -25,7 +26,8 @@ export function newHistoryArrayElement(date: Date) {
 export function newSessionsArrayElement(date: Date) {
 	const newSession = {
 		begin: date,
-		duration: 0
+		duration: 0,
+		final_score: 0
 	};
 	return newSession;
 }
@@ -150,8 +152,71 @@ export function getUpdatedHistoryListOfGenres(
 	};
 }
 
+export function getUpdatedHistoryListOfItems(
+	listOfItems: ItemTypes[],
+	index: number,
+	newItem: ItemTypes
+) {
+	const newListOfItems: ItemTypes[] = listOfItems;
+	let newIndex = 0;
+	if (index === -1) {
+		// lesser than MAX_HISTORY_LENGTH questions are answered
+		newListOfItems.push(newItem);
+		if (newListOfItems.length === MAX_HISTORY_LENGTH) {
+			newIndex = 0; //index 0 should be the oldest element
+		} else {
+			newIndex = -1; //still lesser than MAX_HISTORY_LENGTH questions answered
+		}
+	} else {
+		// MAX_HISTORY_LENGTH are already answered
+		newListOfItems[index] = newItem;
+		if (index === MAX_HISTORY_LENGTH - 1) {
+			newIndex = 0;
+		} else {
+			newIndex = index + 1;
+		}
+	}
+	return {
+		list_of_items: newListOfItems,
+		items_index: newIndex
+	};
+}
+
+export function getUpdatedItemtypeData(
+	newPoints: number,
+	oldItemScore: number,
+	oldItemScores: number[],
+	oldItemIndex: number,
+	itemQuestions: number,
+	MAX_ITEM_HISTORY_LENGTH: number
+){
+	const newItemScore:number = (oldItemScore*itemQuestions + newPoints)/(itemQuestions+1);
+	const newHistoryScores: number[] = oldItemScores;
+	let newIndex = -1;
+	if (oldItemIndex===-1){
+		newHistoryScores.push(newPoints);
+		if (newHistoryScores.length===MAX_ITEM_HISTORY_LENGTH){
+			newIndex = 0;
+		}
+	}else{
+		newHistoryScores[oldItemIndex] = newPoints;
+		newIndex = (oldItemIndex + 1)%MAX_ITEM_HISTORY_LENGTH;
+	}
+
+	const newHistoryScore  = newHistoryScores.reduce((a, b) => a + b, 0) / newHistoryScores.length;
+	
+	return {
+		item_score: newItemScore,
+		item_history_score: newHistoryScore,
+		item_history_scores: newHistoryScores,
+		item_index: newIndex
+	}
+}
+
 export function getUpdatedScores(
 	oldGenreScores: GenreScores,
+	oldScoresHistory: number[],
+	oldScoresIndex: number,
 	genre: Genre,
 	oldGenreLevelCorrect: number,
 	genreLevelXCorrect: number,
@@ -174,6 +239,16 @@ export function getUpdatedScores(
 			newGenreScores.jazz +
 			newGenreScores.rap) /
 		6; // sum of all genre scores divide through number of genre
+	const newScoresHistory: number[] = oldScoresHistory;
+	let newScoresIndex = -1;
+	if (oldScoresIndex===-1){
+		newScoresHistory.push(newOverallScore);
+		if(newScoresHistory.length === MAX_HISTORY_LENGTH) newScoresIndex=0;
+	}else{
+		newScoresHistory[oldScoresIndex]=newOverallScore;
+		newScoresIndex = (oldScoresIndex + 1) % MAX_HISTORY_LENGTH;
+	}
+	const newOverallHistoryScore = newScoresHistory.reduce((a, b) => a + b, 0) / newScoresHistory.length;
 
 	const newGenreHistoryScores: number[] = oldGenreHistoryScoresList;
 	let newGenreHistoryScoresIndex = -1;
@@ -185,7 +260,7 @@ export function getUpdatedScores(
 		} // if not oldGenreHistoryScoresListIndex remains -1 as initialized
 	} else {
 		newGenreHistoryScores[oldGenreHistoryScoresListIndex] = newPoints;
-		newGenreHistoryScoresIndex = (oldGenreHistoryScoresListIndex + 1) % 20;
+		newGenreHistoryScoresIndex = (oldGenreHistoryScoresListIndex + 1) % MAX_HISTORY_GENRE_LENGTH;
 	}
 	let sum = 0;
 	newGenreHistoryScores.forEach((item) => {
@@ -195,6 +270,9 @@ export function getUpdatedScores(
 
 	return {
 		overall_score: newOverallScore,
+		overall_history_score: newOverallHistoryScore,
+		list_of_scores:newScoresHistory,
+		scores_index: newScoresIndex,
 		genre_score: newGenreScore,
 		genre_level_correct: newGenreLevelCorrect,
 		genre_history_score: newGenreHistoryScore,
