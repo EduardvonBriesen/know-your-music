@@ -43,7 +43,7 @@
 	<Avatar
 		class="m-2"
 		rounded="rounded-xl"
-		width="w-2/3"
+		width="w-1/2"
 		src={!!form ? form.cover : data.cover}
 		alt="cover"
 	/>
@@ -62,7 +62,7 @@
 			{#each data.albums ?? [] as albumItem}
 				<button
 					class="btn disabled:opacity-100"
-					class:variant-soft-surface={form?.correct !== albumItem.name &&
+					class:variant-glass-surface={form?.correct !== albumItem.name &&
 						form?.false !== albumItem.name}
 					class:variant-filled-success={form?.correct === albumItem.name}
 					class:variant-filled-error={form?.false === albumItem.name}

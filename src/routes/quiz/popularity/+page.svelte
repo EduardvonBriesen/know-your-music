@@ -78,7 +78,7 @@
 			{#each data.tracks ?? [] as track}
 				<button
 					class="btn btn-lg disabled:opacity-100"
-					class:variant-soft-surface={form?.correct !== track.name && form?.false !== track.name}
+					class:variant-glass-surface={form?.correct !== track.name && form?.false !== track.name}
 					class:variant-filled-success={form?.correct === track.name}
 					class:variant-filled-error={form?.false === track.name}
 					type="submit"

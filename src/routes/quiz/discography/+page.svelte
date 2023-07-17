@@ -88,55 +88,57 @@
 		formData.set('answer', JSON.stringify(items.map((item) => item.name)));
 	}}
 >
-	<section
-		class="flex flex-row justify-center gap-4 p-6"
-		use:dndzone={{
-			items,
-			flipDurationMs,
-			dropTargetStyle: { outline: 'none' },
-			dragDisabled: !!form
-		}}
-		on:consider={handleDndConsider}
-		on:finalize={handleDndFinalize}
-	>
-		{#each items as item (item.id)}
-			<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
-				<Avatar
-					class="w-auto aspect-square"
-					rounded="rounded-xl"
-					border={!!form
-						? form?.result.get(item.name).correct
-							? 'border-4 border-success-500'
-							: 'border-4 border-error-500'
-						: ''}
-					cursor={!form ? 'cursor-pointer' : 'cursor-default'}
-					src={item.image}
-					alt={item.name}
-				/>
-				<p class="text-center line-clamp-1">{item.name}</p>
-				{#if !!form}
-					{#if form?.result.get(item.name).correct}
-						<span class="text-success-500">{form?.result.get(item.name).date}</span>
-					{:else}
-						<span class="text-error-500">{form?.result.get(item.name).date}</span>
+	<section class="p-6 flex flex-col items-center gap-4">
+		<div
+			class="flex flex-row justify-center gap-4"
+			use:dndzone={{
+				items,
+				flipDurationMs,
+				dropTargetStyle: { outline: 'none' },
+				dragDisabled: !!form
+			}}
+			on:consider={handleDndConsider}
+			on:finalize={handleDndFinalize}
+		>
+			{#each items as item (item.id)}
+				<div class="flex flex-col items-center" animate:flip={{ duration: flipDurationMs }}>
+					<Avatar
+						class="w-auto aspect-square"
+						rounded="rounded-xl"
+						border={!!form
+							? form?.result.get(item.name).correct
+								? 'border-4 border-success-500'
+								: 'border-4 border-error-500'
+							: ''}
+						cursor={!form ? 'cursor-pointer' : 'cursor-default'}
+						src={item.image}
+						alt={item.name}
+					/>
+					<p class="text-center line-clamp-1">{item.name}</p>
+					{#if !!form}
+						{#if form?.result.get(item.name).correct}
+							<span class="text-success-500">{form?.result.get(item.name).date}</span>
+						{:else}
+							<span class="text-error-500">{form?.result.get(item.name).date}</span>
+						{/if}
 					{/if}
-				{/if}
-			</div>
-		{/each}
-	</section>
-
-	<footer
-		class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
-			? ''
-			: form?.correct
-			? 'bg-success-200'
-			: 'bg-error-200'}"
-	>
+				</div>
+			{/each}
+		</div>
 		{#if !form}
-			<div class="flex justify-center items-center w-full p-6">
-				<button class="btn variant-filled-surface w-fit" type="submit">Submit</button>
+			<div class="flex justify-center items-center w-full">
+				<button class="btn variant-filled-secondary w-fit" type="submit">Submit</button>
 			</div>
-		{:else}
+		{/if}
+	</section>
+	{#if !!form}
+		<footer
+			class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
+				? ''
+				: form?.correct
+				? 'bg-success-200'
+				: 'bg-error-200'}"
+		>
 			<div class="flex justify-between items-center w-full p-6">
 				<p class="text-center">
 					You scored <span class="text-primary-500">{form?.score}</span> out of
@@ -150,6 +152,6 @@
 					Continue
 				</button>
 			</div>
-		{/if}
-	</footer>
+		</footer>
+	{/if}
 </form>

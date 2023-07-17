@@ -56,7 +56,7 @@
 		formData.set('user_id', user_id);
 	}}
 >
-	<section class="p-6">
+	<section class="p-6 flex flex-col items-center gap-4">
 		<p class="text-justify mt-0">
 			{#if !form}
 				{#each data.bio?.split('<input />') || [] as slice}
@@ -75,18 +75,12 @@
 				</div>
 			{/if}
 		</p>
-	</section>
-	<footer
-		class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
-		class:bg-success-200={!!form && form?.correct}
-		class:bg-error-200={!!form && !form?.correct}
-	>
 		{#if !form}
 			{#if data.options && data.options.length > 0}
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-3 p-4">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					{#each data.options as option}
 						<button
-							class="btn btn-lg variant-filled-secondary whitespace-pre-wrap"
+							class="btn btn-lg variant-glass-surface whitespace-pre-wrap"
 							type="submit"
 							name="answer"
 							value={option}
@@ -100,13 +94,13 @@
 				{#if data.bio?.split('<input').length === 1}
 					<input
 						bind:value={guess}
-						class="input px-2 w-48 m-2"
+						class="input px-2 w-48"
 						name="answer"
 						disabled={!!form}
 						autocomplete="off"
 					/>
 				{/if}
-				<div class="flex justify-center items-center w-full p-6 gap-2">
+				<div class="flex justify-center items-center w-full gap-2">
 					<button
 						class="btn variant-filled-secondary w-fit"
 						type="submit"
@@ -123,7 +117,15 @@
 					</form>
 				</div>
 			{/if}
-		{:else}
+		{/if}
+	</section>
+
+	{#if !!form}
+		<footer
+			class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token"
+			class:bg-success-200={!!form && form?.correct}
+			class:bg-error-200={!!form && !form?.correct}
+		>
 			<div class="flex justify-between items-center w-full p-6">
 				{#if data.artist?.summary.split('<input').length === 1}
 					<input bind:value={guess} class="input px-2 w-48 m-2" name="answer" disabled={!!form} />
@@ -142,8 +144,8 @@
 					>Continue
 				</button>
 			</div>
-		{/if}
-	</footer>
+		</footer>
+	{/if}
 </form>
 
 {#if form?.correct}
