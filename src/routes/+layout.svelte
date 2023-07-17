@@ -96,13 +96,15 @@
 					</button>
 					<div class="card " data-popup="popupCombobox">
 						<ListBox class="p-1">
-							<a href="/quiz/popularity">
-								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
-									Popularity
+							<a href="/quiz/biography">
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Bio">
+									Biography
 								</ListBoxItem>
 							</a>
-							<a href="/quiz/biography">
-								<ListBoxItem bind:group={comboboxValue} name="medium" value="Bio">Bio</ListBoxItem>
+							<a href="/quiz/covers">
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Covers">
+									Covers
+								</ListBoxItem>
 							</a>
 							<a href="/quiz/discography">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Discography">
@@ -114,14 +116,14 @@
 									Lyrics
 								</ListBoxItem>
 							</a>
+							<a href="/quiz/popularity">
+								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
+									Popularity
+								</ListBoxItem>
+							</a>
 							<a href="/quiz/song">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Song">
 									Song
-								</ListBoxItem>
-							</a>
-							<a href="/quiz/covers">
-								<ListBoxItem bind:group={comboboxValue} name="medium" value="Covers">
-									Covers
 								</ListBoxItem>
 							</a>
 						</ListBox>
