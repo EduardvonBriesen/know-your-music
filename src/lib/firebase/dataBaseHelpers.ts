@@ -6,7 +6,14 @@ import {
 	WEIGHT_SCORE_HISTORY,
 	WEIGHT_QUESTIONS_HISTORY
 } from './dataBase.types';
-import type { UserData, Genre, LevelData, GenreData, GenreScores, ItemTypes} from './dataBase.types';
+import type {
+	UserData,
+	Genre,
+	LevelData,
+	GenreData,
+	GenreScores,
+	ItemTypes
+} from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {
 	const newHistory = {
@@ -189,28 +196,28 @@ export function getUpdatedItemtypeData(
 	oldItemIndex: number,
 	itemQuestions: number,
 	MAX_ITEM_HISTORY_LENGTH: number
-){
-	const newItemScore:number = (oldItemScore*itemQuestions + newPoints)/(itemQuestions+1);
+) {
+	const newItemScore: number = (oldItemScore * itemQuestions + newPoints) / (itemQuestions + 1);
 	const newHistoryScores: number[] = oldItemScores;
 	let newIndex = -1;
-	if (oldItemIndex===-1){
+	if (oldItemIndex === -1) {
 		newHistoryScores.push(newPoints);
-		if (newHistoryScores.length===MAX_ITEM_HISTORY_LENGTH){
+		if (newHistoryScores.length === MAX_ITEM_HISTORY_LENGTH) {
 			newIndex = 0;
 		}
-	}else{
+	} else {
 		newHistoryScores[oldItemIndex] = newPoints;
-		newIndex = (oldItemIndex + 1)%MAX_ITEM_HISTORY_LENGTH;
+		newIndex = (oldItemIndex + 1) % MAX_ITEM_HISTORY_LENGTH;
 	}
 
-	const newHistoryScore  = newHistoryScores.reduce((a, b) => a + b, 0) / newHistoryScores.length;
-	
+	const newHistoryScore = newHistoryScores.reduce((a, b) => a + b, 0) / newHistoryScores.length;
+
 	return {
 		item_score: newItemScore,
 		item_history_score: newHistoryScore,
 		item_history_scores: newHistoryScores,
 		item_index: newIndex
-	}
+	};
 }
 
 export function getUpdatedScores(
@@ -241,14 +248,15 @@ export function getUpdatedScores(
 		6; // sum of all genre scores divide through number of genre
 	const newScoresHistory: number[] = oldScoresHistory;
 	let newScoresIndex = -1;
-	if (oldScoresIndex===-1){
+	if (oldScoresIndex === -1) {
 		newScoresHistory.push(newOverallScore);
-		if(newScoresHistory.length === MAX_HISTORY_LENGTH) newScoresIndex=0;
-	}else{
-		newScoresHistory[oldScoresIndex]=newOverallScore;
+		if (newScoresHistory.length === MAX_HISTORY_LENGTH) newScoresIndex = 0;
+	} else {
+		newScoresHistory[oldScoresIndex] = newOverallScore;
 		newScoresIndex = (oldScoresIndex + 1) % MAX_HISTORY_LENGTH;
 	}
-	const newOverallHistoryScore = newScoresHistory.reduce((a, b) => a + b, 0) / newScoresHistory.length;
+	const newOverallHistoryScore =
+		newScoresHistory.reduce((a, b) => a + b, 0) / newScoresHistory.length;
 
 	const newGenreHistoryScores: number[] = oldGenreHistoryScoresList;
 	let newGenreHistoryScoresIndex = -1;
@@ -271,7 +279,7 @@ export function getUpdatedScores(
 	return {
 		overall_score: newOverallScore,
 		overall_history_score: newOverallHistoryScore,
-		list_of_scores:newScoresHistory,
+		list_of_scores: newScoresHistory,
 		scores_index: newScoresIndex,
 		genre_score: newGenreScore,
 		genre_level_correct: newGenreLevelCorrect,

@@ -7,9 +7,9 @@ export const WEIGHT_SCORE_OVERALL = 1.5;
 export const WEIGHT_SCORE_HISTORY = 4;
 export const WEIGHT_QUESTIONS_HISTORY = 3.5;
 
-export const WEIGHT_ITEM_QUESTIONS_HISTORY =4.5;
-export const WEIGHT_ITEM_QUESTIONS_OVERALL =2;
-export const WEIGHT_ITEM_SCORE_HISTORY =2.5;
+export const WEIGHT_ITEM_QUESTIONS_HISTORY = 4.5;
+export const WEIGHT_ITEM_QUESTIONS_OVERALL = 2;
+export const WEIGHT_ITEM_SCORE_HISTORY = 2.5;
 export const WEIGHT_ITEM_SCORE_OVERALL = 1;
 
 export type UserData = {
@@ -20,9 +20,9 @@ export type UserData = {
 		shortterm_overall_history: {
 			MAX_HISTORY_LENGTH: number; // proposal =20
 			current_index: number; // index of the oldest element, if overall_questions<20 then index=-1
-			list_of_scores:number[];
+			list_of_scores: number[];
 			score: number;
-		},
+		};
 		overall_questions: number;
 		genre_scores: GenreScores;
 		music_period_scores: {
@@ -41,7 +41,7 @@ export type UserData = {
 		itemtypes: {
 			[item: string]: itemTypeData;
 		};
-		shortterm_itemtype_history:{
+		shortterm_itemtype_history: {
 			MAX_HISTORY_LENGTH: number;
 			current_index: number;
 			list_of_items: ItemTypes[];
@@ -103,7 +103,7 @@ export type itemTypeData = {
 	historyScore: number;
 	historyScores: number[];
 	index: number;
-}
+};
 
 export type GenreData = {
 	overallScore: number;
@@ -123,4 +123,10 @@ export type GenreScores = {
 	folk_music: number;
 };
 
-export type ItemTypes = 'Biography' | 'Discography' | 'Popularity' | 'Lyrics' | 'Coverguess' ;
+export type ItemTypes =
+	| 'Biography'
+	| 'Discography'
+	| 'Popularity'
+	| 'Lyrics'
+	| 'Coverguess'
+	| 'Song';

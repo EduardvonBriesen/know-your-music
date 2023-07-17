@@ -1,18 +1,10 @@
 import type { Genre, Levels } from '$lib/firebase/dataBase.types';
 import { getGenreWithLevelForItem, updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
-import { db } from '$lib/firebase/firebase';
-import { getArtistInfo, getArtistInfoById, getRandomArtist } from '$lib/server/last-fm';
-import { mbidToSpotifyId } from '$lib/server/music-brainz.js';
-import {
-	getArtist as spotifyGetArtist,
-	getToken,
-	getArtistByGenre,
-	getArtist
-} from '$lib/server/spotify';
+import { getArtistInfo } from '$lib/server/last-fm';
+import type { ArtistInfo } from '$lib/server/last-fm.types.js';
+import { getToken, getArtistByGenre, getArtist } from '$lib/server/spotify';
 import { LevenshteinDistance } from '$lib/server/utils.js';
 import { fail } from '@sveltejs/kit';
-
-// TODO: let user adjust difficulty levels
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('biography') || '{}');
@@ -26,6 +18,7 @@ export const load = async ({ cookies }) => {
 	let artistName = '';
 	let artistId = '';
 	let artistBio = '';
+	let artistInfo: ArtistInfo;
 	let options: string[] = current_quiz.options || [];
 
 	if (!current_quiz.artist) {
@@ -37,40 +30,42 @@ export const load = async ({ cookies }) => {
 		artistName = artist.name;
 		artistId = artist.id;
 
-		const artistInfo = await getArtistInfo(artistName);
-		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
+		const _artistInfo = await getArtistInfo(artistName);
+		if ('error' in _artistInfo) return { error: "Couldn't get artist info" };
+		artistInfo = _artistInfo;
 		artistBio = artistInfo.bio?.summary || '';
-
-		if (level === 'level1') {
-			const relatedArtists =
-				artistInfo.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
-			options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
-		}
-
-		if (level === 'level3') {
-			artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
-		}
-
-		cookies.set(
-			'biography',
-			JSON.stringify({
-				artist: artistId,
-				options: options
-			}),
-			{
-				path: '/'
-			}
-		);
 	} else {
 		// get artist from cookie
 		artistId = current_quiz.artist;
 		const artist = await getArtist(spotifyToken, artistId);
 		if ('error' in artist) return { error: "Couldn't get artist" };
 		artistName = artist.name;
-		const artistInfo = await getArtistInfo(artistName);
-		if ('error' in artistInfo) return { error: "Couldn't get artist info" };
+		const _artistInfo = await getArtistInfo(artistName);
+		if ('error' in _artistInfo) return { error: "Couldn't get artist info" };
+		artistInfo = _artistInfo;
 		artistBio = artistInfo.bio?.summary || '';
 	}
+
+	if (level === 'level1') {
+		const relatedArtists =
+			artistInfo.similar?.artist.map((artist) => artist.name).slice(0, 2) || [];
+		options = [artistName, ...relatedArtists].sort(() => Math.random() - 0.5);
+	}
+
+	if (level === 'level3') {
+		artistBio = artistBio.split('.').slice(0, 2).join('.') + '...';
+	}
+
+	cookies.set(
+		'biography',
+		JSON.stringify({
+			artist: artistId,
+			options: options
+		}),
+		{
+			path: '/'
+		}
+	);
 
 	const inputField = '<input />';
 	const blurredField = '<b class="blur">Asdfasdf</b>';
@@ -92,7 +87,7 @@ export const load = async ({ cookies }) => {
 };
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	guess: async ({ request, cookies }) => {
 		const artistId = JSON.parse(cookies.get('biography') || '{}').artist;
 		const genre: Genre = cookies.get('genre') as Genre;
 		const level: Levels = cookies.get('level') as Levels;
@@ -118,7 +113,13 @@ export const actions = {
 		artistBio = artistBio.replaceAll(/<a.*<\/a>/g, '');
 
 		// update user stats
-		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
+		await updateUserProgressData(
+			response.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Biography'
+		);
 
 		const data = await getGenreWithLevelForItem(response.get('user_id') as string);
 		if (data) {
@@ -141,5 +142,18 @@ export const actions = {
 			image: artist.image,
 			bio: artistBio
 		});
+	},
+	hint: async ({ cookies }) => {
+		const level = cookies.get('level') as Levels;
+		if (level === 'level3') {
+			cookies.set('level', 'level2', {
+				path: '/'
+			});
+		}
+		if (level === 'level2') {
+			cookies.set('level', 'level1', {
+				path: '/'
+			});
+		}
 	}
 };
