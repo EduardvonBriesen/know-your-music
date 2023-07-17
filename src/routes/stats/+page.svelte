@@ -1,53 +1,38 @@
 <script lang="ts">
-	import { auth, db } from '$lib/firebase/firebase';
-	import { type ConicStop, ConicGradient } from '@skeletonlabs/skeleton';
-	import { doc, getDoc } from 'firebase/firestore';
-	import { onMount } from 'svelte';
+	import { LineChart } from '@carbon/charts-svelte'
+  	import '@carbon/styles/css/styles.css' // may affect global styles
+  	import '@carbon/charts-svelte/styles.css'
+	import type {UserData,Genre} from '../../lib/firebase/dataBase.types';
+	import {initDataStructure} from '../../lib/firebase/initDemoUser1'; 
+	import {getScoresHistoryLineChart} from '../../lib/firebase/dashboardLoading';	
 
-	let stats = {
-		correct: 1,
-		incorrect: 1
-	};
-
-	let conicStops: ConicStop[] = [
-		{ label: 'Correct', color: 'rgb(var(--color-success-500))', start: 0, end: 50 },
-		{ label: 'Incorrect', color: 'rgb(var(--color-error-500))', start: 50, end: 100 }
-	];
-
-	$: {
-		const winRate = stats.correct / (stats.correct + stats.incorrect);
-
-		conicStops = [
-			{
-				label: 'Correct',
-				color: 'rgb(var(--color-success-500))',
-				start: 0,
-				end: Math.round(winRate * 100 * 100) / 100
-			},
-			{
-				label: 'Incorrect',
-				color: 'rgb(var(--color-error-500))',
-				start: Math.round(winRate * 100 * 100) / 100,
-				end: 100
-			}
-		];
-	}
-
-	onMount(() => {
-		auth.onAuthStateChanged(async (user) => {
-			if (!user) return;
-			const userRef = doc(db, 'users', user.uid);
-			const userDoc = await getDoc(userRef);
-			if (!userDoc.exists()) return;
-			stats = userDoc.data().stats;
-		});
-	});
+	const data = getScoresHistoryLineChart("initDemoUser1", "Genre");
+	
 </script>
 
-<div class="flex place-content-center">
-	<div class="card p-4 w-2/3 text-token bg-surface-50 space-4 m-12 flex place-content-center">
-		<div class="p-6 m-0 w-min">
-			<ConicGradient class="h4" width="w-48" stops={conicStops} legend>Your Answers</ConicGradient>
+<div class="flex justify-center items-center">
+	<div class="w-3/4 md:w-4/5 xl:w-2/3 m-12 h-4/5">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-square">
+				<p>Chart 1</p>
+
+			</div>
+			<div class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-square">
+				<p>Chart 2</p>
+			</div>
+			<div class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-square">
+				<p>Chart 3</p>
+			</div>
+		</div>
+		<div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 h-1/2">
+			<div class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-video">
+				<p>Chart 4</p>
+			</div>
+			<div class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-video">
+				<p>Chart 5</p>
+			</div>
 		</div>
 	</div>
 </div>
+
+
