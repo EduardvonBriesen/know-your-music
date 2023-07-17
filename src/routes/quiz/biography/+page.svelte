@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { authStore } from '../../../store/store';
 	import { Avatar } from '@skeletonlabs/skeleton';
+	import { invalidateAll } from '$app/navigation';
 
 	export let data;
 	export let form;
@@ -31,6 +32,11 @@
 			feedback = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
 		}
 	}
+
+	const reload = async () => {
+		await invalidateAll();
+		form = null;
+	};
 </script>
 
 <header class="card-header flex flex-col items-center">
@@ -132,9 +138,7 @@
 					class:variant-filled-success={form?.correct}
 					class:variant-filled-error={!form?.correct}
 					type="button"
-					on:click={() => {
-						window.location.reload();
-					}}
+					on:click={reload}
 					>Continue
 				</button>
 			</div>

@@ -6,6 +6,7 @@
 	import { authStore } from '../../../store/store.js';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { invalidateAll } from '$app/navigation';
 
 	export let data;
 	export let form;
@@ -34,7 +35,7 @@
 		}
 	}
 
-	$: feedback = '';
+	let feedback = '';
 
 	const positiveFeedback = ['Good job!', 'Amazing!', 'Correct answer, keep going!'];
 
@@ -52,6 +53,11 @@
 		event: 'hover',
 		target: 'popupHover',
 		placement: 'top'
+	};
+
+	const reload = async () => {
+		form = null;
+		await invalidateAll();
 	};
 </script>
 
@@ -98,17 +104,17 @@
 				<Avatar
 					class="w-auto aspect-square"
 					rounded="rounded-xl"
-					border={!form
-						? ''
-						: form?.result.get(item.name).correct
-						? 'border-4 border-success-500'
-						: 'border-4 border-error-500'}
+					border={!!form
+						? form?.result.get(item.name).correct
+							? 'border-4 border-success-500'
+							: 'border-4 border-error-500'
+						: ''}
 					cursor={!form ? 'cursor-pointer' : 'cursor-default'}
 					src={item.image}
 					alt={item.name}
 				/>
 				<p class="text-center line-clamp-1">{item.name}</p>
-				{#if form}
+				{#if !!form}
 					{#if form?.result.get(item.name).correct}
 						<span class="text-success-500">{form?.result.get(item.name).date}</span>
 					{:else}
@@ -139,10 +145,10 @@
 				<button
 					class="btn w-fit {form?.correct ? 'variant-filled-success' : 'variant-filled-error'}"
 					type="button"
-					on:click={() => {
-						window.location.reload();
-					}}>Continue</button
+					on:click={reload}
 				>
+					Continue
+				</button>
 			</div>
 		{/if}
 	</footer>
