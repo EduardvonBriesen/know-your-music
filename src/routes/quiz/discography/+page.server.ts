@@ -149,7 +149,7 @@ export const actions = {
 
 		return fail(200, {
 			result,
-			score
+			score: Math.round(score * 100) / 100
 		});
 	}
 };
