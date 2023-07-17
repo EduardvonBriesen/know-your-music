@@ -3,7 +3,7 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
-	import { authStore } from '../../../store/store.js';
+	import { animateHandler, authStore } from '../../../store/store.js';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { invalidateAll } from '$app/navigation';
@@ -58,6 +58,7 @@
 	const reload = async () => {
 		form = null;
 		await invalidateAll();
+		animateHandler.animate();
 	};
 </script>
 
@@ -135,17 +136,16 @@
 		<footer
 			class="card-footer flex flex-col p-0 rounded-bl-container-token rounded-br-container-token items-center ring-outline-token {!form
 				? ''
-				: form?.correct
+				: form?.score > 0.5
 				? 'bg-success-200'
 				: 'bg-error-200'}"
 		>
 			<div class="flex justify-between items-center w-full p-6">
 				<p class="text-center">
-					You scored <span class="text-primary-500">{form?.score}</span> out of
-					<span class="text-primary-500">{form?.result.size}</span> points!
+					You scored <strong>{form?.score}</strong> points!
 				</p>
 				<button
-					class="btn w-fit {form?.correct ? 'variant-filled-success' : 'variant-filled-error'}"
+					class="btn w-fit {form?.score > 0.5 ? 'variant-filled-success' : 'variant-filled-error'}"
 					type="button"
 					on:click={reload}
 				>

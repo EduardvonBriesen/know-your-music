@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { confetti } from '@neoconfetti/svelte';
 	import { enhance } from '$app/forms';
-	import { authStore } from '../../../store/store';
+	import { animateHandler, authStore } from '../../../store/store';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { invalidateAll } from '$app/navigation';
 
@@ -35,6 +35,7 @@
 
 	const reload = async () => {
 		await invalidateAll();
+		animateHandler.animate();
 		form = null;
 	};
 </script>
