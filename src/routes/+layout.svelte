@@ -84,18 +84,18 @@
 
 <AppShell>
 	<svelte:fragment slot="header">
-		<AppBar class="px-8 shadow-sm bg-surface-50">
+		<AppBar class="px-8 shadow-sm !variant-soft-surface">
 			<svelte:fragment slot="lead">
 				<a class="text-secondary-500 text-2xl font-bold" href="/">Know Your Music</a>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<nav>
-					<button class="btn variant-filled-surface btn-sm" use:popup={popupCombobox}>
+					<button class="btn variant-soft-secondary btn-sm" use:popup={popupCombobox}>
 						<span class="capitalize">{comboboxValue ?? 'Quiz'}</span>
 						<span>↓</span>
 					</button>
-					<div class="card variant-filled-surface-50" data-popup="popupCombobox">
-						<ListBox rounded="rounded-none">
+					<div class="card " data-popup="popupCombobox">
+						<ListBox class="p-1">
 							<a href="/quiz/popularity">
 								<ListBoxItem bind:group={comboboxValue} name="medium" value="Popularity">
 									Popularity
@@ -126,10 +126,10 @@
 							</a>
 						</ListBox>
 					</div>
-					<button class="btn variant-filled-surface btn-sm">
+					<button class="btn variant-soft-secondary btn-sm">
 						<a href="/stats">Stats</a>
 					</button>
-					<button class="btn variant-filled-surface btn-sm">
+					<button class="btn variant-soft-secondary btn-sm">
 						<a href="/about">About</a>
 					</button>
 					<button
