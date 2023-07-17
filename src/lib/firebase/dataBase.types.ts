@@ -130,3 +130,17 @@ export type ScoreType = 'Overall' | 'History';
 export type ScoreHistoryType = 'Genre' | 'Itemtype' | 'Overall';
 
 export type ItemGenreType = 'Genre' | 'Itemtype';
+
+export type HistoryElement = {
+	date: string,
+	accumulated_duration: number;
+	sessions: SessionElement[];
+	last_score: number;
+};
+
+export type SessionElement = {
+	begin: Date;
+	duration: number;
+	final_score: number;
+	final_history_score: number;
+};
