@@ -96,7 +96,7 @@
 				formData.set('user_id', user_id);
 			}}
 		>
-			<button class="btn btn-lg variant-filled-surface">Start</button>
+			<button class="btn btn-lg variant-filled-secondary">Start</button>
 		</form>
 	{/if}
 
@@ -125,7 +125,7 @@
 				{#each data.options ?? [] as option}
 					<button
 						class="btn btn-lg disabled:opacity-100"
-						class:variant-soft-surface={form?.correct !== option.name &&
+						class:variant-glass-surface={form?.correct !== option.name &&
 							form?.false !== option.name}
 						class:variant-filled-success={form?.correct === option.name}
 						class:variant-filled-error={form?.false === option.name}
