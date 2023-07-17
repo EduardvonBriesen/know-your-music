@@ -494,9 +494,23 @@ export const initDataStructure = (name: string, email: string) => {
 			}
 		},
 		logs: {
-			registered_since: dates[0],
-			overall_duration: caluculateOverallDuration(history),
-			history:history
+			registered_since: new Date(),
+			overall_duration: 0,
+			history: [
+				{
+					date: new Date().toLocaleDateString(),
+					accumulated_duration: 0,
+					sessions: [
+						{
+							begin: new Date(),
+							duration: 0,
+							final_score: 0,
+							final_history_score: 0
+						}
+					],
+					last_score: 0
+				}
+			]
 		}
 	};
 	return data;
