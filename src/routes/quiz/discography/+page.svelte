@@ -3,7 +3,7 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
-	import { authStore } from '../../../store/store.js';
+	import { animateHandler, authStore } from '../../../store/store.js';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { invalidateAll } from '$app/navigation';
@@ -58,6 +58,7 @@
 	const reload = async () => {
 		form = null;
 		await invalidateAll();
+		animateHandler.animate();
 	};
 </script>
 
