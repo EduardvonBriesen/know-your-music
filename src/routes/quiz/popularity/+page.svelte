@@ -5,6 +5,7 @@
 	import { authStore } from '../../../store/store';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { invalidateAll } from '$app/navigation';
 
 	export let data;
 	export let form;
@@ -38,6 +39,11 @@
 		event: 'hover',
 		target: 'popupHover',
 		placement: 'top'
+	};
+
+	const reload = async () => {
+		await invalidateAll();
+		form = null;
 	};
 </script>
 
@@ -102,8 +108,10 @@
 				class="btn w-fit"
 				class:variant-filled-success={!form?.false}
 				class:variant-filled-error={form?.false}
-				on:click={() => window.location.reload()}>Continue</button
+				on:click={reload}
 			>
+				Continue
+			</button>
 		</div>
 	</footer>
 {/if}
