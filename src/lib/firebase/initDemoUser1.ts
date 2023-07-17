@@ -16,31 +16,140 @@ type SessionElement = {
 }
 
 
-const dates: Date[] = [
-	new Date("2022-06-01T00:00:00.000Z"),
-	new Date("2022-10-31T10:30:00"),
-
-]
-
-function generateRandomHistory():HistoryElement[]{
+function generateRandomHistory(dates: Date[]):HistoryElement[]{
 	const history: HistoryElement[] = [];
-	for (const itr=0; itr<30;){
-		const date: Date = new Date("somethingToDo");
-		const accumulateDuration = 0;
-		const newSessions: SessionElement[] = [];
-
+	let date: Date = dates[0];
+	for (let itr=0; itr<dates.length;itr++){
+		date = dates[itr];
+		const {sessions, accumulatedDuration} = generateRandomSession(date);
 		const newHistory: HistoryElement = {
 			date: date.toLocaleDateString(),
-			accumulated_duration: accumulateDuration,
-			sessions: newSessions
+			accumulated_duration: accumulatedDuration,
+			sessions: sessions
 		}
 		history.push(newHistory)
+		//date = dates[it];
 	}
 	return history;
+}
 
+function caluculateOverallDuration(history: HistoryElement[]):number{
+	let result = 0;
+	for(const hist of history){
+		result = result + hist.accumulated_duration;
+	}
+	return result;
+}
+
+function generateRandomSession(date:Date): 
+{
+	sessions: SessionElement[], 
+	accumulatedDuration: number
+}
+{
+	const sessions: SessionElement[] = [];
+	const sessionCount = 1+Math.floor(Math.random()*10)
+
+	let overall_duration = 0;
+	let duration = 0;
+	let score= 0;
+	let historyScore= 0;
+	let begin: Date = new Date();
+
+	for (let itr=0; itr<sessionCount; itr++){
+		if (itr===0){
+			begin = date; // first login this day
+		}else{
+			begin = getNextDate(begin, duration); // after the first login on this day
+		}
+
+		duration = Math.round(Math.random()*500);
+		overall_duration = overall_duration + duration;
+		score = parseFloat((0.95*Math.random()).toFixed(3)+0.05)
+		historyScore = parseFloat((0.8*Math.random()).toFixed(3)+0.2)
+
+		const newSession: SessionElement = {
+			begin: begin,
+			duration: duration,
+			final_score: score,
+			final_history_score: historyScore
+		}
+		sessions.push(newSession)
+	}
+	return {
+		sessions: sessions,
+		accumulatedDuration:overall_duration
+	}
+}
+
+function getNextDate(old: Date, duration: number){
+	old.setSeconds(duration+ (20*60 + 4000*Math.random()))
+	const newDate:Date = new Date(old.toString());
+	return newDate;
+}
+
+function getRandomTime(startHour:number, endHour:number) {
+	const hour = Math.floor(Math.random() * (endHour - startHour + 1)) + startHour;
+	const minutes = Math.floor(Math.random() * 60);
+	return `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
 export const initDataStructure = (name: string, email: string) => {
+	const dates: Date[] = [
+		new Date("2023-05-16T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-17T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-18T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-19T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-20T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-21T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-22T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-24T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-25T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-26T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-27T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-28T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-29T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-05-30T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-01T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-02T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-03T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-04T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-05T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-06T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-08T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-09T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-10T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-11T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-13T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-14T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-15T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-16T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-17T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-18T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-19T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-21T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-22T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-23T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-24T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-25T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-27T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-06-30T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-01T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-02T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-04T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-05T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-07T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-08T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-10T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-12T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-13T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-14T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-15T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-16T" + getRandomTime(8, 12) + ":00.000Z"),
+		new Date("2023-07-17T" + getRandomTime(8, 12) + ":00.000Z"),
+	  ];
+	const history: HistoryElement[] = generateRandomHistory(dates);
+
 	const data: UserData = {
 		name: name,
 		email: email,
@@ -385,34 +494,9 @@ export const initDataStructure = (name: string, email: string) => {
 			}
 		},
 		logs: {
-			registered_since: new Date(),
-			overall_duration: 0,
-			history: [
-				{
-					date: new Date().toLocaleDateString(),
-					accumulated_duration: 0,
-					sessions: [
-						{
-							begin: new Date(),
-							duration: 0,
-							final_score: 0,
-							final_history_score: 0
-						}
-					]
-				},
-				{
-					date: new Date().toLocaleDateString(),
-					accumulated_duration: 0,
-					sessions: [
-						{
-							begin: new Date(),
-							duration: 0,
-							final_score: 0,
-							final_history_score: 0
-						}
-					]
-				}
-			]
+			registered_since: dates[0],
+			overall_duration: caluculateOverallDuration(history),
+			history:history
 		}
 	};
 	return data;
