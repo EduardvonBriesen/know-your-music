@@ -87,9 +87,9 @@
 		<AppBar class="px-8 shadow-sm !variant-soft-surface">
 			<svelte:fragment slot="lead">
 				<a href="/">
-					<img class="absolute top-3.5 h-8 overflow-visible" src="/images/Logo_navbar.svg" alt="logo">
+					<img class="absolute top-[15px] h-8 overflow-visible" src="/images/Logo_navbar.svg" alt="logo">
 				  </a>
-				<a class="absolute top-5 text-secondary-500 text-2xl font-bold ml-20" href="/">Know Your Music</a>
+				<a class="absolute top-[22px] text-secondary-500 text-2xl font-bold ml-[85px] " href="/">Know Your Music</a>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
 				<nav class="mt-12 sm:mt-0">
