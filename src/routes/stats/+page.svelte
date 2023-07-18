@@ -1,9 +1,17 @@
 <script async script lang="ts">
-	import { BarChartGrouped, DonutChart, GaugeChart, LineChart, RadarChart } from '@carbon/charts-svelte';
+	import {
+		Alignments,
+		BarChartGrouped,
+		DonutChart,
+		GaugeChart,
+		LineChart,
+		RadarChart,
+		ScaleTypes
+	} from '@carbon/charts-svelte';
+	
 	import '@carbon/styles/css/styles.css'; // may affect global styles
 	import '@carbon/charts-svelte/styles.css';
-	import type { UserData, Genre } from '../../lib/firebase/dataBase.types';
-	import { initDataStructure } from '../../lib/firebase/initDemoUser1';
+
 	import {
 		getGenreOrItemtypeQuestionsDonutChart,
 		getLevelGenreVerticalGroupedBarChart,
@@ -32,7 +40,19 @@
 				{#await donutDataGenre}
 					<p>Loading...</p>
 				{:then data}
-					<DonutChart data={data.data} options={data.options} />
+					<DonutChart
+						{data}
+						options={{
+							title: 'Blub',
+							resizable: true,
+							donut: {
+								alignment: Alignments.CENTER,
+								center: {
+									label: 'Overall Questions'
+								}
+							}
+						}}
+					/>
 				{/await}
 			</div>
 			<div
@@ -41,7 +61,18 @@
 				{#await radarDataGenre}
 					<p>Loading...</p>
 				{:then data}
-					<RadarChart data={data.data} options={data.options} />
+					<RadarChart
+						{data}
+						options={{
+							title: 'Genre Scores - Alltime vs. short-term History',
+							radar: {
+								axes: {
+									angle: 'feature', //dont change
+									value: 'value' // dont change
+								}
+							}
+						}}
+					/>
 				{/await}
 			</div>
 			<div
@@ -50,7 +81,18 @@
 				{#await gaugeDataGenre}
 					<p>Loading...</p>
 				{:then data}
-					<GaugeChart data={data.data} options={data.options} />
+					<GaugeChart
+						{data}
+						options={{
+							title: 'Gauge semicircular -- danger status',
+							resizable: true,
+							gauge: {
+								type: 'semi', //GaugeTypes.SEMI,
+								status: 'danger' // Statuses.DANGER
+							}
+							//"theme": "g10"
+						}}
+					/>
 				{/await}
 			</div>
 		</div>
@@ -61,7 +103,26 @@
 				{#await lineDataGenre}
 					<p>Loading...</p>
 				{:then data}
-					<LineChart data={data.data} options={data.options} />
+					<LineChart
+						{data}
+						options={{
+							title: 'Line (discrete)',
+							axes: {
+								bottom: {
+									title: '2019 Annual Sales Figures',
+									mapsTo: 'key',
+									scaleType: ScaleTypes.LABELS
+								},
+								left: {
+									mapsTo: 'value',
+									title: 'Conversion rate',
+									scaleType: ScaleTypes.LINEAR
+								}
+							}
+							// "height": "400px",
+							//"theme": "g100"
+						}}
+					/>
 				{/await}
 			</div>
 			<div
@@ -70,7 +131,22 @@
 				{#await barDataGenre}
 					<p>Loading...</p>
 				{:then data}
-					<BarChartGrouped data={data.data} options={data.options} />
+					<BarChartGrouped
+						{data}
+						options={{
+							title: 'Vertical grouped bar (discrete)',
+							axes: {
+								left: {
+									mapsTo: 'value'
+								},
+								bottom: {
+									scaleType: ScaleTypes.LABELS,
+									mapsTo: 'key'
+								}
+							}
+							//"theme": "g100"
+						}}
+					/>
 				{/await}
 			</div>
 		</div>

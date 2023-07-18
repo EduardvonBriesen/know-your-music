@@ -8,16 +8,8 @@ import type {
 	ItemTypes,
 	ItemGenreType
 } from './dataBase.types';
-import {
-	type DonutChartOptions,
-	type ChartTabularData,
-	type RadarChartOptions,
-	type GaugeChartOptions,
-	type LineChartOptions,
-	type BarChartOptions,
-	Alignments
-} from '@carbon/charts-svelte';
 import { db } from './firebase';
+import type { ChartTabularData } from '@carbon/charts-svelte';
 
 export async function getGenreOrItemtypeQuestionsDonutChart(docName: string, type: ItemGenreType) {
 	const collectionsName = 'users';
@@ -51,19 +43,7 @@ export async function getGenreOrItemtypeQuestionsDonutChart(docName: string, typ
 		}
 	}
 
-	const options: DonutChartOptions = {
-		title: 'Blub',
-		resizable: true,
-		donut: {
-			alignment: Alignments.CENTER,
-			center: {
-				label: 'Overall Questions'
-			}
-		},
-		height: '100%'
-	};
-
-	return { data, options };
+	return data;
 }
 
 export async function getGenreOrItemtypeScoresOverallAndHistoryRadarChart(
@@ -114,16 +94,7 @@ export async function getGenreOrItemtypeScoresOverallAndHistoryRadarChart(
 		}
 	}
 
-	const options: RadarChartOptions = {
-		title: 'Genre Scores - Alltime vs. short-term History',
-		radar: {
-			axes: {
-				angle: 'feature', //dont change
-				value: 'value' // dont change
-			}
-		}
-	};
-	return { data, options };
+	return data;
 }
 
 export async function getScoreGaugeChart(docName: string, scoreType: ScoreType) {
@@ -156,19 +127,7 @@ export async function getScoreGaugeChart(docName: string, scoreType: ScoreType) 
 		}
 	];
 
-	const options: GaugeChartOptions = {
-		title: 'Gauge semicircular -- danger status',
-		resizable: true,
-		height: '250px',
-		width: '100%',
-		gauge: {
-			type: 'semi', //GaugeTypes.SEMI,
-			status: 'danger' // Statuses.DANGER
-		}
-		//"theme": "g10"
-	};
-
-	return { data, options };
+	return data;
 }
 
 export async function getLevelGenreVerticalGroupedBarChart(docName: string) {
@@ -195,24 +154,7 @@ export async function getLevelGenreVerticalGroupedBarChart(docName: string) {
 		}
 	}
 
-	const options: BarChartOptions = {
-		title: 'Vertical grouped bar (discrete)',
-		axes: {
-			left: {
-				mapsTo: 'value'
-			},
-			bottom: {
-				scaleType: 'labels',
-				mapsTo: 'key'
-			}
-		}
-		//"theme": "g100"
-	};
-
-	return {
-		data: data,
-		options: options
-	};
+	return data;
 }
 
 export async function getScoresHistoryLineChart(docName: string, type: ScoreHistoryType) {
@@ -278,26 +220,5 @@ export async function getScoresHistoryLineChart(docName: string, type: ScoreHist
 		}
 	}
 
-	const options: LineChartOptions = {
-		title: 'Line (discrete)',
-		axes: {
-			bottom: {
-				title: '2019 Annual Sales Figures',
-				mapsTo: 'key',
-				scaleType: 'labels'
-			},
-			left: {
-				mapsTo: 'value',
-				title: 'Conversion rate',
-				scaleType: 'linear'
-			}
-		}
-		// "height": "400px",
-		//"theme": "g100"
-	};
-
-	return {
-		data: data,
-		options: options
-	};
+	return data;
 }
