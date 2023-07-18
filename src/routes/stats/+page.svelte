@@ -2,6 +2,7 @@
 	import {
 		Alignments,
 		BarChartGrouped,
+		BarChartSimple,
 		DonutChart,
 		GaugeChart,
 		LineChart,
@@ -17,7 +18,10 @@
 		getGenreOrItemtypeScoresOverallAndHistoryRadarChart,
 		getLevelGenreVerticalGroupedBarChart,
 		getScoreGaugeChart,
-		getScoresHistoryLineChart
+		getScoresHistoryLineChart,
+		lineChartTimeBaseScore,
+		verticalSimpleBarDurationDay,
+		verticalSimpleBarDurationIntraDay
 	} from '../../lib/firebase/dashboardLoading';
 	import { authStore } from '../../store/store';
 
@@ -27,6 +31,9 @@
 		user_id = store.user.uid;
 	});
 
+	const barDataIntraDay = verticalSimpleBarDurationIntraDay(user_id);
+	const barDataDay = verticalSimpleBarDurationDay(user_id);
+	const lineDataScore = lineChartTimeBaseScore(user_id);
 	const donutDataGenre = getGenreOrItemtypeQuestionsDonutChart(user_id, 'Genre');
 	const donutDataItem = getGenreOrItemtypeQuestionsDonutChart(user_id, 'Itemtype');
 	const radarDataGenre = getGenreOrItemtypeScoresOverallAndHistoryRadarChart(user_id, 'Genre');
@@ -39,6 +46,88 @@
 <div class="first-letter: flex justify-center items-center">
 	<div class="w-full md:w-4/5 xl:w-2/3 m-12 h-4/5">
 		<div class="carbon-graph grid grid-flow-row-dense grid-cols-2 xl:grid-cols-3 gap-4">
+			<div class="card variant-soft-surface p-4 aspect-[2/1] col-span-2">
+				{#await lineDataScore}
+					<p>Loading...</p>
+				{:then data}
+					<LineChart
+						{data}
+						options={{
+							title: 'Score History',
+							axes: {
+								bottom: {
+									title: 'Time',
+									mapsTo: 'date',
+									scaleType: ScaleTypes.TIME
+								},
+								left: {
+									mapsTo: 'value',
+									title: 'Score',
+									scaleType: ScaleTypes.LINEAR
+								}
+							},
+							curve: 'curveMonotoneX',
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 aspect-[2/1] col-span-2">
+				{#await barDataDay}
+					<p>Loading...</p>
+				{:then data}
+					<BarChartSimple
+						{data}
+						options={{
+							title: 'Time spent per day',
+							axes: {
+								bottom: {
+									title: 'Time',
+									mapsTo: 'date',
+									scaleType: ScaleTypes.TIME
+								},
+								left: {
+									mapsTo: 'value',
+									title: 'Score',
+									scaleType: ScaleTypes.LINEAR
+								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 aspect-[2/1] col-span-2">
+				{#await barDataIntraDay}
+					<p>Loading...</p>
+				{:then data}
+					<BarChartSimple
+						{data}
+						options={{
+							title: 'Time Spent intra Day',
+							axes: {
+								bottom: {
+									title: 'Time',
+									mapsTo: 'date',
+									scaleType: ScaleTypes.TIME
+								},
+								left: {
+									mapsTo: 'value',
+									title: 'Score',
+									scaleType: ScaleTypes.LINEAR
+								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
 			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await donutDataGenre}
 					<p>Loading...</p>
