@@ -1,4 +1,6 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { Avatar } from '@skeletonlabs/skeleton';
 	import RotatingTitle from '../components/RotatingTitle.svelte';
 </script>
 
@@ -12,20 +14,20 @@
 	rotatingWords={['music', 'artist', 'band', 'lyrics', 'music']}
 	description="Unleash your musical expertise through captivating quizzes, from discography to karaoke
 	challenges. Elevate your music knowledge and let your passion shine."
-	showButton={true}
 />
 
 <div class="flex justify-center items-center">
-	<div class="m-6 my-24 w-2/3 xl:w-1/2 max-w-7xl">
-		<h2 class="text-4xl font-bold flex justify-center mb-12">Our quizzes</h2>
-		<grid
-			class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-6 mt-6"
-		>
+	<div class="m-6 w-2/3 xl:w-1/2 max-w-7xl">
+		<grid class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-6 mt-6">
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Bio_quiz.png"
 					alt="Biography"
+					on:click={() => {
+						goto('/quiz/biography');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Biography. <span class="text-surface-500">
@@ -34,10 +36,14 @@
 				</p>
 			</div>
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Cover_quiz.png"
 					alt="Cover"
+					on:click={() => {
+						goto('/quiz/covers');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Cover. <span class="text-surface-500">
@@ -46,10 +52,14 @@
 				</p>
 			</div>
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Discography_quiz.png"
 					alt="Discography"
+					on:click={() => {
+						goto('/quiz/discography');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Discography. <span class="text-surface-500">
@@ -59,10 +69,14 @@
 				</p>
 			</div>
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Lyrics_quiz.png"
 					alt="Lyrics"
+					on:click={() => {
+						goto('/quiz/lyrics');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Lyrics. <span class="text-surface-500">
@@ -71,10 +85,14 @@
 				</p>
 			</div>
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Popularity_quiz.png"
 					alt="Popularity"
+					on:click={() => {
+						goto('/quiz/popularity');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Popularity. <span class="text-surface-500"
@@ -83,10 +101,14 @@
 				</p>
 			</div>
 			<div class="flex flex-col">
-				<img
-					class="h-auto max-w-full object-cover rounded-md aspect-square shadow-lg"
+				<Avatar
+					class="rounded-md shadow-lg hover:scale-105 transition-all cursor-pointer"
+					width="w-full"
 					src="/images/Song_quiz.png"
 					alt="Song"
+					on:click={() => {
+						goto('/quiz/song');
+					}}
 				/>
 				<p class="font-semibold mt-4">
 					Song. <span class="text-surface-500"

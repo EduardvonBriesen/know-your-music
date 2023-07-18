@@ -2,7 +2,6 @@
 	export let preTitle: string;
 	export let rotatingWords: string[];
 	export let description: string;
-	export let showButton: boolean;
 
 	const colorClasses = [
 		'text-secondary-500',
@@ -27,9 +26,6 @@
 	<div class="flex justify-center">
 		<p class="h4 max-w-xl mx-8">{description}</p>
 	</div>
-	{#if showButton}
-		<button class="btn variant-filled-secondary btn-lg variant-filled m-8"> Start quiz </button>
-	{/if}
 </section>
 
 <style>
