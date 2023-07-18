@@ -64,6 +64,7 @@ export type UserData = {
 				final_score: number;
 				final_history_score: number;
 			}[];
+			last_score: number;
 		}[];
 	};
 };
@@ -122,6 +123,12 @@ export type GenreScores = {
 	rap: number;
 	folk_music: number;
 };
+
+export type ScoreType = 'Overall' | 'History';
+
+export type ScoreHistoryType = 'Genre' | 'Itemtype' | 'Overall';
+
+export type ItemGenreType = 'Genre' | 'Itemtype';
 
 export type ItemTypes =
 	| 'Biography'

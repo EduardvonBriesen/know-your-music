@@ -14,12 +14,15 @@
 
 <section class="text-center">
 	<div
-		class="wrapper text-5xl sm:text-7xl 2xl:text-8xl font-bold justify-center mt-16 mb-6 h-14 sm:h-20 2xl:h-28"
+		class="box-content flex text-5xl sm:text-7xl 2xl:text-8xl font-bold justify-center mt-16 mb-6 h-14 sm:h-20 2xl:h-28"
 	>
 		<p>{preTitle}</p>
-		<div class="words">
+		<div class="box-border overflow-hidden">
 			{#each rotatingWords as world, i}
-				<span class="span_titel text-left {colorClasses[i % colorClasses.length]}">{world}</span>
+				<span
+					class="spin-words block pl-4 text-left h-full {colorClasses[i % colorClasses.length]}  "
+					>{world}</span
+				>
 			{/each}
 		</div>
 	</div>
@@ -29,20 +32,7 @@
 </section>
 
 <style>
-	.wrapper {
-		box-sizing: border-box;
-		box-sizing: content-box;
-		display: flex;
-	}
-	.words {
-		box-sizing: border-box;
-		overflow: hidden;
-	}
-	.span_titel {
-		box-sizing: border-box;
-		display: block;
-		height: 100%;
-		padding-left: 0.5ch;
+	.spin-words {
 		animation: spin_words 6s infinite;
 	}
 	@keyframes spin_words {

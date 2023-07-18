@@ -1,4 +1,4 @@
-import { doc, getDoc, updateDoc, type DocumentData, Firestore } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, type DocumentData } from 'firebase/firestore';
 import { MAX_HISTORY_LENGTH, MAX_ITEM_HISTORY_LENGTH } from './dataBase.types';
 import type { UserData, Genre, Levels, LevelData, ItemTypes } from './dataBase.types';
 import {
@@ -19,7 +19,7 @@ import {
 } from './dataBaseHelpers';
 import { db } from './firebase';
 
-export const saveHistory = async (docName: string, db: Firestore) => {
+export const saveHistory = async (docName: string) => {
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);
@@ -57,7 +57,7 @@ export const saveHistory = async (docName: string, db: Firestore) => {
 	}
 };
 
-export const addNewHistory = async (docName: string, db: Firestore, userData: DocumentData) => {
+export const addNewHistory = async (docName: string, userData: DocumentData) => {
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const dateObject = new Date();
@@ -397,7 +397,8 @@ export const initDataStructure = (name: string, email: string) => {
 							final_score: 0,
 							final_history_score: 0
 						}
-					]
+					],
+					last_score: 0,
 				}
 			]
 		}
@@ -405,7 +406,8 @@ export const initDataStructure = (name: string, email: string) => {
 	return data;
 };
 
-export async function getNextItem(docName: string, db: Firestore) {
+
+export async function getNextItem(docName: string){
 	const collectionsName = 'users';
 	const docRef = doc(db, collectionsName, docName);
 	const docSnap = await getDoc(docRef);

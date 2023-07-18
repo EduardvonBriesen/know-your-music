@@ -11,6 +11,7 @@
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import { addNewHistory, saveHistory, initDataStructure } from '../lib/firebase/dataBaseLoadings';
+	//import { initDataStructure2 } from '../lib/firebase/initDemoUser2';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import Blobs from '../components/Blobs.svelte';
@@ -44,12 +45,13 @@
 				//signup
 				const userRef = doc(db, 'users', user.uid);
 				dataToSetStore = initDataStructure('tbd_name', user.email);
+				//dataToSetStore = initDataStructure2();
 				await setDoc(userRef, dataToSetStore, { merge: true });
 			} else {
 				//login
 				const userData = docSnap.data();
 				dataToSetStore = userData;
-				addNewHistory(user.uid, db, userData);
+				addNewHistory(user.uid, userData);
 			}
 
 			authStore.update((store) => {
@@ -68,7 +70,7 @@
 		authStore.subscribe((store: any) => {
 			user_id = store.user.uid;
 		});
-		await saveHistory(user_id, db);
+		await saveHistory(user_id);
 		authHandler.logout();
 	};
 

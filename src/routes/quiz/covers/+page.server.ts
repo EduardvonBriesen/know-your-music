@@ -1,9 +1,11 @@
 import type { Genre, Levels } from '$lib/firebase/dataBase.types';
 import { getToken, getSeveralAlbums, getArtistByGenre, getArtistAlbums } from '$lib/server/spotify';
 import { fail } from '@sveltejs/kit';
-import { read, MIME_JPEG } from 'jimp';
+import jimp from 'jimp';
 import CryptoJS from 'crypto-js';
 import { getGenreWithLevelForItem, updateUserProgressData } from '$lib/firebase/dataBaseLoadings';
+
+const { read, MIME_JPEG } = jimp;
 
 export const load = async ({ cookies }) => {
 	const current_quiz = JSON.parse(cookies.get('covers') || '{}');

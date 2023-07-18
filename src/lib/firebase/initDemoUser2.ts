@@ -2,10 +2,10 @@ import type { UserData } from './dataBase.types';
 
 const MAX_HISTORY_LENGTH = 20;
 
-export function initDataStructure():UserData{
+export function initDataStructure2():UserData{
     return {
-        "name": "Nick",
-        "email": "demo@demo.de",
+        "name": "Max Mustermann",
+        "email": "DEMO@DEMO2.de",
         "progress": {
           "overall_score": 0.449,
           "shortterm_overall_history": {
@@ -363,6 +363,24 @@ export function initDataStructure():UserData{
             "Discography": {
               "overallQuestions": 88,
               "overallScore": 0.33,
+              "historyScore": 0.6,
+              "historyScores": [
+                1,
+                0.3,
+                0,
+                1,
+                1,
+                0.8,
+                0.3,
+                0.8,
+                0,
+                0.8
+              ],
+              "index": 8
+            },
+            "Song": {
+              "overallQuestions": 68,
+              "overallScore": 0.449,
               "historyScore": 0.6,
               "historyScores": [
                 1,

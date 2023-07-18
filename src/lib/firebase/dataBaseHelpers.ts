@@ -12,7 +12,8 @@ import type {
 	LevelData,
 	GenreData,
 	GenreScores,
-	ItemTypes
+	ItemTypes,
+	Levels
 } from './dataBase.types';
 
 export function newHistoryArrayElement(date: Date) {

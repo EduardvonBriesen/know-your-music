@@ -42,12 +42,18 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"crypto-js": "^4.1.1",
-		"firebase": "^9.22.1",
-		"jimp": "^0.22.8",
+		"@carbon/charts": "^1.11.11",
+		"@carbon/charts-svelte": "^1.10.5",
+		"@carbon/styles": "^1.33.1",
 		"@floating-ui/dom": "^1.4.3",
+		"crypto-js": "^4.1.1",
+		"d3": "^7.8.5",
+		"d3-cloud": "^1.2.5",
+		"d3-sankey": "^0.12.3",
+		"firebase": "^9.22.1",
 		"genius-lyrics-api": "^3.2.0",
 		"ioredis": "^5.3.2",
+		"jimp": "^0.22.8",
 		"noisejs": "^2.1.0"
 	}
 }
