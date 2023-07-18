@@ -24,36 +24,32 @@
 			<div class="flex flex-col">
 				<div class="img_Eduard aspect-square rounded-md max-w-full shadow-lg" />
 				<p class="font-semibold mt-4">
-					Eduard von Briesen. <span class="text-[#86868b]"
-						>Pellentesque tristique nisi sed ullamcorper pellentesque. Morbi ultricies ligula quis
-						ipsum elementum iaculis. Sed sit.</span
+					Eduard von Briesen. <span class="text-surface-500"
+						>Hey, I'm Eduard, I'll listen to an Album non-stop for weeks, claim its the best thing ever and then forget about it until I rediscover it two years later, realizing it's just okay.</span
 					>
 				</p>
 			</div>
 			<div class="flex flex-col">
 				<div class="img_Lou aspect-square rounded-md max-w-full shadow-lg" />
 				<p class="font-semibold mt-4">
-					Louisa Ullmann. <span class="text-[#86868b]"
-						>Sed dignissim magna sit amet suscipit viverra. Nunc vulputate metus dapibus felis
-						laoreet, nec pharetra.</span
+					Louisa Ullmann. <span class="text-surface-500"
+						>Hi, I'm Lou and when I go for a run, I switch my Spotify Mode to private so that my friends can't caught me listening to my guilty pleasure playlists.</span
 					>
 				</p>
 			</div>
 			<div class="flex flex-col">
 				<div class="img_Nick aspect-square rounded-md max-w-full shadow-lg" />
 				<p class="font-semibold mt-4">
-					Nick Wiele. <span class="text-[#86868b]"
-						>Nunc blandit posuere metus quis maximus. Proin eleifend elit purus, in tempus justo
-						facilisis finibus.</span
+					Nick Wiele. <span class="text-surface-500"
+						>Hi, this is Nick. Spotify is my most used app. Every night, I listen to podcasts to fall asleep, and in the morning, my alarm clock wakes me up with my favorite song.</span
 					>
 				</p>
 			</div>
 			<div class="flex flex-col">
 				<div class="img_Yousri aspect-square rounded-md max-w-full shadow-lg" />
 				<p class="font-semibold mt-4">
-					Yousri Cherif. <span class="text-[#86868b]"
-						>Media informatic student at LMU. My favorite item type is Guess the Cover since I have
-						a good visual memory.</span
+					Yousri Cherif. <span class="text-surface-500"
+						>Yo, I'm Yousri, the car radio skipper! I can't help but switch songs mid-beat. And yeah, I lower the volume when driving gets stressful.</span
 					>
 				</p>
 			</div>
@@ -63,7 +59,7 @@
 
 <style>
 	.img_Eduard {
-		background: url('https://res2.weblium.site/res/5d8a4cab41a27e002608256a/5d8cbe95dff27b00280a6dde_optimized.webp')
+		background: url('/images/Team_Edu.png')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
@@ -76,39 +72,39 @@
 	}
 
 	.img_Lou {
-		background: url('https://res2.weblium.site/res/5d8a4cab41a27e002608256a/5d8cbe36122259002633ffed_optimized.webp')
+		background: url('/images/Team_Lou.jpg')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
 	}
 	.img_Lou:hover {
-		background: url('https://media1.giphy.com/media/xT9IgG50Fb7Mi0prBC/giphy.gif?cid=ecf05e47ro0nxywhyvgrxv8kms4k247euy53rzqvojas0eh2&ep=v1_gifs_search&rid=giphy.gif&ct=g')
+		background: url('https://media.giphy.com/media/2f7RQiiWMJc40/giphy.gif')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
 	}
 
 	.img_Nick {
-		background: url('https://res2.weblium.site/res/5d8a4cab41a27e002608256a/5d8cbe3c92ab87002626d409_optimized.webp')
+		background: url('/images/Team_Nick.jpg')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
 	}
 	.img_Nick:hover {
-		background: url('https://media1.giphy.com/media/WiM5K1e9MtEic/giphy.gif?cid=ecf05e4746g62qj7y54ux1kjn4pthsp16ro97111wtr8cssf&ep=v1_gifs_search&rid=giphy.gif&ct=g')
+		background: url('https://media.giphy.com/media/UkNA1nFP1q31m/giphy.gif')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
 	}
 
 	.img_Yousri {
-		background: url('https://res2.weblium.site/res/5d8a4cab41a27e002608256a/5d8cbe3a337247002601d4b4_optimized.webp')
+		background: url('/images/Team_Yousri.jpg')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
 	}
 	.img_Yousri:hover {
-		background: url('https://media2.giphy.com/media/5VKbvrjxpVJCM/giphy.gif?cid=ecf05e47sf2zo4uskkiiherfzfn1xm1bmy0ytqjx6qjgkjw3&ep=v1_gifs_search&rid=giphy.gif&ct=g')
+		background: url('https://media1.giphy.com/media/WiM5K1e9MtEic/giphy.gif?cid=ecf05e4746g62qj7y54ux1kjn4pthsp16ro97111wtr8cssf&ep=v1_gifs_search&rid=giphy.gif&ct=g')
 			no-repeat;
 		background-size: cover;
 		background-position: center;
