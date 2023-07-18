@@ -38,10 +38,8 @@
 
 <div class="first-letter: flex justify-center items-center">
 	<div class="w-full md:w-4/5 xl:w-2/3 m-12 h-4/5">
-		<div
-			class="carbon-graph grid grid-flow-row-dense grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-		>
-			<div class="card variant-soft-surface p-4 col-span-1">
+		<div class="carbon-graph grid grid-flow-row-dense grid-cols-2 xl:grid-cols-3 gap-4">
+			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await donutDataGenre}
 					<p>Loading...</p>
 				{:then data}
@@ -90,7 +88,7 @@
 					/>
 				{/await}
 			</div>
-			<div class="card variant-soft-surface p-4 col-span-1">
+			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await donutDataItem}
 					<p>Loading...</p>
 				{:then data}
@@ -112,7 +110,7 @@
 					/>
 				{/await}
 			</div>
-			<div class="card variant-soft-surface p-4 aspect-square col-span-1">
+			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await radarDataGenre}
 					<p>Loading...</p>
 				{:then data}
@@ -134,7 +132,7 @@
 					/>
 				{/await}
 			</div>
-			<div class="card variant-soft-surface p-4 aspect-square col-span-1">
+			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await radarDataItem}
 					<p>Loading...</p>
 				{:then data}
@@ -182,7 +180,7 @@
 					/>
 				{/await}
 			</div>
-			<div class="card variant-soft-surface p-4 col-span-1">
+			<div class="card variant-soft-surface p-4 aspect-square h-full max-w-full col-span-1">
 				{#await gaugeDataGenre}
 					<p>Loading...</p>
 				{:then data}
