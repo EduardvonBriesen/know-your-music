@@ -74,7 +74,7 @@
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{#each data.guessOptions as option}
 					<button
-						class="btn variant-soft-surface whitespace-pre-wrap h-20"
+						class="btn variant-glass-surface whitespace-pre-wrap h-20"
 						value={option}
 						type="submit"
 						name="answer">{option}</button

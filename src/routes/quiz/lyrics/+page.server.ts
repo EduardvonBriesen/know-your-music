@@ -117,7 +117,13 @@ export const actions = {
 			score = Math.round((correctLines / (correctLines + incorrectLines)) * 100) || 0;
 			redis.del(user_id + '-lyrics');
 
-			await updateUserProgressData(answer.get('user_id') as string, score / 100, genre, 'level2');
+			await updateUserProgressData(
+				answer.get('user_id') as string,
+				score / 100,
+				genre,
+				'level2',
+				'Lyrics'
+			);
 
 			finished = true;
 		} else {
@@ -155,7 +161,13 @@ export const actions = {
 		const incorrectLines = Array.from(progress.values()).filter((line) => !line).length;
 		const score = Math.round((correctLines / (correctLines + incorrectLines)) * 100) || 0;
 
-		await updateUserProgressData(answer.get('user_id') as string, score / 100, genre, 'level2');
+		await updateUserProgressData(
+			answer.get('user_id') as string,
+			score / 100,
+			genre,
+			'level2',
+			'Lyrics'
+		);
 
 		return {
 			finished: true,

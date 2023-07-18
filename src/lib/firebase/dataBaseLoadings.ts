@@ -1,10 +1,12 @@
 import { doc, getDoc, updateDoc, type DocumentData } from 'firebase/firestore';
 import { MAX_HISTORY_LENGTH, MAX_ITEM_HISTORY_LENGTH } from './dataBase.types';
 import type { UserData, Genre, Levels, LevelData, ItemTypes } from './dataBase.types';
-import {	WEIGHT_ITEM_QUESTIONS_HISTORY,
-			WEIGHT_ITEM_QUESTIONS_OVERALL,
-			WEIGHT_ITEM_SCORE_HISTORY,
-			WEIGHT_ITEM_SCORE_OVERALL} from './dataBase.types'
+import {
+	WEIGHT_ITEM_QUESTIONS_HISTORY,
+	WEIGHT_ITEM_QUESTIONS_OVERALL,
+	WEIGHT_ITEM_SCORE_HISTORY,
+	WEIGHT_ITEM_SCORE_OVERALL
+} from './dataBase.types';
 import {
 	newHistoryArrayElement,
 	newSessionsArrayElement,
@@ -34,7 +36,8 @@ export const saveHistory = async (docName: string) => {
 			const duration = Math.round(date.valueOf() / 1000) - begin.seconds;
 			sessions[sessions.length - 1].duration = duration;
 			sessions[sessions.length - 1].final_score = data.progress.overall_score;
-			sessions[sessions.length - 1].final_history_score = data.progress.shortterm_overall_history.score;
+			sessions[sessions.length - 1].final_history_score =
+				data.progress.shortterm_overall_history.score;
 			history[history.length - 1].sessions = sessions;
 			const newAccumulateDuration = history[history.length - 1].accumulated_duration + duration;
 			history[history.length - 1].accumulated_duration = newAccumulateDuration;
@@ -82,9 +85,9 @@ export const initDataStructure = (name: string, email: string) => {
 			shortterm_overall_history: {
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH, // proposal =20
 				current_index: -1, // index of the oldest element, if overall_questions<20 then index=-1
-				list_of_scores:[],
+				list_of_scores: [],
 				score: 0
-			},//progress.shortterm_overall_history.current_index.list_of_scores
+			}, //progress.shortterm_overall_history.current_index.list_of_scores
 			overall_questions: 0,
 			genre_scores: {
 				classic: 0,
@@ -325,7 +328,7 @@ export const initDataStructure = (name: string, email: string) => {
 					overall_questions: 0
 				}
 			},
-			itemtypes:{
+			itemtypes: {
 				Biography: {
 					overallQuestions: 0,
 					overallScore: 0,
@@ -333,38 +336,45 @@ export const initDataStructure = (name: string, email: string) => {
 					historyScores: [],
 					index: 0
 				},
-				Discography:{
+				Discography: {
 					overallQuestions: 0,
 					overallScore: 0,
 					historyScore: 0,
 					historyScores: [],
 					index: 0
 				},
-				Popularity:{
+				Popularity: {
 					overallQuestions: 0,
 					overallScore: 0,
 					historyScore: 0,
 					historyScores: [],
 					index: 0
 				},
-				Lyrics:{
+				Lyrics: {
 					overallQuestions: 0,
 					overallScore: 0,
 					historyScore: 0,
 					historyScores: [],
 					index: 0
 				},
-				Coverguess:{
+				Coverguess: {
 					overallQuestions: 0,
 					overallScore: 0,
 					historyScore: 0,
 					historyScores: [],
 					index: 0
 				},
+				Song: {
+					overallQuestions: 0,
+					overallScore: 0,
+					historyScore: 0,
+					historyScores: [],
+					index: 0
+				}
 			},
-			shortterm_itemtype_history:{
+			shortterm_itemtype_history: {
 				MAX_HISTORY_LENGTH: MAX_HISTORY_LENGTH,
-				current_index:-1,
+				current_index: -1,
 				list_of_items: []
 			},
 			shortterm_genre_history: {
@@ -404,7 +414,14 @@ export async function getNextItem(docName: string){
 		return;
 	}
 	const userData = docSnap.data() as UserData;
-	const items: ItemTypes[] = ['Biography', 'Discography','Popularity', 'Lyrics','Coverguess'];
+	const items: ItemTypes[] = [
+		'Biography',
+		'Discography',
+		'Popularity',
+		'Lyrics',
+		'Coverguess',
+		'Song'
+	];
 	const itemHistory = userData.progress.shortterm_itemtype_history.list_of_items;
 	const overall_questions = userData.progress.overall_questions;
 	const overall_score = userData.progress.overall_score;
@@ -418,18 +435,18 @@ export async function getNextItem(docName: string){
 	}
 
 	const weights: number[] = [];
-	for (const item in items){
-		const history_count = itemHistory.filter( (g) => g === item).length;
+	for (const item in items) {
+		const history_count = itemHistory.filter((g) => g === item).length;
 		const item_data = userData.progress.itemtypes[item];
-		let weight =  history_count
-		if (overall_questions===0 || item_data.overallQuestions===0){
+		let weight = history_count;
+		if (overall_questions === 0 || item_data.overallQuestions === 0) {
 			weight = Math.random();
-		}else{
-			weight = 
-			  WEIGHT_ITEM_QUESTIONS_OVERALL * item_data.overallQuestions/overall_questions 
-			+ WEIGHT_ITEM_QUESTIONS_HISTORY * history_count/historyLength
-			+ WEIGHT_ITEM_SCORE_OVERALL * item_data.overallScore/overall_score
-			+ WEIGHT_ITEM_SCORE_HISTORY * item_data.historyScore/history_score;	
+		} else {
+			weight =
+				(WEIGHT_ITEM_QUESTIONS_OVERALL * item_data.overallQuestions) / overall_questions +
+				(WEIGHT_ITEM_QUESTIONS_HISTORY * history_count) / historyLength +
+				(WEIGHT_ITEM_SCORE_OVERALL * item_data.overallScore) / overall_score +
+				(WEIGHT_ITEM_SCORE_HISTORY * item_data.historyScore) / history_score;
 		}
 		weights.push(weight);
 	}
@@ -474,13 +491,13 @@ export async function updateUserProgressData(
 		console.log('No such document!');
 	}
 	const data: UserData = docSnap.data() as UserData;
-	data.progress.itemtypes[item].overallQuestions
+	data.progress.itemtypes[item].overallQuestions;
 
 	//simple increments
 	const overall_questions: number = data.progress.overall_questions + 1;
 	const genre_questions: number = data.progress.genres[genre].overall_questions + 1;
 	const genre_level_questions: number = data.progress.genres[genre][level].questions + 1;
-	const item_question: number = data.progress.itemtypes[item].overallQuestions+1;
+	const item_question: number = data.progress.itemtypes[item].overallQuestions + 1;
 
 	const { list_of_genre, history_current_index } = getUpdatedHistoryListOfGenres(
 		data.progress.shortterm_genre_history.list_of_genre,
@@ -488,11 +505,11 @@ export async function updateUserProgressData(
 		genre
 	);
 
-	const {list_of_items, items_index} = getUpdatedHistoryListOfItems(
+	const { list_of_items, items_index } = getUpdatedHistoryListOfItems(
 		data.progress.shortterm_itemtype_history.list_of_items,
 		data.progress.shortterm_itemtype_history.current_index,
 		item
-	)
+	);
 
 	let genreLevelXCorrect = 0;
 	let genreLevelYCorrect = 0;
@@ -532,26 +549,22 @@ export async function updateUserProgressData(
 		relativePoints
 	);
 
-	const {
-		item_score,
-		item_history_score,
-		item_history_scores,
-		item_index
-	}= getUpdatedItemtypeData(
-		relativePoints,
-		data.progress.itemtypes[item].overallScore,
-		data.progress.itemtypes[item].historyScores,
-		data.progress.itemtypes[item].index,
-		data.progress.itemtypes[item].overallQuestions,
-		MAX_ITEM_HISTORY_LENGTH
-	)
+	const { item_score, item_history_score, item_history_scores, item_index } =
+		getUpdatedItemtypeData(
+			relativePoints,
+			data.progress.itemtypes[item].overallScore,
+			data.progress.itemtypes[item].historyScores,
+			data.progress.itemtypes[item].index,
+			data.progress.itemtypes[item].overallQuestions,
+			MAX_ITEM_HISTORY_LENGTH
+		);
 
 	try {
 		await updateDoc(docRef, {
 			'progress.overall_score': overall_score,
 			'progress.shortterm_overall_history.score': overall_history_score,
 			'progress.shortterm_overall_history.list_of_scores': list_of_scores,
-			'progress.shortterm_overall_history.current_index':scores_index,
+			'progress.shortterm_overall_history.current_index': scores_index,
 			'progress.overall_questions': overall_questions,
 			[`progress.genre_scores.${genre}`]: genre_score,
 			[`progress.genres.${genre}.${level}.questions`]: genre_level_questions,
@@ -563,16 +576,13 @@ export async function updateUserProgressData(
 			[`progress.genres.${genre}.history.scores`]: genre_history_scores,
 			[`progress.genres.${genre}.history.index_oldest_score`]: genre_history_scores_index,
 
-			[`progress.itemtypes.${item}.overallQuestions`] : item_question,
-			[`progress.itemtypes.${item}.overallScore`] : item_score,
-			[`progress.itemtypes.${item}.historyScore`] : item_history_score,
-			[`progress.itemtypes.${item}.historyScores`] : item_history_scores,
-			[`progress.itemtypes.${item}.index`] : item_index,
-			'progress.shortterm_itemtype_history.list_of_items' : list_of_items,
-			'progress.shortterm_itemtype_history.current_index': items_index,
-
-
-
+			[`progress.itemtypes.${item}.overallQuestions`]: item_question,
+			[`progress.itemtypes.${item}.overallScore`]: item_score,
+			[`progress.itemtypes.${item}.historyScore`]: item_history_score,
+			[`progress.itemtypes.${item}.historyScores`]: item_history_scores,
+			[`progress.itemtypes.${item}.index`]: item_index,
+			'progress.shortterm_itemtype_history.list_of_items': list_of_items,
+			'progress.shortterm_itemtype_history.current_index': items_index
 		});
 	} catch (e) {
 		console.error(e);

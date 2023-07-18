@@ -9,6 +9,8 @@ export type Track = {
 	name: string;
 	popularity: number;
 	artist: string;
+	preview_url: string;
+	image: string;
 };
 
 export type Artist = {
@@ -22,6 +24,7 @@ export type Album = {
 	name: string;
 	image: string;
 	release_date: string;
+	album_type: string;
 };
 
 export type SpotifyError = {

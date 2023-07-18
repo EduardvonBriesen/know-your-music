@@ -135,7 +135,13 @@ export const actions = {
 		score = score < 0 ? 0 : score;
 
 		// update user stats
-		await updateUserProgressData(response.get('user_id') as string, score, genre, level);
+		await updateUserProgressData(
+			response.get('user_id') as string,
+			score,
+			genre,
+			level,
+			'Discography'
+		);
 
 		cookies.set('discography', '', {
 			path: '/'
@@ -143,7 +149,7 @@ export const actions = {
 
 		return fail(200, {
 			result,
-			score
+			score: Math.round(score * 100) / 100
 		});
 	}
 };

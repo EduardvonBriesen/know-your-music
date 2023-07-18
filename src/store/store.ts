@@ -21,3 +21,15 @@ export const authHandler = {
 		await signOut(auth);
 	}
 };
+
+export const animateStore = writable({
+	animate: false
+});
+
+export const animateHandler = {
+	animate: () => {
+		animateStore.update((state) => {
+			return { animate: !state.animate };
+		});
+	}
+};
