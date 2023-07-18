@@ -8,8 +8,13 @@ import type {
 	ItemTypes,
 	ItemGenreType
 } from './dataBase.types';
+import type {
+	HistoryElement,
+	SessionElement
+} from './initDemoUser1'
 import { db } from './firebase';
 import type { ChartTabularData } from '@carbon/charts-svelte';
+import {initDataStructure2} from './initDemoUser2'
 
 export async function getGenreOrItemtypeQuestionsDonutChart(docName: string, type: ItemGenreType) {
 	const collectionsName = 'users';
@@ -222,3 +227,138 @@ export async function getScoresHistoryLineChart(docName: string, type: ScoreHist
 
 	return data;
 }
+
+// new Charts down here
+export async function verticalSimpleBarDurationIntraDay(docName: string){   
+    const collectionsName = 'users';
+	const docRef = doc(db, collectionsName, docName);
+	const docSnap = await getDoc(docRef);
+	if (!docSnap.exists()) {
+		return;
+	}
+	// For DEMO Purpose
+	//const userData: UserData = docSnap.data() as UserData;
+    const userData: UserData = initDataStructure2();
+
+	//for DEMO Purpose the first day of the history is choosen -> TODO day should be parameter
+    const sessionsArray: SessionElement[] = userData.logs.history[0].sessions
+    
+    const data: ChartTabularData = [];
+    
+    for (let itr=0; itr<sessionsArray.length; itr++ ){
+        const newElement = {
+            "group": "Duration in Seconds",
+            "date": sessionsArray[itr].begin,
+            "value":sessionsArray[itr].duration
+        };
+        data.push(newElement);
+    }
+
+    // const options:BarChartOptions = {
+    //     "title": "Vertical simple bar (time series)",
+    //     "axes": {
+    //       "left": {
+    //         "mapsTo": "value"
+    //       },
+    //       "bottom": {
+    //         "mapsTo": "date",
+    //         "scaleType": "time"
+    //       }
+    //     },
+    //     "height": "400px",
+    //     //"theme": "g100"
+    // };
+    return data;
+}
+
+export async function verticalSimpleBarDurationDay(docName: string){   
+	const collectionsName = 'users';
+	const docRef = doc(db, collectionsName, docName);
+	const docSnap = await getDoc(docRef);
+	if (!docSnap.exists()) {
+		return;
+	}
+	// For DEMO Purpose
+	//const userData: UserData = docSnap.data() as UserData;
+    const userData: UserData = initDataStructure2();
+
+    const historyArray: HistoryElement[] = userData.logs.history
+    const data: ChartTabularData = [];
+    
+    for (let itr=0; itr<historyArray.length; itr++ ){
+        const newElement = {
+            "group": "Duration in Seconds",
+            "date": historyArray[itr].sessions[0].begin,
+            "value":historyArray[itr].accumulated_duration
+        };
+        data.push(newElement);
+    }
+
+    // const options:BarChartOptions = {
+    //     "title": "Vertical simple bar (time series)",
+    //     "axes": {
+    //       "left": {
+    //         "mapsTo": "value"
+    //       },
+    //       "bottom": {
+    //         "mapsTo": "date",
+    //         "scaleType": "time"
+    //       }
+    //     },
+    //     "height": "400px",
+    //     //"theme": "g100"
+    //};
+    return data;
+}
+
+export async function lineChartTimeBaseScore(docName: string){
+	const collectionsName = 'users';
+	const docRef = doc(db, collectionsName, docName);
+	const docSnap = await getDoc(docRef);
+	if (!docSnap.exists()) {
+		return;
+	}
+	// For DEMO Purpose
+	//const userData: UserData = docSnap.data() as UserData;
+    const userData: UserData = initDataStructure2();
+    
+    const historyArray: HistoryElement[] = userData.logs.history
+    
+    const data: ChartTabularData = [];
+    
+    for (let itr=0; itr<historyArray.length; itr++ ){
+        const newElement = {
+            "group": "Overall Score",
+            "date": historyArray[itr].sessions[0].begin,
+            "value":historyArray[itr].last_score
+        };
+        console.log(historyArray[itr].sessions[0].begin);
+        console.log(itr);
+        data.push(newElement);
+    }
+
+
+    // const options:LineChartOptions = {
+    //     "title": "Line (dense time series)",
+    //     "axes": {
+    //       "bottom": {
+    //         "title": "Zeit",
+    //         "mapsTo": "date",
+    //         "scaleType": "time"
+    //       },
+    //       "left": {
+    //         "mapsTo": "value",
+    //         "title": "Score",
+    //         "scaleType": "linear"
+    //       }
+    //     },
+    //     "curve": "curveMonotoneX",
+    //     "height": "400px",
+    //     //"theme": "g100"
+    //   };
+
+    return data;
+
+}
+
+

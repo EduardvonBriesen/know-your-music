@@ -2,10 +2,10 @@ import type { UserData } from './dataBase.types';
 
 const MAX_HISTORY_LENGTH = 20;
 
-export function initDataStructure():UserData{
+export function initDataStructure2():UserData{
     return {
-        "name": "Nick",
-        "email": "demo@demo.de",
+        "name": "Max Mustermann",
+        "email": "DEMO@DEMO2.de",
         "progress": {
           "overall_score": 0.449,
           "shortterm_overall_history": {

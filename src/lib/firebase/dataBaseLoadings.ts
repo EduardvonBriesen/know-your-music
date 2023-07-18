@@ -397,7 +397,8 @@ export const initDataStructure = (name: string, email: string) => {
 							final_score: 0,
 							final_history_score: 0
 						}
-					]
+					],
+					last_score: 0,
 				}
 			]
 		}

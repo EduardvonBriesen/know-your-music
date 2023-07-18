@@ -2,13 +2,14 @@ import type { UserData } from './dataBase.types';
 
 const MAX_HISTORY_LENGTH = 20;
 
-type HistoryElement = {
+export type HistoryElement = {
 		date: string,
 		accumulated_duration: number;
 		sessions: SessionElement[];
+		last_score: number;
 }
 
-type SessionElement = {
+export type SessionElement = {
 	begin: Date;
 	duration: number;
 	final_score: number;
@@ -25,7 +26,8 @@ function generateRandomHistory(dates: Date[]):HistoryElement[]{
 		const newHistory: HistoryElement = {
 			date: date.toLocaleDateString(),
 			accumulated_duration: accumulatedDuration,
-			sessions: sessions
+			sessions: sessions,
+			last_score: 0
 		}
 		history.push(newHistory)
 		//date = dates[it];
