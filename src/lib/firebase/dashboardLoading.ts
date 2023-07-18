@@ -22,7 +22,7 @@ export async function getGenreOrItemtypeQuestionsDonutChart(docName: string, typ
 	}
 	const userData: UserData = docSnap.data() as UserData;
 	const genres: Genre[] = ['rock', 'classic', 'folk_music', 'jazz', 'rap', 'pop'];
-	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity'];
+	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity', 'Song'];
 
 	const data: ChartTabularData = [];
 
@@ -60,7 +60,7 @@ export async function getGenreOrItemtypeScoresOverallAndHistoryRadarChart(
 	}
 	const userData: UserData = docSnap.data() as UserData;
 	const genres: Genre[] = ['rock', 'classic', 'folk_music', 'jazz', 'rap', 'pop'];
-	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity'];
+	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity', 'Song'];
 
 	const data: ChartTabularData = [];
 	if (type === 'Genre') {
@@ -173,7 +173,7 @@ export async function getScoresHistoryLineChart(docName: string, type: ScoreHist
 	let datasetName = '';
 	let itr = 1;
 	const genres: Genre[] = ['rock', 'classic', 'folk_music', 'jazz', 'rap', 'pop'];
-	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity'];
+	const items: ItemTypes[] = ['Biography', 'Coverguess', 'Discography', 'Lyrics', 'Popularity', 'Song'];
 
 	if (type === 'Genre') {
 		for (const genre of genres) {
