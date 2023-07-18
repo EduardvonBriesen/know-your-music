@@ -64,6 +64,7 @@ export type UserData = {
 				final_score: number;
 				final_history_score: number;
 			}[];
+			last_score: number;
 		}[];
 	};
 };
