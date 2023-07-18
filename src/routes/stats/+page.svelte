@@ -8,12 +8,13 @@
 		RadarChart,
 		ScaleTypes
 	} from '@carbon/charts-svelte';
-	
-	import '@carbon/styles/css/styles.css'; // may affect global styles
+
 	import '@carbon/charts-svelte/styles.css';
+	import '@carbon/charts/styles.css';
 
 	import {
 		getGenreOrItemtypeQuestionsDonutChart,
+		getGenreOrItemtypeScoresOverallAndHistoryRadarChart,
 		getLevelGenreVerticalGroupedBarChart,
 		getScoreGaugeChart,
 		getScoresHistoryLineChart
@@ -27,124 +28,176 @@
 	});
 
 	const donutDataGenre = getGenreOrItemtypeQuestionsDonutChart(user_id, 'Genre');
-	const radarDataGenre = getGenreOrItemtypeQuestionsDonutChart(user_id, 'Genre');
+	const donutDataItem = getGenreOrItemtypeQuestionsDonutChart(user_id, 'Itemtype');
+	const radarDataGenre = getGenreOrItemtypeScoresOverallAndHistoryRadarChart(user_id, 'Genre');
+	const radarDataItem = getGenreOrItemtypeScoresOverallAndHistoryRadarChart(user_id, 'Itemtype');
 	const gaugeDataGenre = getScoreGaugeChart(user_id, 'History');
 	const barDataGenre = getLevelGenreVerticalGroupedBarChart(user_id);
 	const lineDataGenre = getScoresHistoryLineChart(user_id, 'Genre');
 </script>
 
-<div class="flex justify-center items-center">
-	<div class="w-3/4 md:w-4/5 xl:w-2/3 m-12 h-4/5">
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-			<div class="card variant-soft-surface p-4">
+<div class="first-letter: flex justify-center items-center">
+	<div class="w-full md:w-4/5 xl:w-2/3 m-12 h-4/5">
+		<div
+			class="carbon-graph grid grid-flow-row-dense grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+		>
+			<div class="card variant-soft-surface p-4 col-span-1">
 				{#await donutDataGenre}
 					<p>Loading...</p>
 				{:then data}
 					<DonutChart
 						{data}
 						options={{
-							title: 'Blub',
+							title: 'Questions by Genre',
 							resizable: true,
 							donut: {
 								alignment: Alignments.CENTER,
 								center: {
 									label: 'Overall Questions'
 								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
 							}
 						}}
 					/>
 				{/await}
 			</div>
-			<div
-				class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-square"
-			>
-				{#await radarDataGenre}
-					<p>Loading...</p>
-				{:then data}
-					<RadarChart
-						{data}
-						options={{
-							title: 'Genre Scores - Alltime vs. short-term History',
-							radar: {
-								axes: {
-									angle: 'feature', //dont change
-									value: 'value' // dont change
-								}
-							}
-						}}
-					/>
-				{/await}
-			</div>
-			<div
-				class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-square"
-			>
-				{#await gaugeDataGenre}
-					<p>Loading...</p>
-				{:then data}
-					<GaugeChart
-						{data}
-						options={{
-							title: 'Gauge semicircular -- danger status',
-							resizable: true,
-							gauge: {
-								type: 'semi', //GaugeTypes.SEMI,
-								status: 'danger' // Statuses.DANGER
-							}
-							//"theme": "g10"
-						}}
-					/>
-				{/await}
-			</div>
-		</div>
-		<div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 h-1/2">
-			<div
-				class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-video"
-			>
+			<div class="card variant-soft-surface p-4 aspect-[2/1] col-span-2">
 				{#await lineDataGenre}
 					<p>Loading...</p>
 				{:then data}
 					<LineChart
 						{data}
 						options={{
-							title: 'Line (discrete)',
+							title: 'Score History',
 							axes: {
 								bottom: {
-									title: '2019 Annual Sales Figures',
+									title: 'Time',
 									mapsTo: 'key',
 									scaleType: ScaleTypes.LABELS
 								},
 								left: {
 									mapsTo: 'value',
-									title: 'Conversion rate',
+									title: 'Score',
 									scaleType: ScaleTypes.LINEAR
 								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
 							}
-							// "height": "400px",
-							//"theme": "g100"
 						}}
 					/>
 				{/await}
 			</div>
-			<div
-				class="card variant-soft-surface p-4 text-token space-4 flex place-content-center aspect-video"
-			>
+			<div class="card variant-soft-surface p-4 col-span-1">
+				{#await donutDataItem}
+					<p>Loading...</p>
+				{:then data}
+					<DonutChart
+						{data}
+						options={{
+							title: 'Questions by Type',
+							resizable: true,
+							donut: {
+								alignment: Alignments.CENTER,
+								center: {
+									label: 'Overall Questions'
+								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 aspect-square col-span-1">
+				{#await radarDataGenre}
+					<p>Loading...</p>
+				{:then data}
+					<RadarChart
+						{data}
+						options={{
+							title: 'Score by Genre',
+							radar: {
+								alignment: Alignments.CENTER,
+								axes: {
+									angle: 'feature', //dont change
+									value: 'value' // dont change
+								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 aspect-square col-span-1">
+				{#await radarDataItem}
+					<p>Loading...</p>
+				{:then data}
+					<RadarChart
+						{data}
+						options={{
+							title: 'Score by Itemtype',
+							radar: {
+								alignment: Alignments.CENTER,
+								axes: {
+									angle: 'feature', //dont change
+									value: 'value' // dont change
+								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 aspect-[2/1] col-span-2">
 				{#await barDataGenre}
 					<p>Loading...</p>
 				{:then data}
 					<BarChartGrouped
 						{data}
 						options={{
-							title: 'Vertical grouped bar (discrete)',
+							title: 'Score by Level and Genre',
 							axes: {
 								left: {
-									mapsTo: 'value'
+									mapsTo: 'value',
+									title: 'Score'
 								},
 								bottom: {
 									scaleType: ScaleTypes.LABELS,
-									mapsTo: 'key'
+									mapsTo: 'key',
+									title: 'Genre'
 								}
+							},
+							legend: {
+								alignment: Alignments.CENTER
 							}
-							//"theme": "g100"
+						}}
+					/>
+				{/await}
+			</div>
+			<div class="card variant-soft-surface p-4 col-span-1">
+				{#await gaugeDataGenre}
+					<p>Loading...</p>
+				{:then data}
+					<GaugeChart
+						{data}
+						options={{
+							title: 'Score Average Trend',
+							resizable: true,
+							gauge: {
+								type: 'semi', //GaugeTypes.SEMI,
+								status: 'danger' // Statuses.DANGER
+							},
+							legend: {
+								alignment: Alignments.CENTER
+							}
 						}}
 					/>
 				{/await}
