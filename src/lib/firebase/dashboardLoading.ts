@@ -286,7 +286,7 @@ export async function verticalSimpleBarDurationDay(docName: string) {
 		const newElement = {
 			group: 'Duration in Seconds',
 			date: historyArray[itr].sessions[0].begin,
-			value: historyArray[itr].accumulated_duration
+			value: historyArray[itr].accumulated_duration/60
 		};
 		data.push(newElement);
 	}
