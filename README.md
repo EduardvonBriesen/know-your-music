@@ -2,6 +2,19 @@
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
+## Contributions
+
+### Eduard
+- User Management
+- Items (Popularity, Discography, Biography, Lyrics, Song)
+- Dashboard Layouting
+
+### Nick 
+
+### Lou
+
+### Yousri
+
 ## Developing
 
 Once you've created a project and installed dependencies with `pnpm install`, start a development server:
