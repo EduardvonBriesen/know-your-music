@@ -14,6 +14,9 @@ Everything you need to build a Svelte project, powered by [`create-svelte`](http
 ### Lou
 
 ### Yousri
+- Front-end design: item types, home page, about page, navigation, and onboarding.
+- Data visualization prototyping
+- Logo design
 
 ## Developing
 
