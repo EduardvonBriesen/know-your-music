@@ -33,7 +33,7 @@
 				<div class="img_Lou aspect-square rounded-md max-w-full shadow-lg" />
 				<p class="font-semibold mt-4">
 					Louisa Ullmann. <span class="text-surface-500"
-						>Hi, I'm Lou and when I go for a run, I switch my Spotify Mode to private so that my friends can't caught me listening to my guilty pleasure playlists.</span
+						>Hi, I'm Lou and when I go for a run, I switch my Spotify Mode to private so that my friends can't catch me listening to my guilty pleasure playlists.</span
 					>
 				</p>
 			</div>
