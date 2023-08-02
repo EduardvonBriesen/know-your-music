@@ -12,6 +12,7 @@ Everything you need to build a Svelte project, powered by [`create-svelte`](http
 ### Nick 
 - Database communication: update data and get data
 - Algorithms for adaptive item: choosing next genre and difficulty for the next item based on individual history
+- preparation of demo user
 - Implementation of charts for dashboard
 
 ### Lou
